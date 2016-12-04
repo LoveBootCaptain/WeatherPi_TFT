@@ -15,7 +15,7 @@ locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
 
 pygame.init()
 
-# pygame.mouse.set_visible(False)
+pygame.mouse.set_visible(False)
 
 DISPLAY_WIDTH = 240
 DISPLAY_HEIGHT = 320
@@ -30,7 +30,7 @@ BLUE = (52, 152, 219)
 YELLOW = (241, 196, 15)
 ORANGE = (255, 147, 0)
 
-TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
 pygame.display.set_caption('FeatherWeather')
 
 font_small = pygame.font.Font('font/Roboto-Medium.ttf', 14)
@@ -611,9 +611,19 @@ def draw_to_tft():
     time.sleep(1)
 
 
-def loop():
+def quit_all():
 
-    global thread
+    global threads
+
+    for thread in threads:
+        thread.cancel()
+        thread.join()
+
+    pygame.quit()
+    quit()
+
+
+def loop():
 
     update_data()
 
@@ -629,19 +639,17 @@ def loop():
 
                 running = False
 
-                for thread in threads:
-                    thread.cancel()
-                    thread.join()
+                quit_all()
 
-                pygame.quit()
-                quit()
+            elif event.type == pygame.KEYDOWN:
 
-    for thread in threads:
-        thread.cancel()
-        thread.join()
+                if event.key == pygame.K_ESCAPE:
 
-    pygame.quit()
-    quit()
+                    running = False
+
+                    quit_all()
+
+    quit_all()
 
 
 if __name__ == '__main__':
@@ -652,9 +660,4 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
 
-        for thread in threads:
-            thread.cancel()
-            thread.join()
-
-        pygame.quit()
-        quit()
+        quit_all()
