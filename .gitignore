@@ -103,3 +103,4 @@ ENV/
 /.idea/*
 /.idea/dictionaries/*
 /.idea/inspectionProfiles/*
+/logs/latest_weather.json
