@@ -15,7 +15,7 @@ locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
 
 pygame.init()
 
-pygame.mouse.set_visible(False)
+# pygame.mouse.set_visible(False)
 
 DISPLAY_WIDTH = 240
 DISPLAY_HEIGHT = 320
@@ -31,8 +31,8 @@ BLUE = (52, 152, 219)
 YELLOW = (241, 196, 15)
 ORANGE = (255, 147, 0)
 
-# TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
+TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+# TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
 pygame.display.set_caption('FeatherWeather')
 
 font_small = pygame.font.Font('font/Roboto-Medium.ttf', 14)
@@ -48,6 +48,10 @@ SyncRefresh_Path = 'icons/sync-refresh.png'
 WiFi_Path = 'icons/wifi.png'
 NoWiFi_Path = 'icons/no-wifi.png'
 SyncWiFi_Path = 'icons/sync-wifi.png'
+
+Path_Path = 'icons/path.png'
+NoPath_Path = 'icons/no-path.png'
+SyncPath_Path = 'icons/sync-path.png'
 
 WeatherIcon_Path = 'icons/unknown.png'
 
@@ -67,6 +71,7 @@ PrecipRain_Path = 'icons/preciprain.png'
 
 CONNECTION_ERROR = True
 REFRESH_ERROR = True
+PATH_ERROR = True
 PRECIPTYPE = 'NULL'
 
 threads = []
@@ -255,7 +260,7 @@ def read_latest_json():
 
     # print(threads)
 
-    draw_img(SyncRefresh_Path, image_align_right, 5, 1)
+    TFT.blit(pygame.image.load(SyncRefresh_Path), (205, 5))
 
     pygame.display.update()
 
@@ -374,7 +379,7 @@ def update_icon_path():
 
             elif 'moon' in path:
 
-                updated_list.append('icons/moon-0.png')
+                updated_list.append('icons/moon-unknown.png')
 
             else:
 
@@ -385,6 +390,19 @@ def update_icon_path():
     ForeCastIcon_Day_2_Path = updated_list[2]
     ForeCastIcon_Day_3_Path = updated_list[3]
     MoonIcon_Path = updated_list[4]
+
+    global PATH_ERROR
+
+    if any("unknown" in s for s in updated_list):
+
+        PATH_ERROR = True
+
+    else:
+
+        PATH_ERROR = False
+
+    TFT.blit(pygame.image.load(SyncPath_Path), (220, 5))
+    pygame.display.update()
 
     print('\nupdate path for icons: {}'.format(updated_list))
 
@@ -445,11 +463,19 @@ def draw_image_layer():
 
     if REFRESH_ERROR:
 
-        draw_img(NoRefresh_Path, image_align_right, 5, 1)
+        TFT.blit(pygame.image.load(NoRefresh_Path), (205, 5))
 
     else:
 
-        draw_img(Refresh_Path, image_align_right, 5, 1)
+        TFT.blit(pygame.image.load(Refresh_Path), (205, 5))
+
+    if PATH_ERROR:
+
+        TFT.blit(pygame.image.load(NoPath_Path), (220, 5))
+
+    else:
+
+        TFT.blit(pygame.image.load(Path_Path), (220, 5))
 
     if PRECIPTYPE == 'rain':
 
@@ -478,6 +504,8 @@ def draw_image_layer():
 
     # draw_img(WiFi_Path, image_align_left_center, 30, 3)
     # draw_img(Refresh_Path, image_align_right_center, 30, 3)
+
+    # TFT.blit(pygame.image.load(Path_Path), (220, 5))
 
     print('\n')
     print(WeatherIcon_Path)
