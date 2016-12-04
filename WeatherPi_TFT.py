@@ -33,11 +33,11 @@ ORANGE = (255, 147, 0)
 TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 pygame.display.set_caption('FeatherWeather')
 
-font_small = pygame.font.Font('font/Menlo-Regular.ttf', 14)
-font_big = pygame.font.Font('font/Menlo-Regular.ttf', 30)
+font_small = pygame.font.Font('font/Roboto-Medium.ttf', 14)
+font_big = pygame.font.Font('font/Roboto-Medium.ttf', 30)
 
-font_small_bold = pygame.font.Font('font/Menlo-Bold.ttf', 14)
-font_big_bold = pygame.font.Font('font/Menlo-Bold.ttf', 30)
+font_small_bold = pygame.font.Font('font/Roboto-Bold.ttf', 14)
+font_big_bold = pygame.font.Font('font/Roboto-Bold.ttf', 30)
 
 Refresh_Path = 'icons/refresh.png'
 NoRefresh_Path = 'icons/no-refresh.png'
@@ -165,7 +165,7 @@ def image_align_right(image_path, parts):
 
     image_size = get_image_size(image_path)
 
-    right = DISPLAY_WIDTH - image_size[0] - 10
+    right = (DISPLAY_WIDTH / parts) - image_size[0] - 10
 
     # print('Position of the image to align it right: {}'.format(right))
 
@@ -176,7 +176,7 @@ def image_align_left(image_path, parts):
 
     image_size = get_image_size(image_path)
 
-    left = (DISPLAY_WIDTH - image_size[0]) - (DISPLAY_WIDTH - image_size[0] - 10)
+    left = ((DISPLAY_WIDTH / parts) - image_size[0]) - (DISPLAY_WIDTH - image_size[0] - 10)
 
     # print('Position of the image to align it left: {}'.format(left))
 
@@ -562,9 +562,9 @@ def draw_text_layer():
 
         draw_string(precip_string, font_small_bold, ORANGE, string_align_right, 140)
 
-    draw_string(forecast_day_1_string, font_small, ORANGE, string_align_left_center, 165)
-    draw_string(forecast_day_2_string, font_small, ORANGE, string_align_center, 165)
-    draw_string(forecast_day_3_string, font_small, ORANGE, string_align_right_center, 165)
+    draw_string(forecast_day_1_string, font_small_bold, ORANGE, string_align_left_center, 165)
+    draw_string(forecast_day_2_string, font_small_bold, ORANGE, string_align_center, 165)
+    draw_string(forecast_day_3_string, font_small_bold, ORANGE, string_align_right_center, 165)
 
     draw_string(forecast_day_1_min_max_string, font_small, WHITE, string_align_left_center, 180)
     draw_string(forecast_day_2_min_max_string, font_small, WHITE, string_align_center, 180)
@@ -658,5 +658,3 @@ if __name__ == '__main__':
 
         pygame.quit()
         quit()
-
-
