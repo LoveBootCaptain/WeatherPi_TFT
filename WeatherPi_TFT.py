@@ -20,7 +20,8 @@ pygame.mouse.set_visible(False)
 DISPLAY_WIDTH = 240
 DISPLAY_HEIGHT = 320
 
-BLACK = (43, 43, 43)
+# BLACK = (43, 43, 43)
+BLACK = (10, 10, 10)
 WHITE = (255, 255, 255)
 
 RED = (231, 76, 60)
@@ -30,6 +31,7 @@ BLUE = (52, 152, 219)
 YELLOW = (241, 196, 15)
 ORANGE = (255, 147, 0)
 
+# TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
 pygame.display.set_caption('FeatherWeather')
 
@@ -648,6 +650,10 @@ def loop():
                     running = False
 
                     quit_all()
+
+                elif event.key == pygame.K_SPACE:
+
+                    print('SPACE')
 
     quit_all()
 
