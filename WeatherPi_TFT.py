@@ -29,7 +29,7 @@ GREEN = (39, 174, 96)
 BLUE = (52, 152, 219)
 
 YELLOW = (241, 196, 15)
-ORANGE = (255, 147, 0)
+ORANGE = (238, 153, 18)
 
 TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 # TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
@@ -73,216 +73,296 @@ CONNECTION_ERROR = True
 REFRESH_ERROR = True
 PATH_ERROR = True
 PRECIPTYPE = 'NULL'
+PRECIPCOLOR = WHITE
 
 threads = []
 
 json_data = {}
 
 
-def string_align_center(string, font):
+class DrawString:
 
-    size = font.size(string)
+    def __init__(self, string, font, color, y):
 
-    # print('Size of the string "{}": {}'.format(string, size))
+        """
+        :param string: the input string
+        :param font: the font object
+        :param color: a rgb color tuple
+        :param y: the y position where you want to render the text
+        """
+        self.string = string
+        self.font = font
+        self.color = color
+        self.y = y
+        self.size = self.font.size(self.string)
 
-    center = (DISPLAY_WIDTH / 2) - (size[0] / 2)
+    def left(self, offset=0):
 
-    # print('Position of the string to align it center: {}'.format(center))
+        """
+        :param offset: define some offset pixel to move strings a little bit (default=0)
+        :return:
+        """
 
-    return center
+        x = 10 + offset
 
+        self.draw_string(x)
 
-def string_align_right(string, font):
+    def right(self, offset=0):
 
-    size = font.size(string)
+        """
+        :param offset: define some offset pixel to move strings a little bit (default=0)
+        :return:
+        """
 
-    # print('Size of the string "{}": {}'.format(string, size))
+        x = (DISPLAY_WIDTH - self.size[0] - 10) - offset
 
-    right = DISPLAY_WIDTH - size[0] - 10
+        self.draw_string(x)
 
-    # print('Position of the string to align it right: {}'.format(right))
+    def center(self, parts, part, offset=0):
 
-    return right
+        """
+        :param parts: define in how many parts you want to split your display
+        :param part: the part in which you want to render text (first part is 0, second is 1, etc.)
+        :param offset: define some offset pixel to move strings a little bit (default=0)
+        :return:
+        """
 
+        x = ((((DISPLAY_WIDTH / parts) / 2) + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset
 
-def string_align_left(string, font):
+        self.draw_string(x)
 
-    size = font.size(string)
+    def draw_string(self, x):
 
-    # print('Size of the string "{}": {}'.format(string, size))
+        """
+        takes x and y from the functions above and render the font
+        """
 
-    left = (DISPLAY_WIDTH - size[0]) - (DISPLAY_WIDTH - size[0] - 10)
+        TFT.blit(self.font.render(self.string, True, self.color), (x, self.y))
 
-    # print('Position of the string to align it left: {}'.format(left))
 
-    return left
+class DrawImage:
 
+    def __init__(self, image_path, y):
 
-def string_align_left_center(string, font):
+        """
+        :param image_path: the path to the image you want to render
+        :param y: the y-postion of the image you want to render
+        """
 
-    size = font.size(string)
+        self.image_path = image_path
+        self.image = pygame.image.load(self.image_path)
+        self.y = y
+        self.size = self.image.get_rect().size
 
-    # print('Size of the string "{}": {}'.format(string, size))
+    def left(self, offset=0):
 
-    left_center = ((DISPLAY_WIDTH / 3) / 2) - (size[0] / 2)
+        """
+        :param offset: define some offset pixel to move strings a little bit (default=0)
+        :return:
+        """
 
-    # print('Position of the string to align it left_center: {}'.format(left_center))
+        x = 10 + offset
 
-    return left_center
+        self.draw_image(x)
 
+    def right(self, offset=0):
 
-def string_align_right_center(string, font):
+        """
+        :param offset: define some offset pixel to move strings a little bit (default=0)
+        :return:
+        """
 
-    size = font.size(string)
+        x = (DISPLAY_WIDTH - self.size[0] - 10) - offset
 
-    # print('Size of the string "{}": {}'.format(string, size))
+        self.draw_image(x)
 
-    right_center = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (size[0] / 2))
+    def center(self, parts, part, offset=0):
 
-    # print('Position of the string to align it right_center: {}'.format(right_center))
+        """
+        :param parts: define in how many parts you want to split your display
+        :param part: the part in which you want to render text (first part is 0, second is 1, etc.)
+        :param offset: define some offset pixel to move strings a little bit (default=0)
+        :return:
+        """
 
-    return right_center
+        x = int(((((DISPLAY_WIDTH / parts) / 2) + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset)
 
+        self.draw_image(x)
 
-def get_image_size(image_path):
+    def draw_image(self, x):
 
-    image = pygame.image.load(image_path)
+        """
+        takes x from the functions above and the y from the class to render the image
+        """
 
-    size = image.get_rect().size
+        TFT.blit(self.image, (x, self.y))
 
-    # print('Size of the image "{}": {}'.format(image_path, size))
 
-    return size
+class Update:
 
+    @staticmethod
+    def update_json():
 
-def image_align_center(image_path, parts):
+        global threads, CONNECTION_ERROR
 
-    image_size = get_image_size(image_path)
+        thread_1 = threading.Timer(60, Update.update_json)
 
-    # print('Size of the image "{}": {}'.format(image_path, image_size))
+        thread_1.start()
 
-    center = (DISPLAY_WIDTH / parts) - (image_size[0] / 2)
+        threads.append(thread_1)
 
-    # print('Position of the image to align it center: {}'.format(center))
+        # print(threads)
 
-    return center
+        DrawImage(SyncWiFi_Path, 5).left()
+        pygame.display.update()
 
+        try:
 
-def image_align_right(image_path, parts):
+            data = requests.get('http://locutus.dscloud.me:7575/latest_weather.json').json()
 
-    image_size = get_image_size(image_path)
+            with open('logs/latest_weather.json', 'w') as outputfile:
+                json.dump(data, outputfile, indent=2, sort_keys=True)
 
-    right = (DISPLAY_WIDTH / parts) - image_size[0] - 10
+            print('\njson file saved')
 
-    # print('Position of the image to align it right: {}'.format(right))
+            CONNECTION_ERROR = False
 
-    return right
+            # read_latest_json()
 
+        except (requests.HTTPError, requests.ConnectionError):
 
-def image_align_left(image_path, parts):
+            CONNECTION_ERROR = True
 
-    image_size = get_image_size(image_path)
+            print('Connection ERROR')
 
-    left = ((DISPLAY_WIDTH / parts) - image_size[0]) - (DISPLAY_WIDTH - image_size[0] - 10)
+            pass
 
-    # print('Position of the image to align it left: {}'.format(left))
+    @staticmethod
+    def read_json():
 
-    return left
+        global threads, json_data, REFRESH_ERROR
 
+        thread_2 = threading.Timer(10, Update.read_json)
 
-def image_align_left_center(image_path, parts):
+        thread_2.start()
 
-    image_size = get_image_size(image_path)
+        threads.append(thread_2)
 
-    left_center = ((DISPLAY_WIDTH / parts) / 2) - (image_size[0] / 2)
+        # print(threads)
 
-    # print('Position of the image to align it left_center: {}'.format(left_center))
+        DrawImage(SyncRefresh_Path, 5).right(10)
+        pygame.display.update()
 
-    return left_center
+        try:
 
+            data = open('logs/latest_weather.json').read()
 
-def image_align_right_center(image_path, parts):
+            new_json_data = json.loads(data)
 
-    image_size = get_image_size(image_path)
+            print('\njson file read by module')
 
-    right_center = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / parts) / 2) - (image_size[0] / 2))
+            json_data = new_json_data
 
-    # print('Position of the image to align it right_center: {}'.format(right_center))
+            REFRESH_ERROR = False
 
-    return right_center
+            # update_icon_path()
 
+        except IOError:
 
-def update_latest_json():
+            REFRESH_ERROR = True
 
-    global threads, CONNECTION_ERROR
+            print('ERROR - json file read by module')
 
-    thread_1 = threading.Timer(60, update_latest_json)
+    @staticmethod
+    def icon_path():
 
-    thread_1.start()
+        global threads, WeatherIcon_Path, ForeCastIcon_Day_1_Path, \
+            ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path, PRECIPTYPE, PRECIPCOLOR
 
-    threads.append(thread_1)
+        thread_3 = threading.Timer(30, Update.icon_path)
 
-    # print(threads)
+        thread_3.start()
 
-    draw_img(SyncWiFi_Path, image_align_left, 5, 1)
+        threads.append(thread_3)
 
-    pygame.display.update()
+        # print(threads)
 
-    try:
+        folder_path = 'icons/'
+        icon_extension = '.png'
+        mini = 'mini_'
 
-        data = requests.get('http://locutus.dscloud.me:7575/latest_weather.json').json()
+        updated_list = []
 
-        with open('logs/latest_weather.json', 'w') as outputfile:
-            json.dump(data, outputfile, indent=2, sort_keys=True)
+        icon = get_icon()
 
-        print('\njson file saved')
+        forecast = get_forecast_icon()
 
-        CONNECTION_ERROR = False
+        moon = get_moon_icon()
 
-        # read_latest_json()
+        get_precip_type()
 
-    except (requests.HTTPError, requests.ConnectionError):
+        WeatherIcon_Path = folder_path + icon + icon_extension
 
-        CONNECTION_ERROR = True
+        ForeCastIcon_Day_1_Path = folder_path + mini + forecast[0] + icon_extension
+        ForeCastIcon_Day_2_Path = folder_path + mini + forecast[1] + icon_extension
+        ForeCastIcon_Day_3_Path = folder_path + mini + forecast[2] + icon_extension
 
-        pass
+        MoonIcon_Path = folder_path + moon + icon_extension
 
+        path_list = [WeatherIcon_Path, ForeCastIcon_Day_1_Path,
+                     ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path]
 
-def read_latest_json():
+        print('\nvalidating path: {}\n'.format(path_list))
 
-    global threads, json_data, REFRESH_ERROR
+        for path in path_list:
 
-    thread_2 = threading.Timer(10, read_latest_json)
+            if os.path.isfile(path):
 
-    thread_2.start()
+                print('TRUE :', path)
 
-    threads.append(thread_2)
+                updated_list.append(path)
 
-    # print(threads)
+            else:
+                print('FALSE :', path)
 
-    TFT.blit(pygame.image.load(SyncRefresh_Path), (205, 5))
+                if 'mini' in path:
 
-    pygame.display.update()
+                    updated_list.append('icons/mini_unknown.png')
 
-    try:
+                elif 'moon' in path:
 
-        data = open('logs/latest_weather.json').read()
+                    updated_list.append('icons/moon-unknown.png')
 
-        new_json_data = json.loads(data)
+                else:
 
-        print('\njson file read by module')
+                    updated_list.append('icons/unknown.png')
 
-        json_data = new_json_data
+        WeatherIcon_Path = updated_list[0]
+        ForeCastIcon_Day_1_Path = updated_list[1]
+        ForeCastIcon_Day_2_Path = updated_list[2]
+        ForeCastIcon_Day_3_Path = updated_list[3]
+        MoonIcon_Path = updated_list[4]
 
-        REFRESH_ERROR = False
+        global PATH_ERROR
 
-        # update_icon_path()
+        if any("unknown" in s for s in updated_list):
 
-    except IOError:
+            PATH_ERROR = True
 
-        REFRESH_ERROR = True
+        else:
 
-        print('ERROR - json file read by module')
+            PATH_ERROR = False
+
+        DrawImage(SyncPath_Path, 5).right()
+        pygame.display.update()
+
+        print('\nupdate path for icons: {}'.format(updated_list))
+
+    @staticmethod
+    def run():
+        Update.update_json()
+        Update.read_json()
+        Update.icon_path()
 
 
 def get_icon():
@@ -294,6 +374,35 @@ def get_icon():
     # print(icon)
 
     return icon
+
+
+def get_precip_type():
+
+    global json_data, PRECIPCOLOR, PRECIPTYPE
+
+    if int(json_data['currently']['precipProbability'] * 100) == 0:
+
+        PRECIPTYPE = 'Niederschlag'
+        PRECIPCOLOR = ORANGE
+
+    else:
+
+        precip_type = json_data['currently']['precipType']
+
+        if precip_type == 'rain':
+
+            PRECIPTYPE = 'Regen'
+            PRECIPCOLOR = BLUE
+
+        elif precip_type == 'snow':
+
+            PRECIPTYPE = 'Schnee'
+            PRECIPCOLOR = WHITE
+
+        else:
+
+            PRECIPTYPE = str(precip_type)
+            PRECIPCOLOR = RED
 
 
 def get_forecast_icon():
@@ -324,109 +433,16 @@ def get_moon_icon():
     return moon_icon
 
 
-def update_icon_path():
-
-    global threads, WeatherIcon_Path, ForeCastIcon_Day_1_Path, \
-        ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path
-
-    thread_3 = threading.Timer(30, update_icon_path)
-
-    thread_3.start()
-
-    threads.append(thread_3)
-
-    # print(threads)
-
-    folder_path = 'icons/'
-    icon_extension = '.png'
-    mini = 'mini_'
-
-    updated_list = []
-
-    icon = get_icon()
-
-    forecast = get_forecast_icon()
-
-    moon = get_moon_icon()
-
-    WeatherIcon_Path = folder_path + icon + icon_extension
-
-    ForeCastIcon_Day_1_Path = folder_path + mini + forecast[0] + icon_extension
-    ForeCastIcon_Day_2_Path = folder_path + mini + forecast[1] + icon_extension
-    ForeCastIcon_Day_3_Path = folder_path + mini + forecast[2] + icon_extension
-
-    MoonIcon_Path = folder_path + moon + icon_extension
-
-    path_list = [WeatherIcon_Path, ForeCastIcon_Day_1_Path,
-                 ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path]
-
-    print('\nvalidating path: {}\n'.format(path_list))
-
-    for path in path_list:
-
-        if os.path.isfile(path):
-
-            print('TRUE :', path)
-
-            updated_list.append(path)
-
-        else:
-            print('FALSE :', path)
-
-            if 'mini' in path:
-
-                updated_list.append('icons/mini_unknown.png')
-
-            elif 'moon' in path:
-
-                updated_list.append('icons/moon-unknown.png')
-
-            else:
-
-                updated_list.append('icons/unknown.png')
-
-    WeatherIcon_Path = updated_list[0]
-    ForeCastIcon_Day_1_Path = updated_list[1]
-    ForeCastIcon_Day_2_Path = updated_list[2]
-    ForeCastIcon_Day_3_Path = updated_list[3]
-    MoonIcon_Path = updated_list[4]
-
-    global PATH_ERROR
-
-    if any("unknown" in s for s in updated_list):
-
-        PATH_ERROR = True
-
-    else:
-
-        PATH_ERROR = False
-
-    TFT.blit(pygame.image.load(SyncPath_Path), (220, 5))
-    pygame.display.update()
-
-    print('\nupdate path for icons: {}'.format(updated_list))
-
-
-def draw_string(string, font, color, align, y):
-
-    TFT.blit(font.render(string, True, color), (align(string, font), y))
-
-
 def convert_timestamp(timestamp, param_string):
 
     return datetime.datetime.fromtimestamp(int(timestamp)).strftime(param_string)
-
-
-def draw_img(image_path, align, y, parts):
-
-    TFT.blit(pygame.image.load(image_path), (align(image_path, parts), y))
 
 
 def draw_wind_layer(y):
 
     angle = json_data['currently']['windBearing']
 
-    wind_icon = pygame.transform.rotate(pygame.image.load(WindIcon_Path), (360 - angle) + 180)
+    wind_icon = pygame.transform.rotate(pygame.image.load(WindIcon_Path), (360 - angle) + 180)  # (360 - angle) + 180
 
     position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (wind_icon.get_rect()[2] / 2))
 
@@ -435,6 +451,61 @@ def draw_wind_layer(y):
     TFT.blit(wind_icon, (int(position_x), position_y))
 
     print('\nwind direction: {}'.format(angle))
+
+
+def draw_image_layer():
+
+    if CONNECTION_ERROR:
+
+        DrawImage(NoWiFi_Path, 5).left()
+
+    else:
+
+        DrawImage(WiFi_Path, 5).left()
+
+    if REFRESH_ERROR:
+
+        DrawImage(NoRefresh_Path, 5).right(15)
+
+    else:
+
+        DrawImage(Refresh_Path, 5).right(15)
+
+    if PATH_ERROR:
+
+        DrawImage(NoPath_Path, 5).right()
+
+    else:
+
+        DrawImage(Path_Path, 5).right()
+
+    DrawImage(WeatherIcon_Path, 65).center(2, 0)
+
+    if PRECIPTYPE == 'Regen':
+
+        DrawImage(PrecipRain_Path, 140).right()
+
+    elif PRECIPTYPE == 'Schnee':
+
+        DrawImage(PrecipSnow_Path, 140).right()
+
+    DrawImage(ForeCastIcon_Day_1_Path, 200).center(3, 0)
+    DrawImage(ForeCastIcon_Day_2_Path, 200).center(3, 1)
+    DrawImage(ForeCastIcon_Day_3_Path, 200).center(3, 2)
+
+    DrawImage(SunRise_Path, 260).left()
+    DrawImage(SunSet_Path, 290).left()
+
+    DrawImage(MoonIcon_Path, 255).center(1, 0)
+
+    draw_wind_layer(285)
+
+    print('\n')
+    print(WeatherIcon_Path)
+    print(ForeCastIcon_Day_1_Path)
+    print(ForeCastIcon_Day_2_Path)
+    print(ForeCastIcon_Day_3_Path)
+    print(MoonIcon_Path)
 
 
 def draw_time_layer():
@@ -447,79 +518,11 @@ def draw_time_layer():
     print('\nTime: {}'.format(date_time_string))
     print('Day: {}'.format(date_day_string))
 
-    draw_string(date_day_string, font_small, WHITE, string_align_center, 5)
-    draw_string(date_time_string, font_big_bold, WHITE, string_align_center, 20)
-
-
-def draw_image_layer():
-
-    if CONNECTION_ERROR:
-
-        draw_img(NoWiFi_Path, image_align_left, 5, 1)
-
-    else:
-
-        draw_img(WiFi_Path, image_align_left, 5, 1)
-
-    if REFRESH_ERROR:
-
-        TFT.blit(pygame.image.load(NoRefresh_Path), (205, 5))
-
-    else:
-
-        TFT.blit(pygame.image.load(Refresh_Path), (205, 5))
-
-    if PATH_ERROR:
-
-        TFT.blit(pygame.image.load(NoPath_Path), (220, 5))
-
-    else:
-
-        TFT.blit(pygame.image.load(Path_Path), (220, 5))
-
-    if PRECIPTYPE == 'rain':
-
-        draw_img(PrecipRain_Path, image_align_right, 140, 1)
-
-    elif PRECIPTYPE == 'snow':
-
-        draw_img(PrecipSnow_Path, image_align_right, 140, 1)
-
-    else:
-
-        pass
-
-    draw_img(WeatherIcon_Path, image_align_left_center, 65, 2)
-
-    draw_img(ForeCastIcon_Day_1_Path, image_align_left_center, 200, 3)
-    draw_img(ForeCastIcon_Day_2_Path, image_align_center, 200, 2)
-    draw_img(ForeCastIcon_Day_3_Path, image_align_right_center, 200, 3)
-
-    draw_img(SunRise_Path, image_align_left, 260, 1)
-    draw_img(SunSet_Path, image_align_left, 290, 1)
-
-    draw_img(MoonIcon_Path, image_align_center, 255, 2)
-
-    draw_wind_layer(285)
-
-    # draw_img(WiFi_Path, image_align_left_center, 30, 3)
-    # draw_img(Refresh_Path, image_align_right_center, 30, 3)
-
-    # TFT.blit(pygame.image.load(Path_Path), (220, 5))
-
-    print('\n')
-    print(WeatherIcon_Path)
-    print(ForeCastIcon_Day_1_Path)
-    print(ForeCastIcon_Day_2_Path)
-    print(ForeCastIcon_Day_3_Path)
-    print(MoonIcon_Path)
+    DrawString(date_day_string, font_small, WHITE, 5).center(1, 0)
+    DrawString(date_time_string, font_big_bold, WHITE, 20).center(1, 0)
 
 
 def draw_text_layer():
-
-    draw_time_layer()
-
-    global PRECIPTYPE
 
     forecast = json_data['daily']['data']
 
@@ -540,34 +543,6 @@ def draw_text_layer():
     forecast_day_3_min_max_string = str(int(forecast[3]['temperatureMin'])) + ' | ' + str(
         int(forecast[2]['temperatureMax']))
 
-    if int(json_data['currently']['precipProbability'] * 100) == 0:
-
-        precip_string = 'Niederschlag'
-
-        PRECIPTYPE = 'NULL'
-
-    else:
-
-        precip_type = json_data['currently']['precipType']
-
-        if precip_type == 'rain':
-
-            precip_string = 'Regen' + '         '
-
-            PRECIPTYPE = precip_type
-
-        elif precip_type == 'snow':
-
-            precip_string = 'Schnee' + '         '
-
-            PRECIPTYPE = precip_type
-
-        else:
-
-            precip_string = str(precip_type)
-
-            PRECIPTYPE = precip_type
-
     north_string = 'N'
 
     sunrise_string = convert_timestamp(int(json_data['daily']['data'][0]['sunriseTime']), '%H:%M')
@@ -575,44 +550,32 @@ def draw_text_layer():
 
     wind_speed_string = str(round((float(json_data['currently']['windSpeed']) * 1.609344), 1)) + ' km/h'
 
-    draw_string(summary_string, font_small, ORANGE, string_align_center, 55)
-    draw_string(temp_out_string, font_big_bold, ORANGE, string_align_right, 75)
+    draw_time_layer()
 
-    draw_string(rain_string, font_big_bold, ORANGE, string_align_right, 105)
+    DrawString(summary_string, font_small, ORANGE, 55).center(1, 0)
+    DrawString(temp_out_string, font_big_bold, ORANGE, 75).right()
 
-    if PRECIPTYPE == 'rain':
+    DrawString(rain_string, font_big_bold, PRECIPCOLOR, 105).right()
+    DrawString(PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right(25)
 
-        draw_string(precip_string, font_small_bold, BLUE, string_align_right, 140)
+    DrawString(forecast_day_1_string, font_small_bold, ORANGE, 165).center(3, 0)
+    DrawString(forecast_day_2_string, font_small_bold, ORANGE, 165).center(3, 1)
+    DrawString(forecast_day_3_string, font_small_bold, ORANGE, 165).center(3, 2)
 
-    elif PRECIPTYPE == 'snow':
+    DrawString(forecast_day_1_min_max_string, font_small, WHITE, 180).center(3, 0)
+    DrawString(forecast_day_2_min_max_string, font_small, WHITE, 180).center(3, 1)
+    DrawString(forecast_day_3_min_max_string, font_small, WHITE, 180).center(3, 2)
 
-        draw_string(precip_string, font_small_bold, WHITE, string_align_right, 140)
+    DrawString(sunrise_string, font_small, WHITE, 265).left(30)
+    DrawString(sunset_string, font_small, WHITE, 292).left(30)
 
-    else:
-
-        draw_string(precip_string, font_small_bold, ORANGE, string_align_right, 140)
-
-    draw_string(forecast_day_1_string, font_small_bold, ORANGE, string_align_left_center, 165)
-    draw_string(forecast_day_2_string, font_small_bold, ORANGE, string_align_center, 165)
-    draw_string(forecast_day_3_string, font_small_bold, ORANGE, string_align_right_center, 165)
-
-    draw_string(forecast_day_1_min_max_string, font_small, WHITE, string_align_left_center, 180)
-    draw_string(forecast_day_2_min_max_string, font_small, WHITE, string_align_center, 180)
-    draw_string(forecast_day_3_min_max_string, font_small, WHITE, string_align_right_center, 180)
-
-    TFT.blit(font_small.render(sunrise_string, True, WHITE),
-             (string_align_left_center(sunrise_string, font_small) + 20, 265))
-
-    TFT.blit(font_small.render(sunset_string, True, WHITE),
-             (string_align_left_center(sunset_string, font_small) + 20, 292))
-
-    draw_string(north_string, font_small, WHITE, string_align_right_center, 250)
-    draw_string(wind_speed_string, font_small, WHITE, string_align_right_center, 300)
+    DrawString(north_string, font_small, WHITE, 250).center(3, 2)
+    DrawString(wind_speed_string, font_small, WHITE, 300).center(3, 2)
 
     print('\n')
     print('summary: {}'.format(summary_string))
     print('temp out: {}'.format(temp_out_string))
-    print('{}: {}'.format(precip_string, rain_string))
+    print('{}: {}'.format(PRECIPTYPE, rain_string))
     print('forecast: '
           + forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; '
           + forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; '
@@ -620,13 +583,6 @@ def draw_text_layer():
           )
     print('sunrise: {} ; sunset {}'.format(sunrise_string, sunset_string))
     print('WindSpeed: {}'.format(wind_speed_string))
-
-
-def update_data():
-
-    update_latest_json()
-    read_latest_json()
-    update_icon_path()
 
 
 def draw_to_tft():
@@ -655,7 +611,7 @@ def quit_all():
 
 def loop():
 
-    update_data()
+    Update.run()
 
     running = True
 
