@@ -36,6 +36,7 @@ ORANGE = (238, 153, 18)
 ICON_PATH = sys.path[0] + '/icons/'
 FONT_PATH = sys.path[0] + '/font/'
 LOG_PATH = sys.path[0] + '/logs/'
+PATH = sys.path[0]
 
 TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 # TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
@@ -211,11 +212,15 @@ class Update:
 
         try:
 
-            api_key = 'bf24bc37fcae9265a3ea79e0390f5240'
+            config_data = open(PATH + 'config.json').read()
+
+            config = json.loads(config_data)
+
+            forecast_io_key = config['FORECAST_IO_KEY']
 
             options = '?lang=de&units=si&exclude=flags'
 
-            request_url = 'https://api.forecast.io/forecast/' + api_key + '/52.5152463,13.5046708' + options
+            request_url = 'https://api.forecast.io/forecast/' + forecast_io_key + '/52.5152463,13.5046708' + options
 
             # request_url = 'http://weatherpi/latest_weather.json'
 
