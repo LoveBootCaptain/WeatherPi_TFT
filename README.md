@@ -1,29 +1,30 @@
 # WeatherPi_TFT
 
-a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 display written in python3
+a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 display 
+
+> first of all, i'm a beginner in python... so don't be to hard to me... i'm still learning
+
+> written with love in python3
 
 ## Hardware and wiring
 
-i wrote this app on a mac and tested it quite a while. since it uses only standard python3 modules and libraries 
+> i wrote this app on a mac and tested it quite a while. since it uses only standard python3 modules and libraries 
 it should work on nearly everything that can run python3 and pygame.
 
-this tutorial is basically for running it on a raspberry pi (zero, 1, 2, 3) and a TFT display which matches up 
+> this tutorial is basically for running it on a raspberry pi (zero, 1, 2, 3) and a TFT display which matches up 
 with chips like the ones from adafruit. as long as it uses standard spi it should work with the new `dtoverlay`module
 in the latest jessie versions of raspbian... i think there is no need for a custom kernel. it's just a little bit 
 configuration.
 
-i tested it with following TFT's:
+> i tested it with following TFT's:
+> * [TFT FeatherWing - 2.4" 320x240 Touchscreen For All Feathers](https://www.adafruit.com/products/3315)
+> * [Adafruit 2.4" TFT LCD with Touchscreen Breakout w/MicroSD Socket - ILI9341](https://www.adafruit.com/product/2478)
+> * adafruit TFT's with ili9341 driver
 
-* [TFT FeatherWing - 2.4" 320x240 Touchscreen For All Feathers](https://www.adafruit.com/products/3315)
-* [Adafruit 2.4" TFT LCD with Touchscreen Breakout w/MicroSD Socket - ILI9341](https://www.adafruit.com/product/2478)
-* adafruit TFT's with ili9341 driver
-
-no configuration needed for:
-
-> skip all the TFT setup parts
-
-* official raspberry pi 7" display
-* any HDMI display
+> no configuration needed for:
+> * official raspberry pi 7" display
+> * any HDMI display
+> * skip all the TFT setup parts
 
 ### wiring
 
@@ -47,7 +48,7 @@ VCC 3V3 supply                      = +3V3 or 5V
 
 ### install jessie to a sd card and update
 
-get the latest [NOOBS](https://www.raspberrypi.org/downloads/noobs/) installer from:
+get the latest [NOOBS](https://www.raspberrypi.org/downloads/noobs/) installer
 ```
 https://www.raspberrypi.org/downloads/noobs/
 ```
@@ -77,7 +78,7 @@ TODO: write a tutorial for connecting to WiFi via terminal
 
 when your connected to your wifi open a terminal and type:
 ```bash
-sudo apt-get update  -y && sudo apt-get upgrade -y 
+sudo apt-get update -y && sudo apt-get upgrade -y
 ```
 
 ### install WeatherPi_TFT
@@ -92,6 +93,28 @@ git clone https://github.com/LoveBootCaptain/WeatherPi_TFT.git
 TODO: write a requirements.txt
 ```
 
+### get an api key from darksky / forecast.io
+
+go to
+```
+https://darksky.net/dev/
+```
+and register to get an API key
+
+### add API key to config file
+
+create a new config-file
+```bash
+cd
+cd WeatherPi_TFT
+cp example.config.json config.json
+```
+edit the config.json file
+```
+nano config.json
+```
+replace the "xxxxxxxxxxxxxxxxxxxxxxxxx" next to "FORECAST_IO_KEY" with your own API key
+
 ### set up the TFT
 
 in /boot/config.txt, add in the following at the bottom 
@@ -99,9 +122,6 @@ in /boot/config.txt, add in the following at the bottom
 # TFT display and touch panel
 dtoverlay=rpi-display
 dtparam=rotate=0
-dtparam=speed=10000000
-dtparam=xohms=100
-dtparam=debug=4
 ```
 
 change /boot/cmdline.txt to add the following to the end of the existing line
@@ -137,7 +157,7 @@ update-alternatives --install /usr/bin/python python /usr/bin/python3.4 2
 > ```
 > update-alternatives --config python
 > ```
-> and choose your prefered version of python
+> and choose your preferred version of python
 
 check if python3.x is now default with:
 ```bash
@@ -182,6 +202,13 @@ if this is doing what it should you can run the service every time you boot your
 ```bash
 sudo update-rc.d WeatherPi_TFT defaults
 ```
+
+### credits
+
+* fonts and icons [fa2png](http://fa2png.io/), making them colorful was my work
+* [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
+* [squix78](https://github.com/squix78) for his [esp8266 weather station color](https://github.com/squix78/esp8266-weather-station-color) which inspired me to make it in python for a raspberry and another weather api
+* [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
 
 ### screenshots
 
