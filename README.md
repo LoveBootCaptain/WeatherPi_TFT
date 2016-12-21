@@ -20,15 +20,38 @@ VCC 3V3 supply                      = +3V3 or 5V
 
 ## Install
 
-### install WeatherPi_TFT
+### install jessie to a sd card and update
+
+get the latest NOOBS installer from:
+```
+https://www.raspberrypi.org/downloads/noobs/
+```
+> i used NOOBS v2.1.0 which was the latest version for now
 
 ```
+TODO: write a tutorial for setting up SPI
+```
+
+```
+TODO: write a tutorial for connecting to WiFi via terminal
+```
+ 
+when your connected to your wifi open a terminal and type:
+```bash
+sudo apt-get update  -y && sudo apt-get upgrade -y 
+```
+
+### install WeatherPi_TFT
+
+```bash
 git clone https://github.com/LoveBootCaptain/WeatherPi_TFT.git
 ```
 
 ### install the dependencies
 
+```
 TODO: write a requirements.txt
+```
 
 ### set up the TFT
 
@@ -49,7 +72,7 @@ fbcon=map:10 fbcon=font:VGA8x8 logo.nologo
 
 ### setup the service
 
-```
+```bash
 cd
 cd WeatherPi_TFT
 sudo cp Service.sh /etc/init.d/WeatherPiTFT
@@ -66,7 +89,7 @@ sudo chmod -v u+s /usr/bin/python3
 ```
 
 ### setting up python3 as default interpreter
-```
+```bash
 update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
 update-alternatives --install /usr/bin/python python /usr/bin/python3.4 2
 ```
@@ -78,7 +101,7 @@ update-alternatives --install /usr/bin/python python /usr/bin/python3.4 2
 > and choose your prefered version of python
 
 check if python3.x is now default with:
-```
+```bash
 python --version
 ```
 
@@ -90,7 +113,7 @@ Python 3.4.x
 ### update all python modules
 
 open up a python console
-```
+```bash
 python
 ```
 
@@ -103,13 +126,13 @@ for dist in pip.get_installed_distributions():
 ```
 
 if everything is set up and updated correctly:
-```
+```bash
 sudo reboot
 ```
 
 ### test the service
 
-```
+```bash
 sudo service WeatherPiTFT start
 sudo service WeatherPiTFT stop
 sudo service WeatherPiTFT restart
@@ -117,7 +140,7 @@ sudo service WeatherPiTFT status
 ```
 
 if this is doing what it should you can run the service every time you boot your pi
-```
+```bash
 sudo update-rc.d WeatherPi_TFT defaults
 ```
 
