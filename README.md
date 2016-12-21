@@ -18,7 +18,9 @@ i tested it with following TFT's:
 * [Adafruit 2.4" TFT LCD with Touchscreen Breakout w/MicroSD Socket - ILI9341](https://www.adafruit.com/product/2478)
 * adafruit TFT's with ili9341 driver
 
-no configuration needed for (skip all the TFT setup parts)
+no configuration needed for:
+
+> skip all the TFT setup parts
 
 * official raspberry pi 7" display
 * any HDMI display
