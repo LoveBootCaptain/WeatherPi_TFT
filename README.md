@@ -4,6 +4,29 @@ a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 di
 
 ## Hardware and wiring
 
+i wrote this app on a mac and tested it quite a while. since it uses only standard python3 modules and libraries 
+it should work on nearly everything that can run python3 and pygame.
+
+this tutorial is basically for running it on a raspberry pi (zero, 1, 2, 3) and a TFT display which matches up 
+with chips like the ones from adafruit. as long as it uses standard spi it should work with the new `dtoverlay`module
+in the latest jessie versions of raspbian... i think there is no need for a custom kernel. it's just a little bit 
+configuration.
+
+i tested it with following TFT's:
+
+* [TFT FeatherWing - 2.4" 320x240 Touchscreen For All Feathers](https://www.adafruit.com/products/3315)
+* [Adafruit 2.4" TFT LCD with Touchscreen Breakout w/MicroSD Socket - ILI9341](https://www.adafruit.com/product/2478)
+* adafruit TFT's with ili9341 driver
+
+no configuration needed for (skip all the TFT setup parts)
+
+* official raspberry pi 7" display
+* any HDMI display
+
+### wiring
+
+this should explain how to wire up your display
+
 ```
 SDO (MISO) TFT Data Out SPI_MISO    = GPIO09
 SDI (MOSI) TFT Data In  SPI_MOSI    = GPIO10
@@ -22,20 +45,34 @@ VCC 3V3 supply                      = +3V3 or 5V
 
 ### install jessie to a sd card and update
 
-get the latest NOOBS installer from:
+get the latest [NOOBS](https://www.raspberrypi.org/downloads/noobs/) installer from:
 ```
 https://www.raspberrypi.org/downloads/noobs/
 ```
 > i used NOOBS v2.1.0 which was the latest version for now
 
+### setup the SD card
+```
+TODO: write a tutorial for setting up the SD card
+```
+
+### the first boot
+```
+TODO: write a tutorial for first boot
+```
+
+### enable SPI
 ```
 TODO: write a tutorial for setting up SPI
 ```
 
+### connect to your WiFi
 ```
 TODO: write a tutorial for connecting to WiFi via terminal
 ```
- 
+
+### update all tools
+
 when your connected to your wifi open a terminal and type:
 ```bash
 sudo apt-get update  -y && sudo apt-get upgrade -y 
