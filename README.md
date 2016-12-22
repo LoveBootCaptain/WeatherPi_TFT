@@ -206,7 +206,7 @@ sudo service WeatherPiTFT status
 
 if this is doing what it should you can run the service every time you boot your pi
 ```bash
-sudo update-rc.d WeatherPi_TFT defaults
+sudo update-rc.d WeatherPiTFT defaults
 ```
 
 ### credits
