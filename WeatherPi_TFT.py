@@ -197,7 +197,7 @@ class Update:
 
         global threads, CONNECTION_ERROR
 
-        thread = threading.Timer(60, Update.update_json)
+        thread = threading.Timer(120, Update.update_json)
 
         thread.start()
 
@@ -207,17 +207,17 @@ class Update:
 
         try:
 
-            config_data = open(PATH + 'config.json').read()
+            # config_data = open(PATH + 'config.json').read()
+            #
+            # config = json.loads(config_data)
 
-            config = json.loads(config_data)
+            # forecast_io_key = config['FORECAST_IO_KEY']
+            #
+            # options = '?lang=de&units=si&exclude=flags'
 
-            forecast_io_key = config['FORECAST_IO_KEY']
+            # request_url = 'https://api.forecast.io/forecast/' + forecast_io_key + '/52.5152463,13.5046708' + options
 
-            options = '?lang=de&units=si&exclude=flags'
-
-            request_url = 'https://api.forecast.io/forecast/' + forecast_io_key + '/52.5152463,13.5046708' + options
-
-            # request_url = 'http://weatherpi/latest_weather.json'
+            request_url = 'http://weatherpi/latest_weather.json'
 
             data = requests.get(request_url).json()
 
@@ -246,7 +246,7 @@ class Update:
 
         global threads, json_data, REFRESH_ERROR
 
-        thread = threading.Timer(10, Update.read_json)
+        thread = threading.Timer(15, Update.read_json)
 
         thread.start()
 
@@ -277,19 +277,15 @@ class Update:
         DrawImage(SyncPath_Path, 5).right(-5)
         pygame.display.update()
 
+        time.sleep(1)
+
+        Update.icon_path()
+
     @staticmethod
     def icon_path():
 
-        global threads, WeatherIcon_Path, ForeCastIcon_Day_1_Path, \
+        global WeatherIcon_Path, ForeCastIcon_Day_1_Path, \
             ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path, PRECIPTYPE, PRECIPCOLOR
-
-        thread = threading.Timer(30, Update.icon_path)
-
-        thread.start()
-
-        threads.append(thread)
-
-        # print(threads)
 
         folder_path = ICON_PATH
         icon_extension = '.png'
@@ -327,18 +323,19 @@ class Update:
         path_list = [WeatherIcon_Path, ForeCastIcon_Day_1_Path,
                      ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path]
 
-        print('\nvalidating path: {}\n'.format(path_list))
+        # print('\nvalidating path: {}\n'.format(path_list))
 
         for path in path_list:
 
             if os.path.isfile(path):
 
-                print('TRUE :', path)
+                # print('TRUE :', path)
 
                 updated_list.append(path)
 
             else:
-                print('FALSE :', path)
+
+                # print('FALSE :', path)
 
                 if 'mini' in path:
 
@@ -368,7 +365,7 @@ class Update:
 
             PATH_ERROR = False
 
-        print('\nupdate path for icons: {}'.format(updated_list))
+        # print('\nupdate path for icons: {}'.format(updated_list))
 
         Update.get_precip_type()
 
@@ -404,14 +401,14 @@ class Update:
                 PRECIPTYPE = str(precip_type)
                 PRECIPCOLOR = RED
 
-        print('\nupdate PRECIPTYPE to: {}'.format(PRECIPTYPE))
-        print('\nupdate PRECIPCOLOR to: {}'.format(PRECIPCOLOR))
+        # print('\nupdate PRECIPTYPE to: {}'.format(PRECIPTYPE))
+        # print('\nupdate PRECIPCOLOR to: {}'.format(PRECIPCOLOR))
+        print('\nupdated PATH')
 
     @staticmethod
     def run():
         Update.update_json()
         Update.read_json()
-        Update.icon_path()
 
 
 def convert_timestamp(timestamp, param_string):
@@ -446,10 +443,10 @@ def draw_wind_layer(y):
 
         TFT.blit(icon, position)
 
-    draw_middle_position_icon(circle_icon)
     draw_middle_position_icon(arrow_icon)
+    draw_middle_position_icon(circle_icon)
 
-    print('\nwind direction: {}'.format(angle))
+    # print('\nwind direction: {}'.format(angle))
 
 
 def draw_image_layer():
@@ -498,11 +495,11 @@ def draw_image_layer():
 
     draw_wind_layer(285)
 
-    print('\n' + WeatherIcon_Path)
-    print(ForeCastIcon_Day_1_Path)
-    print(ForeCastIcon_Day_2_Path)
-    print(ForeCastIcon_Day_3_Path)
-    print(MoonIcon_Path)
+    # print('\n' + WeatherIcon_Path)
+    # print(ForeCastIcon_Day_1_Path)
+    # print(ForeCastIcon_Day_2_Path)
+    # print(ForeCastIcon_Day_3_Path)
+    # print(MoonIcon_Path)
 
 
 def draw_time_layer():
@@ -511,8 +508,8 @@ def draw_time_layer():
     date_time_string = convert_timestamp(timestamp, '%H:%M:%S')
     date_day_string = convert_timestamp(timestamp, '%A - %d. %b %Y')
 
-    print('\nDay: {}'.format(date_day_string))
-    print('Time: {}'.format(date_time_string))
+    # print('\nDay: {}'.format(date_day_string))
+    # print('Time: {}'.format(date_time_string))
 
     DrawString(date_day_string, font_small, WHITE, 5).center(1, 0)
     DrawString(date_time_string, font_big_bold, WHITE, 20).center(1, 0)
@@ -525,9 +522,9 @@ def draw_text_layer():
     temp_out_string = str(json_data['currently']['temperature']) + '°C'
     rain_string = str(int(json_data['currently']['precipProbability'] * 100)) + ' %'
 
-    forecast_day_1_string = convert_timestamp(forecast[1]['time'], '%a').upper()
-    forecast_day_2_string = convert_timestamp(forecast[2]['time'], '%a').upper()
-    forecast_day_3_string = convert_timestamp(forecast[3]['time'], '%a').upper()
+    forecast_day_1_string = convert_timestamp(forecast[1]['time'], '%A')
+    forecast_day_2_string = convert_timestamp(forecast[2]['time'], '%A')
+    forecast_day_3_string = convert_timestamp(forecast[3]['time'], '%A')
 
     forecast_day_1_min_max_string = str(int(forecast[1]['temperatureMin'])) + ' | ' + str(
         int(forecast[0]['temperatureMax']))
@@ -557,26 +554,26 @@ def draw_text_layer():
     DrawString(forecast_day_2_string, font_small_bold, ORANGE, 165).center(3, 1)
     DrawString(forecast_day_3_string, font_small_bold, ORANGE, 165).center(3, 2)
 
-    DrawString(forecast_day_1_min_max_string, font_small, WHITE, 180).center(3, 0)
-    DrawString(forecast_day_2_min_max_string, font_small, WHITE, 180).center(3, 1)
-    DrawString(forecast_day_3_min_max_string, font_small, WHITE, 180).center(3, 2)
+    DrawString(forecast_day_1_min_max_string, font_small_bold, WHITE, 180).center(3, 0)
+    DrawString(forecast_day_2_min_max_string, font_small_bold, WHITE, 180).center(3, 1)
+    DrawString(forecast_day_3_min_max_string, font_small_bold, WHITE, 180).center(3, 2)
 
-    DrawString(sunrise_string, font_small, WHITE, 265).left(30)
-    DrawString(sunset_string, font_small, WHITE, 292).left(30)
+    DrawString(sunrise_string, font_small_bold, WHITE, 265).left(30)
+    DrawString(sunset_string, font_small_bold, WHITE, 292).left(30)
 
-    DrawString(north_string, font_small, WHITE, 250).center(3, 2)
-    DrawString(wind_speed_string, font_small, WHITE, 300).center(3, 2)
+    DrawString(north_string, font_small_bold, WHITE, 250).center(3, 2)
+    DrawString(wind_speed_string, font_small_bold, WHITE, 300).center(3, 2)
 
-    print('\nsummary: {}'.format(summary_string))
-    print('temp out: {}'.format(temp_out_string))
-    print('{}: {}'.format(PRECIPTYPE, rain_string))
-    print('forecast: '
-          + forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; '
-          + forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; '
-          + forecast_day_3_string + ' ' + forecast_day_3_min_max_string
-          )
-    print('sunrise: {} ; sunset {}'.format(sunrise_string, sunset_string))
-    print('WindSpeed: {}'.format(wind_speed_string))
+    # print('\nsummary: {}'.format(summary_string))
+    # print('temp out: {}'.format(temp_out_string))
+    # print('{}: {}'.format(PRECIPTYPE, rain_string))
+    # print('forecast: '
+    #       + forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; '
+    #       + forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; '
+    #       + forecast_day_3_string + ' ' + forecast_day_3_min_max_string
+    #       )
+    # print('sunrise: {} ; sunset {}'.format(sunrise_string, sunset_string))
+    # print('WindSpeed: {}'.format(wind_speed_string))
 
 
 def draw_to_tft():

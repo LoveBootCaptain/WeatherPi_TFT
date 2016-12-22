@@ -8,6 +8,9 @@ a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 di
 
 ![WeatherPi_TFT](./docs/WeatherPi_TFT_01.1.jpg)
 
+### all available weather icons in 2 sizes
+![Weather Icons](./docs/WEATHER_ICONS.gif)
+
 
 ## Hardware and wiring
 
