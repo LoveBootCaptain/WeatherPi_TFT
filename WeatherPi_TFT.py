@@ -207,9 +207,6 @@ class Update:
 
         # print(threads)
 
-        DrawImage(SyncWiFi_Path, 5).left()
-        pygame.display.update()
-
         try:
 
             config_data = open(PATH + 'config.json').read()
@@ -242,6 +239,9 @@ class Update:
             print('Connection ERROR')
 
             pass
+
+        DrawImage(SyncWiFi_Path, 5).left()
+        pygame.display.update()
 
     @staticmethod
     def read_json():
@@ -370,12 +370,12 @@ class Update:
 
             PATH_ERROR = False
 
-        DrawImage(SyncRefresh_Path, 5).right(7)
-        pygame.display.update()
-
         print('\nupdate path for icons: {}'.format(updated_list))
 
         Update.get_precip_type()
+
+        DrawImage(SyncRefresh_Path, 5).right(7)
+        pygame.display.update()
 
     @staticmethod
     def get_precip_type():
@@ -432,13 +432,24 @@ def convert_timestamp(timestamp, param_string):
 def draw_wind_layer(y):
     angle = json_data['currently']['windBearing']
 
-    wind_icon = pygame.transform.rotate(pygame.image.load(WindIcon_Path), (360 - angle) + 180)  # (360 - angle) + 180
+    arrow_icon = pygame.transform.rotate(pygame.image.load('icons/arrow.png'),
+                                         (360 - angle) + 180)  # (360 - angle) + 180
 
-    position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (wind_icon.get_rect()[2] / 2))
+    def middle_position(icon):
 
-    position_y = y - (wind_icon.get_rect()[3] / 2)
+        position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (icon.get_rect()[2] / 2))
 
-    TFT.blit(wind_icon, (int(position_x), int(position_y)))
+        position_y = (y - (icon.get_rect()[3] / 2))
+
+        position = (position_x, position_y)
+
+        return position
+
+    circle_icon = pygame.image.load('icons/circle.png')
+
+    TFT.blit(circle_icon, middle_position(circle_icon))
+
+    TFT.blit(arrow_icon, middle_position(arrow_icon))
 
     print('\nwind direction: {}'.format(angle))
 
