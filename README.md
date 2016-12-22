@@ -214,6 +214,8 @@ sudo update-rc.d WeatherPi_TFT defaults
 
 #### darcula styled theme
 
+![WeatherPi_TFT](https://www.dropbox.com/s/8gk6vxfy5ul5ksp/WeatherPi_TFT_01.png?dl=0)
+
 ![Darcula styled Theme for WeatherPi_TFT](https://dl.dropboxusercontent.com/u/6076227/github/darcula_theme.png)
 
 ![WeatherPi_TFT](https://dl.dropboxusercontent.com/u/6076227/github/darcula_feather_weather_pi.png)
