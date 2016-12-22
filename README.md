@@ -174,6 +174,7 @@ it should say something like:
 Python 3.4.x
 ```
 
+
 ### update all python modules
 
 open up a python console
