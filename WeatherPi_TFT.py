@@ -318,8 +318,6 @@ class Update:
 
         # print(icon, forecast, moon_icon)
 
-        get_precip_type()
-
         WeatherIcon_Path = folder_path + icon + icon_extension
 
         ForeCastIcon_Day_1_Path = folder_path + mini + forecast[0] + icon_extension
@@ -377,40 +375,45 @@ class Update:
 
         print('\nupdate path for icons: {}'.format(updated_list))
 
+        Update.get_precip_type()
+
+    @staticmethod
+    def get_precip_type():
+
+        global json_data, PRECIPCOLOR, PRECIPTYPE
+
+        if int(json_data['currently']['precipProbability'] * 100) == 0:
+
+            PRECIPTYPE = 'Niederschlag'
+            PRECIPCOLOR = ORANGE
+
+        else:
+
+            precip_type = json_data['currently']['precipType']
+
+            if precip_type == 'rain':
+
+                PRECIPTYPE = 'Regen'
+                PRECIPCOLOR = BLUE
+
+            elif precip_type == 'snow':
+
+                PRECIPTYPE = 'Schnee'
+                PRECIPCOLOR = WHITE
+
+            else:
+
+                PRECIPTYPE = str(precip_type)
+                PRECIPCOLOR = RED
+
+        print('\nupdate PRECIPTYPE to: {}'.format(PRECIPTYPE))
+        print('\nupdate PRECIPCOLOR to: {}'.format(PRECIPCOLOR))
+
     @staticmethod
     def run():
         Update.update_json()
         Update.read_json()
         Update.icon_path()
-
-
-def get_precip_type():
-
-    global json_data, PRECIPCOLOR, PRECIPTYPE
-
-    if int(json_data['currently']['precipProbability'] * 100) == 0:
-
-        PRECIPTYPE = 'Niederschlag'
-        PRECIPCOLOR = ORANGE
-
-    else:
-
-        precip_type = json_data['currently']['precipType']
-
-        if precip_type == 'rain':
-
-            PRECIPTYPE = 'Regen'
-            PRECIPCOLOR = BLUE
-
-        elif precip_type == 'snow':
-
-            PRECIPTYPE = 'Schnee'
-            PRECIPCOLOR = WHITE
-
-        else:
-
-            PRECIPTYPE = str(precip_type)
-            PRECIPCOLOR = RED
 
 
 def convert_timestamp(timestamp, param_string):
