@@ -11,6 +11,8 @@ a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 di
 ### all available weather icons in 2 sizes
 ![Weather Icons](./docs/WEATHER_ICONS.gif)
 
+### icons for 28 moonphases
+![Moon Icons](./docs/MOON_ICONS.gif)
 
 ## Hardware and wiring
 
