@@ -89,7 +89,6 @@ ENV/
 .ropeproject
 /.gitignore
 /test_modules.py
-/aaa.py
 /start.sh
 /tests/
 /modules/
@@ -103,5 +102,5 @@ ENV/
 /.idea/*
 /.idea/dictionaries/*
 /.idea/inspectionProfiles/*
-/logs/latest_weather.json
 /config.json
+
