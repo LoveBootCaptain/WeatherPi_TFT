@@ -36,7 +36,7 @@ ORANGE = (238, 153, 18)
 ICON_PATH = sys.path[0] + '/icons/'
 FONT_PATH = sys.path[0] + '/font/'
 LOG_PATH = sys.path[0] + '/logs/'
-PATH = sys.path[0]
+PATH = sys.path[0] + '/'
 
 TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 # TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
