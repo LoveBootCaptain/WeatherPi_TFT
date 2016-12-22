@@ -428,12 +428,15 @@ def convert_timestamp(timestamp, param_string):
 
 
 def draw_wind_layer(y):
+
     angle = json_data['currently']['windBearing']
+
+    circle_icon = pygame.image.load(ICON_PATH + 'circle.png')
 
     arrow_icon = pygame.transform.rotate(pygame.image.load(ICON_PATH + 'arrow.png'),
                                          (360 - angle) + 180)  # (360 - angle) + 180
 
-    def middle_position(icon):
+    def draw_middle_position_icon(icon):
 
         position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (icon.get_rect()[2] / 2))
 
@@ -441,13 +444,10 @@ def draw_wind_layer(y):
 
         position = (position_x, position_y)
 
-        return position
+        TFT.blit(icon, position)
 
-    circle_icon = pygame.image.load(ICON_PATH + 'circle.png')
-
-    TFT.blit(circle_icon, middle_position(circle_icon))
-
-    TFT.blit(arrow_icon, middle_position(arrow_icon))
+    draw_middle_position_icon(circle_icon)
+    draw_middle_position_icon(arrow_icon)
 
     print('\nwind direction: {}'.format(angle))
 
