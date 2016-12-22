@@ -34,7 +34,7 @@ YELLOW = (241, 196, 15)
 ORANGE = (238, 153, 18)
 
 ICON_PATH = sys.path[0] + '/icons/'
-FONT_PATH = sys.path[0] + '/font/'
+FONT_PATH = sys.path[0] + '/fonts/'
 LOG_PATH = sys.path[0] + '/logs/'
 PATH = sys.path[0] + '/'
 
@@ -91,7 +91,7 @@ class DrawString:
     def __init__(self, string, font, color, y):
         """
         :param string: the input string
-        :param font: the font object
+        :param font: the fonts object
         :param color: a rgb color tuple
         :param y: the y position where you want to render the text
         """
@@ -135,7 +135,7 @@ class DrawString:
 
     def draw_string(self, x):
         """
-        takes x and y from the functions above and render the font
+        takes x and y from the functions above and render the fonts
         """
 
         TFT.blit(self.font.render(self.string, True, self.color), (x, self.y))

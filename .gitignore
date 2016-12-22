@@ -88,17 +88,13 @@ ENV/
 # Rope project settings
 .ropeproject
 /.gitignore
-/test_modules.py
 /start.sh
-/tests/
-/modules/
 /icons/debug.bmp
 /icons/list.txt
 /icons/download.py
-/font/PressStart2P.ttf
-/font/Pixel-Noir.ttf
-/font/Pixel-Noir Skinny Caps.ttf
-/MicroPython/
+/fonts/PressStart2P.ttf
+/fonts/Pixel-Noir.ttf
+/fonts/Pixel-Noir Skinny Caps.ttf
 /.idea/*
 /.idea/dictionaries/*
 /.idea/inspectionProfiles/*

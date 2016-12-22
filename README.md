@@ -217,7 +217,7 @@ sudo update-rc.d WeatherPi_TFT defaults
 
 ### screenshots
 
-#### darcula styled theme with anaother font
+#### darcula styled theme with another font
 
 ![Darcula styled Theme for WeatherPi_TFT](./docs/DARKULA_THEME_01.jpg)
 

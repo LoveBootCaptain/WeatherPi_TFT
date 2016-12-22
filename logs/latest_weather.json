@@ -1,27 +1,27 @@
 {
   "currently": {
-    "apparentTemperature": -6.28,
-    "cloudCover": 0.22,
-    "dewPoint": -5.58,
+    "apparentTemperature": -6.58,
+    "cloudCover": 0.23,
+    "dewPoint": -5.81,
     "humidity": 0.87,
     "icon": "clear-night",
-    "ozone": 313.14,
+    "ozone": 313.19,
     "precipIntensity": 0,
     "precipProbability": 0,
-    "pressure": 1028.79,
+    "pressure": 1028.78,
     "summary": "Heiter",
-    "temperature": -3.77,
-    "time": 1482368148,
+    "temperature": -4,
+    "time": 1482368448,
     "visibility": 9.99,
-    "windBearing": 183,
-    "windSpeed": 1.63
+    "windBearing": 184,
+    "windSpeed": 1.65
   },
   "daily": {
     "data": [
       {
         "apparentTemperatureMax": -1.42,
         "apparentTemperatureMaxTime": 1482408000,
-        "apparentTemperatureMin": -7.23,
+        "apparentTemperatureMin": -8.21,
         "apparentTemperatureMinTime": 1482375600,
         "cloudCover": 0.58,
         "dewPoint": -3.14,
@@ -46,7 +46,7 @@
         "time": 1482361200,
         "visibility": 9.99,
         "windBearing": 214,
-        "windSpeed": 2.62
+        "windSpeed": 2.72
       },
       {
         "apparentTemperatureMax": 0.84,
@@ -181,7 +181,7 @@
         "summary": "Leichter Regen am Vormittag.",
         "sunriseTime": 1482823078,
         "sunsetTime": 1482850726,
-        "temperatureMax": 6.04,
+        "temperatureMax": 6.05,
         "temperatureMaxTime": 1482840000,
         "temperatureMin": 0.67,
         "temperatureMinTime": 1482876000,
@@ -190,7 +190,7 @@
         "windSpeed": 6.53
       },
       {
-        "apparentTemperatureMax": 1.95,
+        "apparentTemperatureMax": 1.96,
         "apparentTemperatureMaxTime": 1482926400,
         "apparentTemperatureMin": -4.97,
         "apparentTemperatureMinTime": 1482890400,
@@ -251,24 +251,7 @@
   "hourly": {
     "data": [
       {
-        "apparentTemperature": -2.7,
-        "cloudCover": 0.18,
-        "dewPoint": -2.67,
-        "humidity": 0.87,
-        "icon": "clear-night",
-        "ozone": 312.6,
-        "precipIntensity": 0,
-        "precipProbability": 0,
-        "pressure": 1028.85,
-        "summary": "Heiter",
-        "temperature": -0.81,
-        "time": 1482364800,
-        "visibility": 9.99,
-        "windBearing": 181,
-        "windSpeed": 1.52
-      },
-      {
-        "apparentTemperature": -6.55,
+        "apparentTemperature": -6.56,
         "cloudCover": 0.23,
         "dewPoint": -5.81,
         "humidity": 0.87,
@@ -285,7 +268,7 @@
         "windSpeed": 1.64
       },
       {
-        "apparentTemperature": -6.93,
+        "apparentTemperature": -8.08,
         "cloudCover": 0.29,
         "dewPoint": -5.87,
         "humidity": 0.87,
@@ -298,13 +281,13 @@
         "temperature": -4.06,
         "time": 1482372000,
         "visibility": 9.99,
-        "windBearing": 186,
-        "windSpeed": 1.82
+        "windBearing": 196,
+        "windSpeed": 2.72
       },
       {
-        "apparentTemperature": -7.23,
+        "apparentTemperature": -8.21,
         "cloudCover": 0.35,
-        "dewPoint": -5.78,
+        "dewPoint": -5.82,
         "humidity": 0.87,
         "icon": "partly-cloudy-night",
         "ozone": 315,
@@ -315,13 +298,13 @@
         "temperature": -3.96,
         "time": 1482375600,
         "visibility": 9.99,
-        "windBearing": 191,
-        "windSpeed": 2.12
+        "windBearing": 198,
+        "windSpeed": 2.94
       },
       {
-        "apparentTemperature": -7.07,
+        "apparentTemperature": -7.68,
         "cloudCover": 0.38,
-        "dewPoint": -5.33,
+        "dewPoint": -5.34,
         "humidity": 0.87,
         "icon": "partly-cloudy-night",
         "ozone": 317.48,
@@ -329,16 +312,16 @@
         "precipProbability": 0,
         "pressure": 1028.47,
         "summary": "Leicht bew\u00f6lkt",
-        "temperature": -3.51,
+        "temperature": -3.53,
         "time": 1482379200,
         "visibility": 9.99,
-        "windBearing": 195,
-        "windSpeed": 2.4
+        "windBearing": 200,
+        "windSpeed": 2.94
       },
       {
-        "apparentTemperature": -6.56,
+        "apparentTemperature": -6.86,
         "cloudCover": 0.41,
-        "dewPoint": -4.7,
+        "dewPoint": -4.67,
         "humidity": 0.88,
         "icon": "partly-cloudy-night",
         "ozone": 320.56,
@@ -346,16 +329,16 @@
         "precipProbability": 0,
         "pressure": 1028.43,
         "summary": "Leicht bew\u00f6lkt",
-        "temperature": -2.95,
+        "temperature": -2.96,
         "time": 1482382800,
         "visibility": 9.99,
-        "windBearing": 198,
-        "windSpeed": 2.54
+        "windBearing": 201,
+        "windSpeed": 2.81
       },
       {
-        "apparentTemperature": -7.17,
+        "apparentTemperature": -7.05,
         "cloudCover": 0.44,
-        "dewPoint": -4.91,
+        "dewPoint": -4.92,
         "humidity": 0.88,
         "icon": "partly-cloudy-night",
         "ozone": 322.8,
@@ -365,8 +348,9 @@
         "summary": "Leicht bew\u00f6lkt",
         "temperature": -3.18,
         "time": 1482386400,
+        "visibility": 9.99,
         "windBearing": 203,
-        "windSpeed": 2.84
+        "windSpeed": 2.73
       },
       {
         "apparentTemperature": -7.2,
@@ -1072,6 +1056,24 @@
         "time": 1482537600,
         "windBearing": 210,
         "windSpeed": 6.01
+      },
+      {
+        "apparentTemperature": -7.02,
+        "cloudCover": 0.85,
+        "dewPoint": -2.31,
+        "humidity": 0.92,
+        "icon": "partly-cloudy-night",
+        "ozone": 288.39,
+        "precipAccumulation": 0.03,
+        "precipIntensity": 0.0356,
+        "precipProbability": 0.02,
+        "precipType": "snow",
+        "pressure": 1023.63,
+        "summary": "\u00dcberwiegend bew\u00f6lkt",
+        "temperature": -1.2,
+        "time": 1482541200,
+        "windBearing": 215,
+        "windSpeed": 6.08
       }
     ],
     "icon": "snow",
