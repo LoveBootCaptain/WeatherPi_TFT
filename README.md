@@ -6,7 +6,7 @@ a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 di
 
 > written with love in python3
 
-![WeatherPi_TFT](./docs/WeatherPi_TFT_01.jpg)
+![WeatherPi_TFT](./docs/WeatherPi_TFT_01.1.jpg)
 
 
 ## Hardware and wiring
