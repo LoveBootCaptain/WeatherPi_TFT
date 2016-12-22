@@ -276,7 +276,7 @@ class Update:
 
             print('ERROR - json file read by module')
 
-        DrawImage(SyncPath_Path, 5).right()
+        DrawImage(SyncPath_Path, 5).right(-5)
         pygame.display.update()
 
     @staticmethod
@@ -370,7 +370,7 @@ class Update:
 
             PATH_ERROR = False
 
-        DrawImage(SyncRefresh_Path, 5).right(12)
+        DrawImage(SyncRefresh_Path, 5).right(7)
         pygame.display.update()
 
         print('\nupdate path for icons: {}'.format(updated_list))
@@ -454,19 +454,19 @@ def draw_image_layer():
 
     if REFRESH_ERROR:
 
-        DrawImage(NoRefresh_Path, 5).right(12)
+        DrawImage(NoRefresh_Path, 5).right(7)
 
     else:
 
-        DrawImage(Refresh_Path, 5).right(12)
+        DrawImage(Refresh_Path, 5).right(7)
 
     if PATH_ERROR:
 
-        DrawImage(NoPath_Path, 5).right()
+        DrawImage(NoPath_Path, 5).right(-5)
 
     else:
 
-        DrawImage(Path_Path, 5).right()
+        DrawImage(Path_Path, 5).right(-5)
 
     DrawImage(WeatherIcon_Path, 65).center(2, 0)
 
