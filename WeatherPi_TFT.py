@@ -71,8 +71,6 @@ MoonIcon_Path = ICON_PATH + 'moon-0.png'
 SunRise_Path = ICON_PATH + 'sunrise.png'
 SunSet_Path = ICON_PATH + 'sunset.png'
 
-WindIcon_Path = ICON_PATH + 'wind-direction.png'
-
 PrecipSnow_Path = ICON_PATH + 'precipsnow.png'
 PrecipRain_Path = ICON_PATH + 'preciprain.png'
 
@@ -432,7 +430,7 @@ def convert_timestamp(timestamp, param_string):
 def draw_wind_layer(y):
     angle = json_data['currently']['windBearing']
 
-    arrow_icon = pygame.transform.rotate(pygame.image.load('icons/arrow.png'),
+    arrow_icon = pygame.transform.rotate(pygame.image.load(ICON_PATH + 'arrow.png'),
                                          (360 - angle) + 180)  # (360 - angle) + 180
 
     def middle_position(icon):
@@ -445,7 +443,7 @@ def draw_wind_layer(y):
 
         return position
 
-    circle_icon = pygame.image.load('icons/circle.png')
+    circle_icon = pygame.image.load(ICON_PATH + 'circle.png')
 
     TFT.blit(circle_icon, middle_position(circle_icon))
 
