@@ -99,6 +99,8 @@ sudo apt-get update -y && sudo apt-get upgrade -y
 
 ```bash
 git clone https://github.com/LoveBootCaptain/WeatherPi_TFT.git
+cd WeatherPi_TFT
+rm -rf docs/
 ```
 
 ### install the dependencies

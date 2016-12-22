@@ -207,17 +207,17 @@ class Update:
 
         try:
 
-            # config_data = open(PATH + 'config.json').read()
-            #
-            # config = json.loads(config_data)
+            config_data = open(PATH + 'config.json').read()
 
-            # forecast_io_key = config['FORECAST_IO_KEY']
-            #
-            # options = '?lang=de&units=si&exclude=flags'
+            config = json.loads(config_data)
 
-            # request_url = 'https://api.forecast.io/forecast/' + forecast_io_key + '/52.5152463,13.5046708' + options
+            forecast_io_key = config['FORECAST_IO_KEY']
 
-            request_url = 'http://weatherpi/latest_weather.json'
+            options = '?lang=de&units=si&exclude=flags'
+
+            request_url = 'https://api.forecast.io/forecast/' + forecast_io_key + '/52.5152463,13.5046708' + options
+
+            # request_url = 'http://weatherpi/latest_weather.json'
 
             data = requests.get(request_url).json()
 
