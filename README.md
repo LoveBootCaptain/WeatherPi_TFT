@@ -1,5 +1,7 @@
 # WeatherPi_TFT
 
+![Hardware](./docs/HARDWARE_1.1.jpg)
+
 a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 display 
 
 > first of all, i'm a beginner in python... so don't be to hard to me... i'm still learning
