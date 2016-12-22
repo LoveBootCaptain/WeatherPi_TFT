@@ -100,3 +100,4 @@ ENV/
 /.idea/inspectionProfiles/*
 /config.json
 
+/logs/latest_weather.json
