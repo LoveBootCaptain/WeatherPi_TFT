@@ -38,6 +38,8 @@ configuration.
 
 ### wiring
 
+![wiring](./docs/WIRING_1.1.jpg)
+
 this should explain how to wire up your display
 
 ```
