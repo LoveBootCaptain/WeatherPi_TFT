@@ -1,20 +1,20 @@
 {
   "currently": {
-    "apparentTemperature": -6.58,
+    "apparentTemperature": -6.61,
     "cloudCover": 0.23,
     "dewPoint": -5.81,
     "humidity": 0.87,
     "icon": "clear-night",
-    "ozone": 313.19,
+    "ozone": 313.2,
     "precipIntensity": 0,
     "precipProbability": 0,
     "pressure": 1028.78,
     "summary": "Heiter",
-    "temperature": -4,
-    "time": 1482368448,
+    "temperature": -4.01,
+    "time": 1482368505,
     "visibility": 9.99,
     "windBearing": 184,
-    "windSpeed": 1.65
+    "windSpeed": 1.67
   },
   "daily": {
     "data": [
@@ -302,7 +302,7 @@
         "windSpeed": 2.94
       },
       {
-        "apparentTemperature": -7.68,
+        "apparentTemperature": -7.69,
         "cloudCover": 0.38,
         "dewPoint": -5.34,
         "humidity": 0.87,

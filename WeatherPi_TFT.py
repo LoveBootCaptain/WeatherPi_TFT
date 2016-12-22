@@ -385,6 +385,7 @@ class Update:
 
 
 def get_precip_type():
+
     global json_data, PRECIPCOLOR, PRECIPTYPE
 
     if int(json_data['currently']['precipProbability'] * 100) == 0:
