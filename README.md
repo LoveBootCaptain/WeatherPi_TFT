@@ -6,10 +6,15 @@ a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 di
 
 > written with love in python3
 
+![WeatherPi_TFT](./docs/WeatherPi_TFT_01.jpg)
+
+
 ## Hardware and wiring
 
-> i wrote this app on a mac and tested it quite a while. since it uses only standard python3 modules and libraries 
+> i wrote this app on a mac with PyCharm and tested it quite a while. since it uses only standard python3 modules and libraries 
 it should work on nearly everything that can run python3 and pygame.
+
+![PyCharm IDE by intelliJ jetbrains](./docs/PYCHARM_01.jpg)
 
 > this tutorial is basically for running it on a raspberry pi (zero, 1, 2, 3) and a TFT display which matches up 
 with chips like the ones from adafruit. as long as it uses standard spi it should work with the new `dtoverlay`module
@@ -212,10 +217,8 @@ sudo update-rc.d WeatherPi_TFT defaults
 
 ### screenshots
 
-#### darcula styled theme
+#### darcula styled theme with anaother font
 
-![WeatherPi_TFT](https://www.dropbox.com/s/8gk6vxfy5ul5ksp/WeatherPi_TFT_01.png?dl=0)
+![Darcula styled Theme for WeatherPi_TFT](./docs/DARKULA_THEME_01.jpg)
 
-![Darcula styled Theme for WeatherPi_TFT](https://dl.dropboxusercontent.com/u/6076227/github/darcula_theme.png)
-
-![WeatherPi_TFT](https://dl.dropboxusercontent.com/u/6076227/github/darcula_feather_weather_pi.png)
+![WeatherPi_TFT](./docs/DAKULA_THEME_02.png)
