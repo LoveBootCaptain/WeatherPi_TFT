@@ -130,10 +130,11 @@ edit the config.json file
 nano config.json
 ```
 * replace the `"xxxxxxxxxxxxxxxxxxxxxxxxx"` next to `"FORECAST_IO_KEY"` with your own API key (don't remove the ")
-* replace `"FORECAST_LANGUAGE": "en"` with your preferred language (supported languages of the api see [DarkSky API Docs](https://darksky.net/dev/docs/forecast))
-* replace `"FORECAST_UNITS": "si"` with your preferred unit format (imperial (`us`) or metric (`si`) (supported unit formats of the api see [DarkSky API Docs](https://darksky.net/dev/docs/forecast)))
+* replace `"FORECAST_LANGUAGE": "en"` with your preferred language
+* replace `"FORECAST_UNITS": "si"` with your preferred unit format
 * replace `"FORECAST_LAT": 40.705565` and `"FORECAST_LON": -74.1180865` with the coordinates of your preferred forecast-location (this example-location data is from new york city)
-* replace `"FORECAST_EXCLUDES": "flags"` with whatever you want to exclude in the API-respond (see [DarkSky API Docs](https://darksky.net/dev/docs/forecast) for exclude details)
+* replace `"FORECAST_EXCLUDES": "flags"` with whatever you want to exclude in the API-respond
+* for language-support, units, lat , lon and excludes please refer to -> **[DarkSky API Docs](https://darksky.net/dev/docs/forecast)**
 
 ### set up the TFT
 
@@ -231,11 +232,12 @@ sudo update-rc.d WeatherPiTFT defaults
 
 ### credits
 
-* fonts from [google](https://fonts.google.com/)
-* icons [fa2png](http://fa2png.io/), making them colorful was my work
-* [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
 * [squix78](https://github.com/squix78) for his [esp8266 weather station color](https://github.com/squix78/esp8266-weather-station-color) which inspired me to make it in python for a raspberry and another weather api
+* [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
 * [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
+* icons: [fa2png](http://fa2png.io/), making them colorful was my work
+* fonts: [google](https://fonts.google.com/)
+
 
 ### screenshots
 
