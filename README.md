@@ -129,7 +129,11 @@ edit the config.json file
 ```
 nano config.json
 ```
-replace the "xxxxxxxxxxxxxxxxxxxxxxxxx" next to "FORECAST_IO_KEY" with your own API key
+* replace the `"xxxxxxxxxxxxxxxxxxxxxxxxx"` next to `"FORECAST_IO_KEY"` with your own API key (don't remove the ")
+* replace `"FORECAST_LANGUAGE": "en"` with your preferred language (supported languages of the api see [DarkSky API Docs](https://darksky.net/dev/docs/forecast))
+* replace `"FORECAST_UNITS": "si"` with your preferred unit format (imperial (`us`) or metric (`si`) (supported unit formats of the api see [DarkSky API Docs](https://darksky.net/dev/docs/forecast)))
+* replace `"FORECAST_LAT": 40.705565` and `"FORECAST_LON": -74.1180865` with the coordinates of your preferred forecast-location (this example-location data is from new york city)
+* replace `"FORECAST_EXCLUDES": "flags"` with whatever you want to exclude in the API-respond (see [DarkSky API Docs](https://darksky.net/dev/docs/forecast) for exclude details)
 
 ### set up the TFT
 
@@ -219,6 +223,11 @@ if this is doing what it should you can run the service every time you boot your
 ```bash
 sudo update-rc.d WeatherPiTFT defaults
 ```
+
+## Troubleshooting
+
+* if you have any issues with setting up your `locale` please read the [issue #1](https://github.com/LoveBootCaptain/WeatherPi_TFT/issues/1)
+* if some special characters of your language is not supported (e.g. like chinese characters) please read the [issue #1](https://github.com/LoveBootCaptain/WeatherPi_TFT/issues/1#issuecomment-269432142)
 
 ### credits
 

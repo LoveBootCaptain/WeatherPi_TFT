@@ -22,8 +22,8 @@ pygame.mouse.set_visible(False)
 DISPLAY_WIDTH = 240
 DISPLAY_HEIGHT = 320
 
-# BLACK = (43, 43, 43)
 BLACK = (10, 10, 10)
+DARK_GRAY = (43, 43, 43)
 WHITE = (255, 255, 255)
 
 RED = (231, 76, 60)
@@ -101,8 +101,7 @@ class DrawString:
 
     def left(self, offset=0):
         """
-        :param offset: define some offset pixel to move strings a little bit (default=0)
-        :return:
+        :param offset: define some offset pixel to move strings a little bit more left (default=0)
         """
 
         x = 10 + offset
@@ -111,8 +110,7 @@ class DrawString:
 
     def right(self, offset=0):
         """
-        :param offset: define some offset pixel to move strings a little bit (default=0)
-        :return:
+        :param offset: define some offset pixel to move strings a little bit more right (default=0)
         """
 
         x = (DISPLAY_WIDTH - self.size[0] - 10) - offset
@@ -124,7 +122,6 @@ class DrawString:
         :param parts: define in how many parts you want to split your display
         :param part: the part in which you want to render text (first part is 0, second is 1, etc.)
         :param offset: define some offset pixel to move strings a little bit (default=0)
-        :return:
         """
 
         x = ((((DISPLAY_WIDTH / parts) / 2) + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset
@@ -153,8 +150,7 @@ class DrawImage:
 
     def left(self, offset=0):
         """
-        :param offset: define some offset pixel to move strings a little bit (default=0)
-        :return:
+        :param offset: define some offset pixel to move image a little bit more left(default=0)
         """
 
         x = 10 + offset
@@ -163,8 +159,7 @@ class DrawImage:
 
     def right(self, offset=0):
         """
-        :param offset: define some offset pixel to move strings a little bit (default=0)
-        :return:
+        :param offset: define some offset pixel to move image a little bit more right (default=0)
         """
 
         x = (DISPLAY_WIDTH - self.size[0] - 10) - offset
@@ -176,7 +171,6 @@ class DrawImage:
         :param parts: define in how many parts you want to split your display
         :param part: the part in which you want to render text (first part is 0, second is 1, etc.)
         :param offset: define some offset pixel to move strings a little bit (default=0)
-        :return:
         """
 
         x = int(((((DISPLAY_WIDTH / parts) / 2) + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset)
@@ -197,13 +191,11 @@ class Update:
 
         global threads, CONNECTION_ERROR
 
-        thread = threading.Timer(120, Update.update_json)
+        thread = threading.Timer(300, Update.update_json)
 
         thread.start()
 
         threads.append(thread)
-
-        # print(threads)
 
         try:
 
@@ -212,10 +204,17 @@ class Update:
             config = json.loads(config_data)
 
             forecast_io_key = config['FORECAST_IO_KEY']
+            forecast_lang = config['FORECAST_LANGUAGE']
+            forecast_units = config['FORECAST_UNITS']
+            forecast_lat = config['FORECAST_LAT']
+            forecast_lon = config['FORECAST_LON']
+            forecast_excludes = config['FORECAST_EXCLUDES']
 
-            options = '?lang=de&units=si&exclude=flags'
+            api_endpoint = 'https://api.forecast.io/forecast/'
 
-            request_url = 'https://api.forecast.io/forecast/' + forecast_io_key + '/52.5152463,13.5046708' + options
+            options = '?lang={}&units={}&exclude={}'.format(forecast_lang, forecast_units, forecast_excludes)
+
+            request_url = str(api_endpoint + forecast_io_key + '/{},{}'.format(forecast_lat, forecast_lon) + options)
 
             # request_url = 'http://weatherpi/latest_weather.json'
 
@@ -227,8 +226,6 @@ class Update:
             print('\njson file saved')
 
             CONNECTION_ERROR = False
-
-            # read_latest_json()
 
         except (requests.HTTPError, requests.ConnectionError):
 
@@ -246,13 +243,12 @@ class Update:
 
         global threads, json_data, REFRESH_ERROR
 
-        thread = threading.Timer(15, Update.read_json)
+        thread = threading.Timer(30, Update.read_json)
 
         thread.start()
 
         threads.append(thread)
 
-        # print(threads)
 
         try:
 
@@ -265,8 +261,6 @@ class Update:
             json_data = new_json_data
 
             REFRESH_ERROR = False
-
-            # update_icon_path()
 
         except IOError:
 
@@ -310,7 +304,7 @@ class Update:
 
         moon = 'moon-' + str(moon_icon)
 
-        # print(icon, forecast, moon_icon)
+        print(icon, forecast, moon_icon)
 
         WeatherIcon_Path = folder_path + icon + icon_extension
 
@@ -323,19 +317,19 @@ class Update:
         path_list = [WeatherIcon_Path, ForeCastIcon_Day_1_Path,
                      ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path]
 
-        # print('\nvalidating path: {}\n'.format(path_list))
+        print('\nvalidating path: {}\n'.format(path_list))
 
         for path in path_list:
 
             if os.path.isfile(path):
 
-                # print('TRUE :', path)
+                print('TRUE :', path)
 
                 updated_list.append(path)
 
             else:
 
-                # print('FALSE :', path)
+                print('FALSE :', path)
 
                 if 'mini' in path:
 
@@ -365,7 +359,7 @@ class Update:
 
             PATH_ERROR = False
 
-        # print('\nupdate path for icons: {}'.format(updated_list))
+        print('\nupdate path for icons: {}'.format(updated_list))
 
         Update.get_precip_type()
 
@@ -401,8 +395,8 @@ class Update:
                 PRECIPTYPE = str(precip_type)
                 PRECIPCOLOR = RED
 
-        # print('\nupdate PRECIPTYPE to: {}'.format(PRECIPTYPE))
-        # print('\nupdate PRECIPCOLOR to: {}'.format(PRECIPCOLOR))
+        print('\nupdate PRECIPTYPE to: {}'.format(PRECIPTYPE))
+        print('\nupdate PRECIPCOLOR to: {}'.format(PRECIPCOLOR))
         print('\nupdated PATH')
 
     @staticmethod
@@ -446,7 +440,7 @@ def draw_wind_layer(y):
     draw_middle_position_icon(arrow_icon)
     draw_middle_position_icon(circle_icon)
 
-    # print('\nwind direction: {}'.format(angle))
+    print('\nwind direction: {}'.format(angle))
 
 
 def draw_image_layer():
@@ -495,11 +489,11 @@ def draw_image_layer():
 
     draw_wind_layer(285)
 
-    # print('\n' + WeatherIcon_Path)
-    # print(ForeCastIcon_Day_1_Path)
-    # print(ForeCastIcon_Day_2_Path)
-    # print(ForeCastIcon_Day_3_Path)
-    # print(MoonIcon_Path)
+    print('\n' + WeatherIcon_Path)
+    print(ForeCastIcon_Day_1_Path)
+    print(ForeCastIcon_Day_2_Path)
+    print(ForeCastIcon_Day_3_Path)
+    print(MoonIcon_Path)
 
 
 def draw_time_layer():
@@ -508,10 +502,10 @@ def draw_time_layer():
     date_time_string = convert_timestamp(timestamp, '%H:%M:%S')
     date_day_string = convert_timestamp(timestamp, '%A - %d. %b %Y')
 
-    # print('\nDay: {}'.format(date_day_string))
-    # print('Time: {}'.format(date_time_string))
+    print('\nDay: {}'.format(date_day_string))
+    print('Time: {}'.format(date_time_string))
 
-    DrawString(date_day_string, font_small, WHITE, 5).center(1, 0)
+    DrawString(date_day_string, font_small_bold, WHITE, 5).center(1, 0)
     DrawString(date_time_string, font_big_bold, WHITE, 20).center(1, 0)
 
 
@@ -522,9 +516,9 @@ def draw_text_layer():
     temp_out_string = str(json_data['currently']['temperature']) + '°C'
     rain_string = str(int(json_data['currently']['precipProbability'] * 100)) + ' %'
 
-    forecast_day_1_string = convert_timestamp(forecast[1]['time'], '%A')
-    forecast_day_2_string = convert_timestamp(forecast[2]['time'], '%A')
-    forecast_day_3_string = convert_timestamp(forecast[3]['time'], '%A')
+    forecast_day_1_string = convert_timestamp(forecast[1]['time'], '%a').upper()
+    forecast_day_2_string = convert_timestamp(forecast[2]['time'], '%a').upper()
+    forecast_day_3_string = convert_timestamp(forecast[3]['time'], '%a').upper()
 
     forecast_day_1_min_max_string = str(int(forecast[1]['temperatureMin'])) + ' | ' + str(
         int(forecast[0]['temperatureMax']))
@@ -544,10 +538,11 @@ def draw_text_layer():
 
     draw_time_layer()
 
-    DrawString(summary_string, font_small, ORANGE, 55).center(1, 0)
-    DrawString(temp_out_string, font_big_bold, ORANGE, 75).right()
+    DrawString(summary_string, font_small_bold, ORANGE, 55).center(1, 0)
 
-    DrawString(rain_string, font_big_bold, PRECIPCOLOR, 105).right()
+    DrawString(temp_out_string, font_big, ORANGE, 75).right()
+
+    DrawString(rain_string, font_big, PRECIPCOLOR, 105).right()
     DrawString(PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right()
 
     DrawString(forecast_day_1_string, font_small_bold, ORANGE, 165).center(3, 0)
@@ -564,16 +559,16 @@ def draw_text_layer():
     DrawString(north_string, font_small_bold, WHITE, 250).center(3, 2)
     DrawString(wind_speed_string, font_small_bold, WHITE, 300).center(3, 2)
 
-    # print('\nsummary: {}'.format(summary_string))
-    # print('temp out: {}'.format(temp_out_string))
-    # print('{}: {}'.format(PRECIPTYPE, rain_string))
-    # print('forecast: '
-    #       + forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; '
-    #       + forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; '
-    #       + forecast_day_3_string + ' ' + forecast_day_3_min_max_string
-    #       )
-    # print('sunrise: {} ; sunset {}'.format(sunrise_string, sunset_string))
-    # print('WindSpeed: {}'.format(wind_speed_string))
+    print('\nsummary: {}'.format(summary_string))
+    print('temp out: {}'.format(temp_out_string))
+    print('{}: {}'.format(PRECIPTYPE, rain_string))
+    print('forecast: '
+          + forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; '
+          + forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; '
+          + forecast_day_3_string + ' ' + forecast_day_3_min_max_string
+          )
+    print('sunrise: {} ; sunset {}'.format(sunrise_string, sunset_string))
+    print('WindSpeed: {}'.format(wind_speed_string))
 
 
 def draw_to_tft():
