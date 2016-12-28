@@ -4,6 +4,7 @@
 # MIT License
 #
 # Copyright (c) 2016 LoveBootCaptain (https://github.com/LoveBootCaptain)
+# Author: Stephan Ansorge aka LoveBootCaptain
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
