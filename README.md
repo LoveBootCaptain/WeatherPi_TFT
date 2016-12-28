@@ -58,6 +58,14 @@ GND Ground                          = GND
 VCC 3V3 supply                      = +3V3 or 5V
 ```
 
+* optional if you like to use the included PiButtons script
+```
+BUTTON 1    used for restart app    = GPIO19
+BUTTON 2    used for shutdown pi    = GPIO26
+```
+* give you the option to put some function on a hardware button (like restart the WeatherPiTFT service, shutdown/reboot your Pi, change display brightness, etc.)
+* feel free to add your own functions in `PiButtons.py`
+
 ## Setup your Pi
 
 ### install jessie to a sd card and update
@@ -147,25 +155,32 @@ dtparam=rotate=0
 fbcon=map:10 fbcon=font:VGA8x8 logo.nologo
 ```
 
-### setup the service
+### setup the services
 
 ```bash
 cd
 cd WeatherPi_TFT
-sudo cp Service.sh /etc/init.d/WeatherPiTFT
+sudo cp WeatherPi_TFT_Service.sh /etc/init.d/WeatherPiTFT
+sudo cp PiButtons_Service.sh /etc/init.d/PiButtons
 sudo chmod +x /etc/init.d/WeatherPiTFT
+sudo chmod +x /etc/init.d/PiButtons
 sudo chmod +x Weatherpi_TFT.py
+sudo chmod +x PiButtons.py
 ```
 
 ### run python with root privileges
 
-
+* this is useful if you like to run your python scripts on boot and with sudo support in python 
 ```bash
 sudo chown -v root:root /usr/bin/python3
 sudo chmod -v u+s /usr/bin/python3
 ```
 
 ### setting up python3 as default interpreter
+
+* this should start your wanted python version just by typing `python` in the terminal
+* helps if you have projects in python2 and python3 and don't want to hassle with the python version in your service scripts
+
 ```bash
 update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
 update-alternatives --install /usr/bin/python python /usr/bin/python3.4 2
@@ -208,18 +223,28 @@ for dist in pip.get_installed_distributions():
 sudo reboot
 ```
 
-### test the service
+### test the services
 
+
+* for the WeatherPiTFT Service
 ```bash
 sudo service WeatherPiTFT start
 sudo service WeatherPiTFT stop
 sudo service WeatherPiTFT restart
 sudo service WeatherPiTFT status
 ```
+* for the PiButtons Service
+```bash
+sudo service PiButtons start
+sudo service PiButtons stop
+sudo service PiButtons restart
+sudo service PiButtons status
+```
 
 * if this is doing what it should you can run the service every time you boot your pi
 ```bash
 sudo update-rc.d WeatherPiTFT defaults
+sudo update-rc.d PiButtons defaults
 ```
 
 ## Troubleshooting
