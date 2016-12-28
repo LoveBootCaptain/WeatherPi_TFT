@@ -253,6 +253,9 @@ sudo update-rc.d PiButtons defaults
 * if some special characters of your language is not supported (e.g. like chinese characters) please read the [issue #1](https://github.com/LoveBootCaptain/WeatherPi_TFT/issues/1#issuecomment-269432142)
 * a good way to setup for chinese was given from @yifanshu02 **[here](https://github.com/LoveBootCaptain/WeatherPi_TFT/issues/1#issuecomment-269472167)**
 
+WeatherPi_TFT in Chinese
+![WeatherPi_TFT in Chinese](https://cloud.githubusercontent.com/assets/12606871/21522086/9733c0ea-cd3d-11e6-9bd7-cd39a605b356.png)
+
 ### credits
 
 * [squix78](https://github.com/squix78) for his [esp8266 weather station color](https://github.com/squix78/esp8266-weather-station-color) which inspired me to make it in python for a raspberry and another weather api
