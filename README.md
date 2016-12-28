@@ -13,7 +13,7 @@ a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 di
 ### all available weather icons in 2 sizes
 ![Weather Icons](./docs/WEATHER_ICONS_1.2.gif)
 
-### icons for 28 moonphases
+### icons for moonphases
 ![Moon Icons](./docs/MOON_ICONS.gif)
 
 ## Hardware and wiring
@@ -42,7 +42,7 @@ configuration.
 
 ![wiring](./docs/WIRING_1.1.jpg)
 
-this should explain how to wire up your display
+* this should explain how to wire up your display
 
 ```
 SDO (MISO) TFT Data Out SPI_MISO    = GPIO09
@@ -58,11 +58,11 @@ GND Ground                          = GND
 VCC 3V3 supply                      = +3V3 or 5V
 ```
 
-## Install
+## Setup your Pi
 
 ### install jessie to a sd card and update
 
-get the latest [NOOBS](https://www.raspberrypi.org/downloads/noobs/) installer
+* get the latest [NOOBS](https://www.raspberrypi.org/downloads/noobs/) installer
 ```
 https://www.raspberrypi.org/downloads/noobs/
 ```
@@ -90,12 +90,12 @@ TODO: write a tutorial for connecting to WiFi via terminal
 
 ### update all tools
 
-when your connected to your wifi open a terminal and type:
+* when your connected to your wifi open up a terminal and type:
 ```bash
 sudo apt-get update -y && sudo apt-get upgrade -y
 ```
 
-### install WeatherPi_TFT
+## install and configure WeatherPi_TFT
 
 ```bash
 git clone https://github.com/LoveBootCaptain/WeatherPi_TFT.git
@@ -111,41 +111,38 @@ TODO: write a requirements.txt
 
 ### get an api key from darksky / forecast.io
 
-go to
-```
-https://darksky.net/dev/
-```
-and register to get an API key
+* go to [darksky.net](https://darksky.net/dev/)
+* and register to get an API key
 
-### add API key to config file
+### add API key and other options to the config file
 
-create a new config-file
+* create a new config-file
 ```bash
 cd
 cd WeatherPi_TFT
 cp example.config.json config.json
 ```
-edit the config.json file
+* edit the config.json file
 ```
 nano config.json
 ```
-* replace the `"xxxxxxxxxxxxxxxxxxxxxxxxx"` next to `"FORECAST_IO_KEY"` with your own API key (don't remove the ")
-* replace `"FORECAST_LANGUAGE": "en"` with your preferred language
-* replace `"FORECAST_UNITS": "si"` with your preferred unit format
-* replace `"FORECAST_LAT": 40.705565` and `"FORECAST_LON": -74.1180865` with the coordinates of your preferred forecast-location (this example-location data is from new york city)
-* replace `"FORECAST_EXCLUDES": "flags"` with whatever you want to exclude in the API-respond
+* replace `xxxxxxxxxxxxxxxxxxxxxxxxx` in  `"FORECAST_IO_KEY": "xxxxxxxxxxxxxxxxxxxxxxxxx"` with your own API key
+* replace `en` in `"FORECAST_LANGUAGE": "en"` with your preferred language
+* replace `si` in `"FORECAST_UNITS": "si"` with your preferred unit format
+* replace `40.705565` and `-74.1180865` in `"FORECAST_LAT": 40.705565` and `"FORECAST_LON": -74.1180865` with the coordinates of your preferred forecast-location (this example-location data is from new york city)
+* replace `flags` in `"FORECAST_EXCLUDES": "flags"` with whatever you want to exclude in the API-respond
 * for language-support, units, lat , lon and excludes please refer to -> **[DarkSky API Docs](https://darksky.net/dev/docs/forecast)**
 
 ### set up the TFT
 
-in /boot/config.txt, add in the following at the bottom 
+* in /boot/config.txt, add in the following at the bottom 
 ```
 # TFT display and touch panel
 dtoverlay=rpi-display
 dtparam=rotate=0
 ```
 
-change /boot/cmdline.txt to add the following to the end of the existing line
+* change /boot/cmdline.txt to add the following to the end of the existing line
 ```
 fbcon=map:10 fbcon=font:VGA8x8 logo.nologo
 ```
@@ -180,12 +177,12 @@ update-alternatives --install /usr/bin/python python /usr/bin/python3.4 2
 > ```
 > and choose your preferred version of python
 
-check if python3.x is now default with:
+* check if python3.x is now default with:
 ```bash
 python --version
 ```
 
-it should say something like: 
+* it should say something like: 
 ```
 Python 3.4.x
 ```
@@ -193,12 +190,12 @@ Python 3.4.x
 
 ### update all python modules
 
-open up a python console
+* open up a python console
 ```bash
 python
 ```
 
-than run this line by line
+* than run this line by line
 ```python
 import pip
 from subprocess import call
@@ -206,7 +203,7 @@ for dist in pip.get_installed_distributions():
     call("pip install --upgrade " + dist.project_name, shell=True)
 ```
 
-if everything is set up and updated correctly:
+* if everything is set up and updated correctly:
 ```bash
 sudo reboot
 ```
@@ -220,7 +217,7 @@ sudo service WeatherPiTFT restart
 sudo service WeatherPiTFT status
 ```
 
-if this is doing what it should you can run the service every time you boot your pi
+* if this is doing what it should you can run the service every time you boot your pi
 ```bash
 sudo update-rc.d WeatherPiTFT defaults
 ```
