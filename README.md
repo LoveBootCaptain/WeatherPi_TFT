@@ -222,7 +222,8 @@ sudo update-rc.d WeatherPiTFT defaults
 
 ### credits
 
-* fonts and icons [fa2png](http://fa2png.io/), making them colorful was my work
+* fonts from [google]https://fonts.google.com/
+* icons [fa2png](http://fa2png.io/), making them colorful was my work
 * [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
 * [squix78](https://github.com/squix78) for his [esp8266 weather station color](https://github.com/squix78/esp8266-weather-station-color) which inspired me to make it in python for a raspberry and another weather api
 * [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
