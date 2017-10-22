@@ -209,6 +209,7 @@ class DrawImage:
         TFT.blit(self.image, (x, self.y))
 
 
+
 class Update:
     @staticmethod
     def update_json():
