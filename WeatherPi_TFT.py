@@ -114,8 +114,8 @@ class DrawString:
         :param offset: define some offset pixel to move strings a little bit (default=0)
         """
 
-        x = ((((DISPLAY_WIDTH / parts) / 2)
-              + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset
+        x = ((((DISPLAY_WIDTH / parts) / 2) +
+              ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset
 
         self.draw_string(x)
 
@@ -164,8 +164,8 @@ class DrawImage:
         :param offset: define some offset pixel to move strings a little bit (default=0)
         """
 
-        x = int(((((DISPLAY_WIDTH / parts) / 2)
-                  + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset)
+        x = int(((((DISPLAY_WIDTH / parts) / 2) +
+                  ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset)
 
         self.draw_image(x)
 
@@ -203,8 +203,8 @@ class Update:
             options = '?lang={}&units={}&exclude={}'.format(
                 forecast_lang, forecast_units, forecast_excludes)
 
-            request_url = str(api_endpoint + forecast_io_key
-                              + '/{},{}'.format(forecast_lat, forecast_lon) + options)
+            request_url = str(api_endpoint + forecast_io_key +
+                              '/{},{}'.format(forecast_lat, forecast_lon) + options)
 
             # request_url = 'http://weatherpi/latest_weather.json'
 
@@ -399,86 +399,26 @@ def convert_timestamp(timestamp, param_string):
     return timestring
 
 
-def draw_wind_layer(y):
+def draw_background():
+    TFT.fill(BLACK)
 
-    angle = json_data['currently']['windBearing']
-
-    circle_icon = pygame.image.load(ICON_PATH + 'circle.png')
-
-    arrow_icon = pygame.transform.rotate(pygame.image.load(ICON_PATH + 'arrow.png'),
-                                         (360 - angle) + 180)  # (360 - angle) + 180
-
-    def draw_middle_position_icon(icon):
-
-        position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2)
-                      - (icon.get_rect()[2] / 2))
-
-        position_y = (y - (icon.get_rect()[3] / 2))
-
-        position = (position_x, position_y)
-
-        TFT.blit(icon, position)
-
-    draw_middle_position_icon(arrow_icon)
-    draw_middle_position_icon(circle_icon)
-
-    print('\nwind direction: {}'.format(angle))
-
-
-def draw_image_layer():
     if CONNECTION_ERROR:
-
         DrawImage(NoWiFi_Path, 5).left()
-
     else:
-
         DrawImage(WiFi_Path, 5).left()
 
     if REFRESH_ERROR:
-
         DrawImage(NoRefresh_Path, 5).right(7)
-
     else:
-
         DrawImage(Refresh_Path, 5).right(7)
 
     if PATH_ERROR:
-
         DrawImage(NoPath_Path, 5).right(-5)
-
     else:
-
         DrawImage(Path_Path, 5).right(-5)
 
-    DrawImage(WeatherIcon_Path, 65).center(2, 0)
 
-    if PRECIPTYPE == 'Regen':
-
-        DrawImage(PrecipRain_Path, 140).right(45)
-
-    elif PRECIPTYPE == 'Schnee':
-
-        DrawImage(PrecipSnow_Path, 140).right(50)
-
-    DrawImage(ForeCastIcon_Day_1_Path, 200).center(3, 0)
-    DrawImage(ForeCastIcon_Day_2_Path, 200).center(3, 1)
-    DrawImage(ForeCastIcon_Day_3_Path, 200).center(3, 2)
-
-    DrawImage(SunRise_Path, 260).left()
-    DrawImage(SunSet_Path, 290).left()
-
-    DrawImage(MoonIcon_Path, 255).center(1, 0)
-
-    draw_wind_layer(285)
-
-    print('\n' + WeatherIcon_Path)
-    print(ForeCastIcon_Day_1_Path)
-    print(ForeCastIcon_Day_2_Path)
-    print(ForeCastIcon_Day_3_Path)
-    print(MoonIcon_Path)
-
-
-def draw_time_layer():
+def draw_clock():
     timestamp = time.time()
 
     date_time_string = convert_timestamp(timestamp, '%H:%M:%S')
@@ -491,48 +431,43 @@ def draw_time_layer():
     DrawString(date_time_string, font_big_bold, WHITE, 20).center(1, 0)
 
 
-def draw_text_layer():
-    forecast = json_data['daily']['data']
-
+def draw_weather():
     summary_string = json_data['currently']['summary']
     temp_out_string = str(json_data['currently']['temperature']) + '°C'
     rain_string = str(
         int(json_data['currently']['precipProbability'] * 100)) + ' %'
 
+    DrawString(summary_string, font_small_bold, ORANGE, 55).center(1, 0)
+    DrawString(temp_out_string, font_big, ORANGE, 75).right()
+    DrawString(rain_string, font_big, PRECIPCOLOR, 105).right()
+    DrawString(PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right()
+
+    DrawImage(WeatherIcon_Path, 65).center(2, 0)
+    if PRECIPTYPE == 'Regen':
+        DrawImage(PrecipRain_Path, 140).right(45)
+    elif PRECIPTYPE == 'Schnee':
+        DrawImage(PrecipSnow_Path, 140).right(50)
+
+    print('summary: {}'.format(summary_string))
+    print('temp out: {}'.format(temp_out_string))
+    print('{}: {}'.format(PRECIPTYPE, rain_string))
+    print(WeatherIcon_Path)
+
+
+def draw_weather_forecast():
+    forecast = json_data['daily']['data']
     forecast_day_1_string = convert_timestamp(
         forecast[1]['time'], '%a').upper()
     forecast_day_2_string = convert_timestamp(
         forecast[2]['time'], '%a').upper()
     forecast_day_3_string = convert_timestamp(
         forecast[3]['time'], '%a').upper()
-
     forecast_day_1_min_max_string = str(int(forecast[1]['temperatureMin'])) + ' | ' + str(
         int(forecast[0]['temperatureMax']))
-
     forecast_day_2_min_max_string = str(int(forecast[2]['temperatureMin'])) + ' | ' + str(
         int(forecast[1]['temperatureMax']))
-
     forecast_day_3_min_max_string = str(int(forecast[3]['temperatureMin'])) + ' | ' + str(
         int(forecast[2]['temperatureMax']))
-
-    north_string = 'N'
-
-    sunrise_string = convert_timestamp(
-        int(json_data['daily']['data'][0]['sunriseTime']), '%H:%M')
-    sunset_string = convert_timestamp(
-        int(json_data['daily']['data'][0]['sunsetTime']), '%H:%M')
-
-    wind_speed_string = str(
-        round((float(json_data['currently']['windSpeed']) * 1.609344), 1)) + ' km/h'
-
-    draw_time_layer()
-
-    DrawString(summary_string, font_small_bold, ORANGE, 55).center(1, 0)
-
-    DrawString(temp_out_string, font_big, ORANGE, 75).right()
-
-    DrawString(rain_string, font_big, PRECIPCOLOR, 105).right()
-    DrawString(PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right()
 
     DrawString(forecast_day_1_string, font_small_bold,
                ORANGE, 165).center(3, 0)
@@ -548,32 +483,76 @@ def draw_text_layer():
     DrawString(forecast_day_3_min_max_string,
                font_small_bold, WHITE, 180).center(3, 2)
 
+    DrawImage(ForeCastIcon_Day_1_Path, 200).center(3, 0)
+    DrawImage(ForeCastIcon_Day_2_Path, 200).center(3, 1)
+    DrawImage(ForeCastIcon_Day_3_Path, 200).center(3, 2)
+
+    print('forecast: '
+          + forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; '
+          + forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; '
+          + forecast_day_3_string + ' ' + forecast_day_3_min_max_string
+          )
+    print(ForeCastIcon_Day_1_Path)
+    print(ForeCastIcon_Day_2_Path)
+    print(ForeCastIcon_Day_3_Path)
+
+
+def draw_sunrise_sunset():
+    sunrise_string = convert_timestamp(
+        int(json_data['daily']['data'][0]['sunriseTime']), '%H:%M')
+    sunset_string = convert_timestamp(
+        int(json_data['daily']['data'][0]['sunsetTime']), '%H:%M')
+
+    DrawImage(SunRise_Path, 260).left()
+    DrawImage(SunSet_Path, 290).left()
     DrawString(sunrise_string, font_small_bold, WHITE, 265).left(30)
     DrawString(sunset_string, font_small_bold, WHITE, 292).left(30)
 
+    print('sunrise: {} ; sunset {}'.format(sunrise_string, sunset_string))
+
+
+def draw_moon_phase():
+    DrawImage(MoonIcon_Path, 255).center(1, 0)
+
+    print(MoonIcon_Path)
+
+
+def draw_wind():
+    def draw_middle_position_icon(icon):
+        y = 285
+        position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) -
+                      (icon.get_rect()[2] / 2))
+        position_y = (y - (icon.get_rect()[3] / 2))
+        position = (position_x, position_y)
+        TFT.blit(icon, position)
+
+    north_string = 'N'
+    wind_speed_string = str(
+        round((float(json_data['currently']['windSpeed']) * 1.609344), 1)) + ' km/h'
     DrawString(north_string, font_small_bold, WHITE, 250).center(3, 2)
     DrawString(wind_speed_string, font_small_bold, WHITE, 300).center(3, 2)
 
-    print('\nsummary: {}'.format(summary_string))
-    print('temp out: {}'.format(temp_out_string))
-    print('{}: {}'.format(PRECIPTYPE, rain_string))
-    print('forecast: ' +
-          forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; ' +
-          forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; ' +
-          forecast_day_3_string + ' ' + forecast_day_3_min_max_string
-          )
-    print('sunrise: {} ; sunset {}'.format(sunrise_string, sunset_string))
+    angle = json_data['currently']['windBearing']
+    circle_icon = pygame.image.load(ICON_PATH + 'circle.png')
+    arrow_icon = pygame.transform.rotate(pygame.image.load(ICON_PATH + 'arrow.png'),
+                                         (360 - angle) + 180)  # (360 - angle) + 180
+    draw_middle_position_icon(arrow_icon)
+    draw_middle_position_icon(circle_icon)
+
     print('WindSpeed: {}'.format(wind_speed_string))
+    print('wind direction: {}'.format(angle))
 
 
 def draw_to_tft():
-    TFT.fill(BLACK)
-
-    draw_image_layer()
-    draw_text_layer()
+    draw_background()
+    draw_clock()
+    draw_weather()
+    draw_weather_forecast()
+    draw_sunrise_sunset()
+    draw_moon_phase()
+    draw_wind()
 
     pygame.display.update()
-
     time.sleep(1)
 
 
