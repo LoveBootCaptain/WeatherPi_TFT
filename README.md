@@ -2,7 +2,7 @@
 
 ![Hardware](./docs/HARDWARE_1.1.jpg)
 
-a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 display 
+a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 display
 
 > first of all, i'm a beginner in python... so don't be to hard to me... i'm still learning
 
@@ -18,14 +18,14 @@ a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 di
 
 ## Hardware and wiring
 
-> i wrote this app on a mac with PyCharm and tested it quite a while. since it uses only standard python3 modules and libraries 
+> i wrote this app on a mac with PyCharm and tested it quite a while. since it uses only standard python3 modules and libraries
 it should work on nearly everything that can run python3 and pygame.
 
 ![PyCharm IDE by intelliJ jetbrains](./docs/PYCHARM_01.jpg)
 
-> this tutorial is basically for running it on a raspberry pi (zero, 1, 2, 3) and a TFT display which matches up 
+> this tutorial is basically for running it on a raspberry pi (zero, 1, 2, 3) and a TFT display which matches up
 with chips like the ones from adafruit. as long as it uses standard spi it should work with the new `dtoverlay`module
-in the latest jessie versions of raspbian... i think there is no need for a custom kernel. it's just a little bit 
+in the latest jessie versions of raspbian... i think there is no need for a custom kernel. it's just a little bit
 configuration.
 
 > i tested it with following TFT's:
@@ -53,7 +53,7 @@ CS TFT Chip Select      SPI_CE0_N   = GPIO08
 D/C TFT Data / Command              = GPIO24
 
 RESET Reset                         = GPIO23
- 
+
 GND Ground                          = GND
 VCC 3V3 supply                      = +3V3 or 5V
 ```
@@ -143,7 +143,7 @@ nano config.json
 
 ### set up the TFT
 
-* in /boot/config.txt, add in the following at the bottom 
+* in /boot/config.txt, add in the following at the bottom
 ```
 # TFT display and touch panel
 dtoverlay=rpi-display
@@ -170,7 +170,7 @@ sudo chmod +x PiButtons.py
 
 ### run python with root privileges
 
-* this is useful if you like to run your python scripts on boot and with sudo support in python 
+* this is useful if you like to run your python scripts on boot and with sudo support in python
 ```bash
 sudo chown -v root:root /usr/bin/python3
 sudo chmod -v u+s /usr/bin/python3
@@ -197,7 +197,7 @@ update-alternatives --install /usr/bin/python python /usr/bin/python3.4 2
 python --version
 ```
 
-* it should say something like: 
+* it should say something like:
 ```
 Python 3.4.x
 ```
@@ -265,6 +265,7 @@ sudo update-rc.d PiButtons defaults
 * [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
 * icons: [fa2png](http://fa2png.io/), making them colorful was my work
 * fonts: [google](https://fonts.google.com/)
+* fonts: [Noto-Sans-CJK-JP]https://github.com/minoryorg/Noto-Sans-CJK-JP
 
 
 ### screenshots

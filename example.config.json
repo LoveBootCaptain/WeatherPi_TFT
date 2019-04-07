@@ -4,5 +4,10 @@
   "FORECAST_UNITS": "si",
   "FORECAST_LAT": 40.705565,
   "FORECAST_LON": -74.1180865,
-  "FORECAST_EXCLUDES": "flags"
+  "FORECAST_EXCLUDES": "flags",
+
+  "FONT_SMALL": "Roboto-Medium.ttf",
+  "FONT_BIG": "Roboto-Medium.ttf",
+  "FONT_SMALL_BOLD": "Roboto-Bold.ttf",
+  "FONT_BIG_BOLD": "Roboto-Bold.ttf"
 }

@@ -1,30 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# MIT License
-#
-# Copyright (c) 2016 LoveBootCaptain (https://github.com/LoveBootCaptain)
-# Author: Stephan Ansorge aka LoveBootCaptain
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 import datetime
+import gettext
 import json
 import locale
 import os
@@ -34,14 +12,6 @@ import sys
 
 import pygame
 import requests
-
-os.putenv('SDL_FBDEV', '/dev/fb1')
-
-locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
-
-pygame.init()
-
-pygame.mouse.set_visible(False)
 
 DISPLAY_WIDTH = 240
 DISPLAY_HEIGHT = 320
@@ -61,16 +31,6 @@ ICON_PATH = sys.path[0] + '/icons/'
 FONT_PATH = sys.path[0] + '/fonts/'
 LOG_PATH = sys.path[0] + '/logs/'
 PATH = sys.path[0] + '/'
-
-TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-# TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
-pygame.display.set_caption('WeatherPi_TFT')
-
-font_small = pygame.font.Font(FONT_PATH + 'Roboto-Medium.ttf', 14)
-font_big = pygame.font.Font(FONT_PATH + 'Roboto-Medium.ttf', 30)
-
-font_small_bold = pygame.font.Font(FONT_PATH + 'Roboto-Bold.ttf', 14)
-font_big_bold = pygame.font.Font(FONT_PATH + 'Roboto-Bold.ttf', 30)
 
 Refresh_Path = ICON_PATH + 'refresh.png'
 NoRefresh_Path = ICON_PATH + 'no-refresh.png'
@@ -98,6 +58,12 @@ SunSet_Path = ICON_PATH + 'sunset.png'
 PrecipSnow_Path = ICON_PATH + 'precipsnow.png'
 PrecipRain_Path = ICON_PATH + 'preciprain.png'
 
+(language_code, encoding) = locale.getdefaultlocale()
+locale.setlocale(locale.LC_ALL, (language_code, encoding))
+trans = gettext.translation(
+    "messages", localedir="locale", languages=[language_code], fallback=True)
+trans.install()
+
 CONNECTION_ERROR = True
 REFRESH_ERROR = True
 PATH_ERROR = True
@@ -106,7 +72,7 @@ PRECIPCOLOR = WHITE
 
 threads = []
 
-json_data = {}
+ason_data = {}
 
 
 class DrawString:
@@ -148,7 +114,8 @@ class DrawString:
         :param offset: define some offset pixel to move strings a little bit (default=0)
         """
 
-        x = ((((DISPLAY_WIDTH / parts) / 2) + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset
+        x = ((((DISPLAY_WIDTH / parts) / 2)
+              + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset
 
         self.draw_string(x)
 
@@ -197,7 +164,8 @@ class DrawImage:
         :param offset: define some offset pixel to move strings a little bit (default=0)
         """
 
-        x = int(((((DISPLAY_WIDTH / parts) / 2) + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset)
+        x = int(((((DISPLAY_WIDTH / parts) / 2)
+                  + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset)
 
         self.draw_image(x)
 
@@ -207,7 +175,6 @@ class DrawImage:
         """
 
         TFT.blit(self.image, (x, self.y))
-
 
 
 class Update:
@@ -224,10 +191,6 @@ class Update:
 
         try:
 
-            config_data = open(PATH + 'config.json').read()
-
-            config = json.loads(config_data)
-
             forecast_io_key = config['FORECAST_IO_KEY']
             forecast_lang = config['FORECAST_LANGUAGE']
             forecast_units = config['FORECAST_UNITS']
@@ -237,9 +200,11 @@ class Update:
 
             api_endpoint = 'https://api.forecast.io/forecast/'
 
-            options = '?lang={}&units={}&exclude={}'.format(forecast_lang, forecast_units, forecast_excludes)
+            options = '?lang={}&units={}&exclude={}'.format(
+                forecast_lang, forecast_units, forecast_excludes)
 
-            request_url = str(api_endpoint + forecast_io_key + '/{},{}'.format(forecast_lat, forecast_lon) + options)
+            request_url = str(api_endpoint + forecast_io_key
+                              + '/{},{}'.format(forecast_lat, forecast_lon) + options)
 
             # request_url = 'http://weatherpi/latest_weather.json'
 
@@ -273,7 +238,6 @@ class Update:
         thread.start()
 
         threads.append(thread)
-
 
         try:
 
@@ -313,7 +277,7 @@ class Update:
         updated_list = []
 
         # known conditions:
-        # clear-day, clear-night, partly-cloudy-day, partly-cloudy-night, wind, cloudy, rain, snow, fog
+        # clear-day, clear-night, partly-cloudy-day, partly-cloudy-night, wind, cloudy, aain, snow, fog
 
         icon = json_data['currently']['icon']
 
@@ -321,7 +285,8 @@ class Update:
         forecast_icon_2 = json_data['daily']['data'][2]['icon']
         forecast_icon_3 = json_data['daily']['data'][3]['icon']
 
-        forecast = (str(forecast_icon_1), str(forecast_icon_2), str(forecast_icon_3))
+        forecast = (str(forecast_icon_1), str(
+            forecast_icon_2), str(forecast_icon_3))
 
         moon_icon = json_data['daily']['data'][0]['moonPhase']
 
@@ -333,9 +298,12 @@ class Update:
 
         WeatherIcon_Path = folder_path + icon + icon_extension
 
-        ForeCastIcon_Day_1_Path = folder_path + mini + forecast[0] + icon_extension
-        ForeCastIcon_Day_2_Path = folder_path + mini + forecast[1] + icon_extension
-        ForeCastIcon_Day_3_Path = folder_path + mini + forecast[2] + icon_extension
+        ForeCastIcon_Day_1_Path = folder_path + \
+            mini + forecast[0] + icon_extension
+        ForeCastIcon_Day_2_Path = folder_path + \
+            mini + forecast[1] + icon_extension
+        ForeCastIcon_Day_3_Path = folder_path + \
+            mini + forecast[2] + icon_extension
 
         MoonIcon_Path = folder_path + moon + icon_extension
 
@@ -397,27 +365,15 @@ class Update:
         global json_data, PRECIPCOLOR, PRECIPTYPE
 
         if int(json_data['currently']['precipProbability'] * 100) == 0:
-
-            PRECIPTYPE = 'Niederschlag'
+            PRECIPTYPE = _("Precipitation")
             PRECIPCOLOR = ORANGE
-
         else:
-
-            precip_type = json_data['currently']['precipType']
-
-            if precip_type == 'rain':
-
-                PRECIPTYPE = 'Regen'
+            PRECIPTYPE = _(json_data['currently']['precipType'])
+            if PRECIPTYPE == 'rain':
                 PRECIPCOLOR = BLUE
-
-            elif precip_type == 'snow':
-
-                PRECIPTYPE = 'Schnee'
+            elif PRECIPTYPE == 'snow':
                 PRECIPCOLOR = WHITE
-
             else:
-
-                PRECIPTYPE = str(precip_type)
                 PRECIPCOLOR = RED
 
         print('\nupdate PRECIPTYPE to: {}'.format(PRECIPTYPE))
@@ -431,14 +387,14 @@ class Update:
 
 
 def convert_timestamp(timestamp, param_string):
-
     """
     :param timestamp: takes a normal integer unix timestamp
     :param param_string: use the default convert timestamp to timestring options
     :return: a converted string from timestamp
     """
 
-    timestring = str(datetime.datetime.fromtimestamp(int(timestamp)).strftime(param_string))
+    timestring = str(datetime.datetime.fromtimestamp(
+        int(timestamp)).strftime(param_string))
 
     return timestring
 
@@ -454,7 +410,8 @@ def draw_wind_layer(y):
 
     def draw_middle_position_icon(icon):
 
-        position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (icon.get_rect()[2] / 2))
+        position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2)
+                      - (icon.get_rect()[2] / 2))
 
         position_y = (y - (icon.get_rect()[3] / 2))
 
@@ -525,7 +482,7 @@ def draw_time_layer():
     timestamp = time.time()
 
     date_time_string = convert_timestamp(timestamp, '%H:%M:%S')
-    date_day_string = convert_timestamp(timestamp, '%A - %d. %b %Y')
+    date_day_string = convert_timestamp(timestamp, '%x')
 
     print('\nDay: {}'.format(date_day_string))
     print('Time: {}'.format(date_time_string))
@@ -539,11 +496,15 @@ def draw_text_layer():
 
     summary_string = json_data['currently']['summary']
     temp_out_string = str(json_data['currently']['temperature']) + '°C'
-    rain_string = str(int(json_data['currently']['precipProbability'] * 100)) + ' %'
+    rain_string = str(
+        int(json_data['currently']['precipProbability'] * 100)) + ' %'
 
-    forecast_day_1_string = convert_timestamp(forecast[1]['time'], '%a').upper()
-    forecast_day_2_string = convert_timestamp(forecast[2]['time'], '%a').upper()
-    forecast_day_3_string = convert_timestamp(forecast[3]['time'], '%a').upper()
+    forecast_day_1_string = convert_timestamp(
+        forecast[1]['time'], '%a').upper()
+    forecast_day_2_string = convert_timestamp(
+        forecast[2]['time'], '%a').upper()
+    forecast_day_3_string = convert_timestamp(
+        forecast[3]['time'], '%a').upper()
 
     forecast_day_1_min_max_string = str(int(forecast[1]['temperatureMin'])) + ' | ' + str(
         int(forecast[0]['temperatureMax']))
@@ -556,10 +517,13 @@ def draw_text_layer():
 
     north_string = 'N'
 
-    sunrise_string = convert_timestamp(int(json_data['daily']['data'][0]['sunriseTime']), '%H:%M')
-    sunset_string = convert_timestamp(int(json_data['daily']['data'][0]['sunsetTime']), '%H:%M')
+    sunrise_string = convert_timestamp(
+        int(json_data['daily']['data'][0]['sunriseTime']), '%H:%M')
+    sunset_string = convert_timestamp(
+        int(json_data['daily']['data'][0]['sunsetTime']), '%H:%M')
 
-    wind_speed_string = str(round((float(json_data['currently']['windSpeed']) * 1.609344), 1)) + ' km/h'
+    wind_speed_string = str(
+        round((float(json_data['currently']['windSpeed']) * 1.609344), 1)) + ' km/h'
 
     draw_time_layer()
 
@@ -570,13 +534,19 @@ def draw_text_layer():
     DrawString(rain_string, font_big, PRECIPCOLOR, 105).right()
     DrawString(PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right()
 
-    DrawString(forecast_day_1_string, font_small_bold, ORANGE, 165).center(3, 0)
-    DrawString(forecast_day_2_string, font_small_bold, ORANGE, 165).center(3, 1)
-    DrawString(forecast_day_3_string, font_small_bold, ORANGE, 165).center(3, 2)
+    DrawString(forecast_day_1_string, font_small_bold,
+               ORANGE, 165).center(3, 0)
+    DrawString(forecast_day_2_string, font_small_bold,
+               ORANGE, 165).center(3, 1)
+    DrawString(forecast_day_3_string, font_small_bold,
+               ORANGE, 165).center(3, 2)
 
-    DrawString(forecast_day_1_min_max_string, font_small_bold, WHITE, 180).center(3, 0)
-    DrawString(forecast_day_2_min_max_string, font_small_bold, WHITE, 180).center(3, 1)
-    DrawString(forecast_day_3_min_max_string, font_small_bold, WHITE, 180).center(3, 2)
+    DrawString(forecast_day_1_min_max_string,
+               font_small_bold, WHITE, 180).center(3, 0)
+    DrawString(forecast_day_2_min_max_string,
+               font_small_bold, WHITE, 180).center(3, 1)
+    DrawString(forecast_day_3_min_max_string,
+               font_small_bold, WHITE, 180).center(3, 2)
 
     DrawString(sunrise_string, font_small_bold, WHITE, 265).left(30)
     DrawString(sunset_string, font_small_bold, WHITE, 292).left(30)
@@ -587,10 +557,10 @@ def draw_text_layer():
     print('\nsummary: {}'.format(summary_string))
     print('temp out: {}'.format(temp_out_string))
     print('{}: {}'.format(PRECIPTYPE, rain_string))
-    print('forecast: '
-          + forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; '
-          + forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; '
-          + forecast_day_3_string + ' ' + forecast_day_3_min_max_string
+    print('forecast: ' +
+          forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; ' +
+          forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; ' +
+          forecast_day_3_string + ' ' + forecast_day_3_min_max_string
           )
     print('sunrise: {} ; sunset {}'.format(sunrise_string, sunset_string))
     print('WindSpeed: {}'.format(wind_speed_string))
@@ -650,12 +620,32 @@ def loop():
     quit_all()
 
 
+def init_pygame():
+    global TFT, font_small, font_big, font_small_bold, font_big_bold
+
+    os.putenv('SDL_FBDEV', '/dev/fb1')
+    pygame.init()
+    pygame.mouse.set_visible(False)
+    TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+    # TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
+    pygame.display.set_caption('WeatherPi_TFT')
+
+    font_small = pygame.font.Font(FONT_PATH + config['FONT_SMALL'], 14)
+    font_big = pygame.font.Font(FONT_PATH + config['FONT_BIG'], 30)
+    font_small_bold = pygame.font.Font(
+        FONT_PATH + config['FONT_SMALL_BOLD'], 14)
+    font_big_bold = pygame.font.Font(FONT_PATH + config['FONT_BIG_BOLD'], 30)
+
+
 if __name__ == '__main__':
 
-    try:
+    config_data = open(PATH + 'config.json').read()
+    config = json.loads(config_data)
 
+    init_pygame()
+
+    try:
         loop()
 
     except KeyboardInterrupt:
-
         quit_all()
