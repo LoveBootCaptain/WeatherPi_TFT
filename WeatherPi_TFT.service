@@ -1,0 +1,10 @@
+[Unit]
+Description=WeatherPi_TFT
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/WeatherPi_TFT
+ExecStart=/home/pi/WeatherPi_TFT/WeatherPi_TFT.py
+
+[Install]
+WantedBy=multi-user.target

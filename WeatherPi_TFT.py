@@ -6,15 +6,11 @@ import gettext
 import json
 import locale
 import os
-import threading
-import time
-import sys
-
 import pygame
 import requests
-
-DISPLAY_WIDTH = 240
-DISPLAY_HEIGHT = 320
+import sys
+import threading
+import time
 
 BLACK = (10, 10, 10)
 DARK_GRAY = (43, 43, 43)
@@ -27,37 +23,6 @@ BLUE = (52, 152, 219)
 YELLOW = (241, 196, 15)
 ORANGE = (238, 153, 18)
 
-ICON_PATH = sys.path[0] + '/icons/'
-FONT_PATH = sys.path[0] + '/fonts/'
-LOG_PATH = sys.path[0] + '/logs/'
-PATH = sys.path[0] + '/'
-
-Refresh_Path = ICON_PATH + 'refresh.png'
-NoRefresh_Path = ICON_PATH + 'no-refresh.png'
-SyncRefresh_Path = ICON_PATH + 'sync-refresh.png'
-
-WiFi_Path = ICON_PATH + 'wifi.png'
-NoWiFi_Path = ICON_PATH + 'no-wifi.png'
-SyncWiFi_Path = ICON_PATH + 'sync-wifi.png'
-
-Path_Path = ICON_PATH + 'path.png'
-NoPath_Path = ICON_PATH + 'no-path.png'
-SyncPath_Path = ICON_PATH + 'sync-path.png'
-
-WeatherIcon_Path = ICON_PATH + 'unknown.png'
-
-ForeCastIcon_Day_1_Path = ICON_PATH + 'mini_unknown.png'
-ForeCastIcon_Day_2_Path = ICON_PATH + 'mini_unknown.png'
-ForeCastIcon_Day_3_Path = ICON_PATH + 'mini_unknown.png'
-
-MoonIcon_Path = ICON_PATH + 'moon-0.png'
-
-SunRise_Path = ICON_PATH + 'sunrise.png'
-SunSet_Path = ICON_PATH + 'sunset.png'
-
-PrecipSnow_Path = ICON_PATH + 'precipsnow.png'
-PrecipRain_Path = ICON_PATH + 'preciprain.png'
-
 (language_code, encoding) = locale.getdefaultlocale()
 locale.setlocale(locale.LC_ALL, (language_code, encoding))
 trans = gettext.translation(
@@ -67,323 +32,29 @@ trans.install()
 CONNECTION_ERROR = True
 REFRESH_ERROR = True
 PATH_ERROR = True
-PRECIPTYPE = 'NULL'
+PRECIPTYPE = "NULL"
 PRECIPCOLOR = WHITE
 
 threads = []
+weather_data = {}
 
-ason_data = {}
 
+def icon_file(file):
+    return "{}/icons/{}".format(sys.path[0], file)
 
-class DrawString:
-    def __init__(self, string, font, color, y):
-        """
-        :param string: the input string
-        :param font: the fonts object
-        :param color: a rgb color tuple
-        :param y: the y position where you want to render the text
-        """
-        self.string = string
-        self.font = font
-        self.color = color
-        self.y = y
-        self.size = self.font.size(self.string)
 
-    def left(self, offset=0):
-        """
-        :param offset: define some offset pixel to move strings a little bit more left (default=0)
-        """
+def log_file(file):
+    return "{}/logs/{}".format(sys.path[0], file)
 
-        x = 10 + offset
 
-        self.draw_string(x)
+def font_file(file):
+    return "{}/fonts/{}".format(sys.path[0], file)
 
-    def right(self, offset=0):
-        """
-        :param offset: define some offset pixel to move strings a little bit more right (default=0)
-        """
 
-        x = (DISPLAY_WIDTH - self.size[0] - 10) - offset
-
-        self.draw_string(x)
-
-    def center(self, parts, part, offset=0):
-        """
-        :param parts: define in how many parts you want to split your display
-        :param part: the part in which you want to render text (first part is 0, second is 1, etc.)
-        :param offset: define some offset pixel to move strings a little bit (default=0)
-        """
-
-        x = ((((DISPLAY_WIDTH / parts) / 2) +
-              ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset
-
-        self.draw_string(x)
-
-    def draw_string(self, x):
-        """
-        takes x and y from the functions above and render the fonts
-        """
-
-        TFT.blit(self.font.render(self.string, True, self.color), (x, self.y))
-
-
-class DrawImage:
-    def __init__(self, image_path, y):
-        """
-        :param image_path: the path to the image you want to render
-        :param y: the y-postion of the image you want to render
-        """
-
-        self.image_path = image_path
-        self.image = pygame.image.load(self.image_path)
-        self.y = y
-        self.size = self.image.get_rect().size
-
-    def left(self, offset=0):
-        """
-        :param offset: define some offset pixel to move image a little bit more left(default=0)
-        """
-
-        x = 10 + offset
-
-        self.draw_image(x)
-
-    def right(self, offset=0):
-        """
-        :param offset: define some offset pixel to move image a little bit more right (default=0)
-        """
-
-        x = (DISPLAY_WIDTH - self.size[0] - 10) - offset
-
-        self.draw_image(x)
-
-    def center(self, parts, part, offset=0):
-        """
-        :param parts: define in how many parts you want to split your display
-        :param part: the part in which you want to render text (first part is 0, second is 1, etc.)
-        :param offset: define some offset pixel to move strings a little bit (default=0)
-        """
-
-        x = int(((((DISPLAY_WIDTH / parts) / 2) +
-                  ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset)
-
-        self.draw_image(x)
-
-    def draw_image(self, x):
-        """
-        takes x from the functions above and the y from the class to render the image
-        """
-
-        TFT.blit(self.image, (x, self.y))
-
-
-class Update:
-    @staticmethod
-    def update_json():
-
-        global threads, CONNECTION_ERROR
-
-        thread = threading.Timer(300, Update.update_json)
-
-        thread.start()
-
-        threads.append(thread)
-
-        try:
-
-            forecast_io_key = config['FORECAST_IO_KEY']
-            forecast_lang = config['FORECAST_LANGUAGE']
-            forecast_units = config['FORECAST_UNITS']
-            forecast_lat = config['FORECAST_LAT']
-            forecast_lon = config['FORECAST_LON']
-            forecast_excludes = config['FORECAST_EXCLUDES']
-
-            api_endpoint = 'https://api.forecast.io/forecast/'
-
-            options = '?lang={}&units={}&exclude={}'.format(
-                forecast_lang, forecast_units, forecast_excludes)
-
-            request_url = str(api_endpoint + forecast_io_key +
-                              '/{},{}'.format(forecast_lat, forecast_lon) + options)
-
-            # request_url = 'http://weatherpi/latest_weather.json'
-
-            data = requests.get(request_url).json()
-
-            with open(LOG_PATH + 'latest_weather.json', 'w') as outputfile:
-                json.dump(data, outputfile, indent=2, sort_keys=True)
-
-            print('\njson file saved')
-
-            CONNECTION_ERROR = False
-
-        except (requests.HTTPError, requests.ConnectionError):
-
-            CONNECTION_ERROR = True
-
-            print('Connection ERROR')
-
-            pass
-
-        DrawImage(SyncWiFi_Path, 5).left()
-        pygame.display.update()
-
-    @staticmethod
-    def read_json():
-
-        global threads, json_data, REFRESH_ERROR
-
-        thread = threading.Timer(30, Update.read_json)
-
-        thread.start()
-
-        threads.append(thread)
-
-        try:
-
-            data = open(LOG_PATH + 'latest_weather.json').read()
-
-            new_json_data = json.loads(data)
-
-            print('\njson file read by module')
-
-            json_data = new_json_data
-
-            REFRESH_ERROR = False
-
-        except IOError:
-
-            REFRESH_ERROR = True
-
-            print('ERROR - json file read by module')
-
-        DrawImage(SyncPath_Path, 5).right(-5)
-        pygame.display.update()
-
-        time.sleep(1)
-
-        Update.icon_path()
-
-    @staticmethod
-    def icon_path():
-
-        global WeatherIcon_Path, ForeCastIcon_Day_1_Path, \
-            ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path, PRECIPTYPE, PRECIPCOLOR
-
-        folder_path = ICON_PATH
-        icon_extension = '.png'
-        mini = 'mini_'
-
-        updated_list = []
-
-        # known conditions:
-        # clear-day, clear-night, partly-cloudy-day, partly-cloudy-night, wind, cloudy, aain, snow, fog
-
-        icon = json_data['currently']['icon']
-
-        forecast_icon_1 = json_data['daily']['data'][1]['icon']
-        forecast_icon_2 = json_data['daily']['data'][2]['icon']
-        forecast_icon_3 = json_data['daily']['data'][3]['icon']
-
-        forecast = (str(forecast_icon_1), str(
-            forecast_icon_2), str(forecast_icon_3))
-
-        moon_icon = json_data['daily']['data'][0]['moonPhase']
-
-        moon_icon = int((float(moon_icon) * 100 / 3.57) + 0.25)
-
-        moon = 'moon-' + str(moon_icon)
-
-        print(icon, forecast, moon_icon)
-
-        WeatherIcon_Path = folder_path + icon + icon_extension
-
-        ForeCastIcon_Day_1_Path = folder_path + \
-            mini + forecast[0] + icon_extension
-        ForeCastIcon_Day_2_Path = folder_path + \
-            mini + forecast[1] + icon_extension
-        ForeCastIcon_Day_3_Path = folder_path + \
-            mini + forecast[2] + icon_extension
-
-        MoonIcon_Path = folder_path + moon + icon_extension
-
-        path_list = [WeatherIcon_Path, ForeCastIcon_Day_1_Path,
-                     ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path]
-
-        print('\nvalidating path: {}\n'.format(path_list))
-
-        for path in path_list:
-
-            if os.path.isfile(path):
-
-                print('TRUE :', path)
-
-                updated_list.append(path)
-
-            else:
-
-                print('FALSE :', path)
-
-                if 'mini' in path:
-
-                    updated_list.append(ICON_PATH + 'mini_unknown.png')
-
-                elif 'moon' in path:
-
-                    updated_list.append(ICON_PATH + 'moon-unknown.png')
-
-                else:
-
-                    updated_list.append(ICON_PATH + 'unknown.png')
-
-        WeatherIcon_Path = updated_list[0]
-        ForeCastIcon_Day_1_Path = updated_list[1]
-        ForeCastIcon_Day_2_Path = updated_list[2]
-        ForeCastIcon_Day_3_Path = updated_list[3]
-        MoonIcon_Path = updated_list[4]
-
-        global PATH_ERROR
-
-        if any("unknown" in s for s in updated_list):
-
-            PATH_ERROR = True
-
-        else:
-
-            PATH_ERROR = False
-
-        print('\nupdate path for icons: {}'.format(updated_list))
-
-        Update.get_precip_type()
-
-        DrawImage(SyncRefresh_Path, 5).right(7)
-        pygame.display.update()
-
-    @staticmethod
-    def get_precip_type():
-
-        global json_data, PRECIPCOLOR, PRECIPTYPE
-
-        if int(json_data['currently']['precipProbability'] * 100) == 0:
-            PRECIPTYPE = _("Precipitation")
-            PRECIPCOLOR = ORANGE
-        else:
-            PRECIPTYPE = _(json_data['currently']['precipType'])
-            if PRECIPTYPE == 'rain':
-                PRECIPCOLOR = BLUE
-            elif PRECIPTYPE == 'snow':
-                PRECIPCOLOR = WHITE
-            else:
-                PRECIPCOLOR = RED
-
-        print('\nupdate PRECIPTYPE to: {}'.format(PRECIPTYPE))
-        print('\nupdate PRECIPCOLOR to: {}'.format(PRECIPCOLOR))
-        print('\nupdated PATH')
-
-    @staticmethod
-    def run():
-        Update.update_json()
-        Update.read_json()
+def load_config():
+    global config
+    data = open("{}/config.json".format(sys.path[0])).read()
+    config = json.loads(data)
 
 
 def convert_timestamp(timestamp, param_string):
@@ -393,159 +64,288 @@ def convert_timestamp(timestamp, param_string):
     :return: a converted string from timestamp
     """
 
-    timestring = str(datetime.datetime.fromtimestamp(
-        int(timestamp)).strftime(param_string))
+    timestring = str(
+        datetime.datetime.fromtimestamp(int(timestamp)).strftime(param_string))
 
     return timestring
 
 
+def temparature_text(temperature):
+    if config["FORECAST_UNITS"] == "si":
+        return "{}°C".format(temperature)
+    else:
+        return "{}°F".format(temperature)
+
+
+def percentage_text(value):
+    return "{}%".format(value)
+
+
+def precip_color(precip_type):
+    if precip_type == "rain":
+        return BLUE
+    elif precip_type == "snow":
+        return WHITE
+    elif precip_type == "sleet":
+        return RED
+    else:
+        return ORENGE
+
+
+def speed_text(speed):
+    if config["FORECAST_UNITS"] == "si":
+        return "{} km/h".format(speed)
+    else:
+        return "{} mi/h".format(speed)
+
+
+class WeatherModule:
+    def __init__(self, rect):
+        """
+        :param rect: module area (top, left, width, height)
+        """
+        self.rect = pygame.Rect(rect)
+
+    def draw(self):
+        SCREEN.fill(WHITE, rect=self.rect)
+
+    def clean(self):
+        SCREEN.fill(BLACK, rect=self.rect)
+
+    def draw_text(self, text, font, color, position, align="left"):
+        """
+        :param text: text to draw
+        :param font: font object
+        :param color: rgb color tuple
+        :param position: render relative position (x, y)
+        :param align: text align. "left", "center", "right"
+        """
+        (x, y) = position
+        size = font.size(text)
+        print(size)
+        if align == "center":
+            x = (self.rect.width - size[0]) / 2
+        elif align == "right":
+            x = self.rect.width - size[0]
+        SCREEN.blit(
+            font.render(text, True, color),
+            (self.rect.left + x, self.rect.top + y))
+
+    def draw_file(self, file, position, rotate=0):
+        if os.path.isfile(file):
+            image = pygame.image.load(file)
+            self.draw_image(image, position, rotate)
+        else:
+            global PATH_ERROR
+            PATH_ERROR = True
+            print("{} not found.".format(file))
+
+    def draw_image(self, image, position, rotate=0):
+        (x, y) = position
+        if rotate:
+            (w, h) = image.get_size()
+            image = pygame.transform.rotate(image, rotate)
+            x = x + (w - image.get_width()) / 2
+            y = h + (h - image.get_height()) / 2
+        SCREEN.blit(image, (self.rect.left + x, self.rect.top + y))
+
+
+class Update:
+    @staticmethod
+    def get_weather():
+        global threads, CONNECTION_ERROR
+
+        thread = threading.Timer(300, Update.get_weather)
+        thread.start()
+        threads.append(thread)
+
+        try:
+        #   url = "https://api.forecast.io/forecast/{}/{},{}".format(
+        #       config["FORECAST_IO_KEY"], config["FORECAST_LAT"],
+        #       config["FORECAST_LON"])
+        #   data = requests.get(url,
+        #                       params={
+        #                           "lang": config["FORECAST_LANGUAGE"],
+        #                           "units": config["FORECAST_UNITS"],
+        #                           "exclude": config["FORECAST_EXCLUDES"]
+        #                       }).json()
+        #   with open(log_file("latest_weather.json"), "w") as file:
+        #       json.dump(data, file, indent=2, sort_keys=True)
+
+            CONNECTION_ERROR = False
+            print("\njson file saved")
+
+        except (requests.HTTPError, requests.ConnectionError):
+            CONNECTION_ERROR = True
+            print("Connection ERROR")
+
+    @staticmethod
+    def load_weather():
+        global threads, weather_data, PATH_ERROR, REFRESH_ERROR
+
+        thread = threading.Timer(30, Update.load_weather)
+        thread.start()
+        threads.append(thread)
+
+        PATH_ERROR = REFRESH_ERROR = False
+        try:
+            data = open(log_file("latest_weather.json")).read()
+            new_weather_data = json.loads(data)
+            weather_data = new_weather_data
+            print("\nweather file loaded")
+
+        except IOError:
+            REFRESH_ERROR = True
+            print("ERROR - can't load weather file")
+
+    @staticmethod
+    def run():
+        #Update.get_weather()
+        Update.load_weather()
+
+
 def draw_background():
-    TFT.fill(BLACK)
+    SCREEN.fill(BLACK)
 
-    if CONNECTION_ERROR:
-        DrawImage(NoWiFi_Path, 5).left()
-    else:
-        DrawImage(WiFi_Path, 5).left()
+    wifi_icon = icon_file("no-wifi.png" if CONNECTION_ERROR else "wifi.png")
+    refresh_icon = icon_file("no-refresh.png"
+                             if REFRESH_ERROR else "refresh.png")
+    path_icon = icon_file("no-path.png" if PATH_ERROR else "path.png")
 
-    if REFRESH_ERROR:
-        DrawImage(NoRefresh_Path, 5).right(7)
-    else:
-        DrawImage(Refresh_Path, 5).right(7)
-
-    if PATH_ERROR:
-        DrawImage(NoPath_Path, 5).right(-5)
-    else:
-        DrawImage(Path_Path, 5).right(-5)
+    wm = WeatherModule((225, 0, 15, 45))
+    wm.draw_file(wifi_icon, (0, 0))
+    wm.draw_file(refresh_icon, (0, 15))
+    wm.draw_file(path_icon, (0, 30))
 
 
 def draw_clock():
     timestamp = time.time()
+    locale_date = convert_timestamp(timestamp, "%x")
+    locale_time = convert_timestamp(timestamp, "%H:%M")
+    locale_second = convert_timestamp(timestamp, "%S")
 
-    date_time_string = convert_timestamp(timestamp, '%H:%M:%S')
-    date_day_string = convert_timestamp(timestamp, '%x')
+    wm = WeatherModule((0, 0, 120, 50))
+    wm.draw_text(locale_date, font_small_bold, WHITE, (10, 4))
+    wm.draw_text(locale_time, font_big_bold, WHITE, (10, 19))
+    wm.draw_text(locale_second, font_small_bold, WHITE, (92, 19))
 
-    print('\nDay: {}'.format(date_day_string))
-    print('Time: {}'.format(date_time_string))
+    print("\nDay: {}".format(locale_date))
+    print("Time: {}".format(locale_time))
 
-    DrawString(date_day_string, font_small_bold, WHITE, 5).center(1, 0)
-    DrawString(date_time_string, font_big_bold, WHITE, 20).center(1, 0)
-
+#def draw_temperature_humidity():
+#    wm = WeatherModule((180, 50, 80, 110))
+#    print("====")
+#    wm.draw_text(_("Indoor"), font_small_bold, WHITE, (0, 25))
+#    wm.draw_text("18.9°C", font_small_bold, WHITE, (0, 45))
+#    wm.draw_text("47.3%", font_small_bold, WHITE, (0, 65))
+#    print("====")
 
 def draw_weather():
-    summary_string = json_data['currently']['summary']
-    temp_out_string = str(json_data['currently']['temperature']) + '°C'
-    rain_string = str(
-        int(json_data['currently']['precipProbability'] * 100)) + ' %'
+    currently = weather_data["currently"]
+    summary = currently["summary"]
+    temperature = temparature_text(currently["temperature"])
 
-    DrawString(summary_string, font_small_bold, ORANGE, 55).center(1, 0)
-    DrawString(temp_out_string, font_big, ORANGE, 75).right()
-    DrawString(rain_string, font_big, PRECIPCOLOR, 105).right()
-    DrawString(PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right()
+    # If precipIntensity is zero, then this property will not be defined
+    precip_robability = currently["precipProbability"]
+    if precip_robability:
+        precip_robability = percentage_text(precip_robability * 100)
+        precip_type = _(currently["precipType"])
+        color = precip_color(currently["precipType"])
+    else:
+        precip_robability = percentage_text(precip_robability * 100)
+        precip_type = _("Precipitation")
+        color = ORANGE
 
-    DrawImage(WeatherIcon_Path, 65).center(2, 0)
-    if PRECIPTYPE == 'Regen':
-        DrawImage(PrecipRain_Path, 140).right(45)
-    elif PRECIPTYPE == 'Schnee':
-        DrawImage(PrecipSnow_Path, 140).right(50)
+    weather_icon = icon_file("{}.png".format(currently["icon"]))
 
-    print('summary: {}'.format(summary_string))
-    print('temp out: {}'.format(temp_out_string))
-    print('{}: {}'.format(PRECIPTYPE, rain_string))
-    print(WeatherIcon_Path)
+    #    DrawString(summary, font_small_bold, ORANGE, 55).center(1, 0)
+    #    DrawString(temperature, font_big_bold, ORANGE, 75).right()
+    #    DrawString(precip_probability, font_big_bold, precip_color,
+    #               105).right()
+    #    DrawString(_(precip_type), font_small_bold, precip_color, 140).right()
+
+    wm = WeatherModule((0, 50, 240, 110))
+    wm.draw_text(summary, font_small_bold, color, (0, 5), "center")
+    wm.draw_text(temperature, font_big_bold, color, (0, 25), "right")
+    wm.draw_text(precip_robability, font_big_bold, color, (120, 55), "right")
+    wm.draw_text(precip_type, font_small_bold, color, (0, 90), "right")
+    wm.draw_file(weather_icon, (10, 5))
+
+    if precip_type == "rain":
+        wm.draw_file(icon_file("preciprain.png"), (120, 65))
+    elif precip_type == "show":
+        wm.draw_file(icon_file("precipsnow.png"), (120, 65))
+
+    print("summary: {}".format(summary))
+    print("temperature: {}".format(temperature))
+    print("{}: {}".format(_(precip_type), precip_robability))
+    print("precip_type: {} ; color: {}".format(precip_type, color))
+    print(weather_icon)
 
 
 def draw_weather_forecast():
-    forecast = json_data['daily']['data']
-    forecast_day_1_string = convert_timestamp(
-        forecast[1]['time'], '%a').upper()
-    forecast_day_2_string = convert_timestamp(
-        forecast[2]['time'], '%a').upper()
-    forecast_day_3_string = convert_timestamp(
-        forecast[3]['time'], '%a').upper()
-    forecast_day_1_min_max_string = str(int(forecast[1]['temperatureMin'])) + ' | ' + str(
-        int(forecast[0]['temperatureMax']))
-    forecast_day_2_min_max_string = str(int(forecast[2]['temperatureMin'])) + ' | ' + str(
-        int(forecast[1]['temperatureMax']))
-    forecast_day_3_min_max_string = str(int(forecast[3]['temperatureMin'])) + ' | ' + str(
-        int(forecast[2]['temperatureMax']))
+    daily = weather_data["daily"]["data"]
+    for i in range(config["FORECAST_DAYS"]):
+        day_of_week = convert_timestamp(daily[i + 1]["time"], "%a")
+        temperature = "{} | {}".format(
+            int(daily[i + 1]["temperatureMin"]),
+            int(daily[i + 1]["temperatureMax"]))
+        weather_icon = icon_file("mini_{}.png".format(daily[i + 1]["icon"]))
 
-    DrawString(forecast_day_1_string, font_small_bold,
-               ORANGE, 165).center(3, 0)
-    DrawString(forecast_day_2_string, font_small_bold,
-               ORANGE, 165).center(3, 1)
-    DrawString(forecast_day_3_string, font_small_bold,
-               ORANGE, 165).center(3, 2)
+        wm = WeatherModule((i * 80, 160, 80, 80))
+        wm.draw_text(day_of_week, font_small_bold, ORANGE, (0, 0), "center")
+        wm.draw_text(temperature, font_small_bold, WHITE, (0, 15), "center")
+        wm.draw_file(weather_icon, (15, 35))
 
-    DrawString(forecast_day_1_min_max_string,
-               font_small_bold, WHITE, 180).center(3, 0)
-    DrawString(forecast_day_2_min_max_string,
-               font_small_bold, WHITE, 180).center(3, 1)
-    DrawString(forecast_day_3_min_max_string,
-               font_small_bold, WHITE, 180).center(3, 2)
-
-    DrawImage(ForeCastIcon_Day_1_Path, 200).center(3, 0)
-    DrawImage(ForeCastIcon_Day_2_Path, 200).center(3, 1)
-    DrawImage(ForeCastIcon_Day_3_Path, 200).center(3, 2)
-
-    print('forecast: '
-          + forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; '
-          + forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; '
-          + forecast_day_3_string + ' ' + forecast_day_3_min_max_string
-          )
-    print(ForeCastIcon_Day_1_Path)
-    print(ForeCastIcon_Day_2_Path)
-    print(ForeCastIcon_Day_3_Path)
+        print("forecast: {} ; {} ; {}".format(day_of_week, temperature, weather_icon))
 
 
 def draw_sunrise_sunset():
-    sunrise_string = convert_timestamp(
-        int(json_data['daily']['data'][0]['sunriseTime']), '%H:%M')
-    sunset_string = convert_timestamp(
-        int(json_data['daily']['data'][0]['sunsetTime']), '%H:%M')
+    daily = weather_data["daily"]["data"]
+    surise = convert_timestamp(int(daily[0]["sunriseTime"]), "%H:%M")
+    sunset = convert_timestamp(int(daily[0]["sunsetTime"]), "%H:%M")
 
-    DrawImage(SunRise_Path, 260).left()
-    DrawImage(SunSet_Path, 290).left()
-    DrawString(sunrise_string, font_small_bold, WHITE, 265).left(30)
-    DrawString(sunset_string, font_small_bold, WHITE, 292).left(30)
+    wm = WeatherModule((0, 240, 80, 80))
+    wm.draw_file(icon_file("sunrise.png"), (10, 20))
+    wm.draw_file(icon_file("sunset.png"), (10, 50))
+    wm.draw_text(surise, font_small_bold, WHITE, (0, 25), "right")
+    wm.draw_text(sunset, font_small_bold, WHITE, (0, 55), "right")
 
-    print('sunrise: {} ; sunset {}'.format(sunrise_string, sunset_string))
+    print("sunrise: {} ; sunset {}".format(surise, sunset))
 
 
 def draw_moon_phase():
-    DrawImage(MoonIcon_Path, 255).center(1, 0)
+    daily = weather_data["daily"]["data"]
+    moon_phase = int((float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25)
+    moon_icon = icon_file("moon-{}.png".format(moon_phase))
 
-    print(MoonIcon_Path)
+    wm = WeatherModule((80, 240, 80, 80))
+    wm.draw_file(moon_icon, (10, 10))
+
+    print("moon phase: {} ; {}".format(moon_phase, moon_icon))
 
 
 def draw_wind():
-    def draw_middle_position_icon(icon):
-        y = 285
-        position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) -
-                      (icon.get_rect()[2] / 2))
-        position_y = (y - (icon.get_rect()[3] / 2))
-        position = (position_x, position_y)
-        TFT.blit(icon, position)
+    currently = weather_data["currently"]
+    wind_speed = str(
+        round((float(currently["windSpeed"]) * 1.609344), 1)) + " km/h"
+    wind_bearing = currently["windBearing"]
+    angle = 360 - wind_bearing + 180
 
-    north_string = 'N'
-    wind_speed_string = str(
-        round((float(json_data['currently']['windSpeed']) * 1.609344), 1)) + ' km/h'
-    DrawString(north_string, font_small_bold, WHITE, 250).center(3, 2)
-    DrawString(wind_speed_string, font_small_bold, WHITE, 300).center(3, 2)
+    wm = WeatherModule((160, 240, 80, 80))
+    wm.draw_text("N", font_small_bold, WHITE, (0, 10), "center")
+    wm.draw_text(wind_speed, font_small_bold, WHITE, (0, 60), "center")
+    wm.draw_file(icon_file("circle.png"), (25, 30))
+    wm.draw_file(icon_file("arrow.png"), (25, 35), angle)
 
-    angle = json_data['currently']['windBearing']
-    circle_icon = pygame.image.load(ICON_PATH + 'circle.png')
-    arrow_icon = pygame.transform.rotate(pygame.image.load(ICON_PATH + 'arrow.png'),
-                                         (360 - angle) + 180)  # (360 - angle) + 180
-    draw_middle_position_icon(arrow_icon)
-    draw_middle_position_icon(circle_icon)
-
-    print('WindSpeed: {}'.format(wind_speed_string))
-    print('wind direction: {}'.format(angle))
+    print("wind speed: {}".format(wind_speed))
+    print("wind bearing: {}({})".format(wind_bearing, angle))
 
 
-def draw_to_tft():
+def refresh_screen():
     draw_background()
     draw_clock()
+#    draw_temperature_humidity()
     draw_weather()
     draw_weather_forecast()
     draw_sunrise_sunset()
@@ -571,55 +371,41 @@ def loop():
     Update.run()
 
     running = True
-
     while running:
-
-        draw_to_tft()
-
+        refresh_screen()
         for event in pygame.event.get():
-
             if event.type == pygame.QUIT:
-
                 running = False
-
-                quit_all()
-
+                break
             elif event.type == pygame.KEYDOWN:
-
                 if event.key == pygame.K_ESCAPE:
-
                     running = False
-
-                    quit_all()
-
+                    break
                 elif event.key == pygame.K_SPACE:
-
-                    print('SPACE')
+                    print("SPACE")
 
     quit_all()
 
 
 def init_pygame():
-    global TFT, font_small, font_big, font_small_bold, font_big_bold
+    global SCREEN, font_small, font_big, font_small_bold, font_big_bold
 
-    os.putenv('SDL_FBDEV', '/dev/fb1')
+    os.putenv("SDL_FBDEV", "/dev/fb1")
     pygame.init()
     pygame.mouse.set_visible(False)
-    TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-    # TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
-    pygame.display.set_caption('WeatherPi_TFT')
+    SCREEN = pygame.display.set_mode(
+        (config["DISPLAY_WIDTH"], config["DISPLAY_HEIGHT"]))
+    # SCREEN = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
+    pygame.display.set_caption("WeatherPi_SCREEN")
 
-    font_small = pygame.font.Font(FONT_PATH + config['FONT_SMALL'], 14)
-    font_big = pygame.font.Font(FONT_PATH + config['FONT_BIG'], 30)
-    font_small_bold = pygame.font.Font(
-        FONT_PATH + config['FONT_SMALL_BOLD'], 14)
-    font_big_bold = pygame.font.Font(FONT_PATH + config['FONT_BIG_BOLD'], 30)
+    font_small = pygame.font.Font(font_file(config["FONT_REGULAR"]), 14)
+    font_big = pygame.font.Font(font_file(config["FONT_REGULAR"]), 30)
+    font_small_bold = pygame.font.Font(font_file(config["FONT_BOLD"]), 14)
+    font_big_bold = pygame.font.Font(font_file(config["FONT_BOLD"]), 30)
 
 
-if __name__ == '__main__':
-
-    config_data = open(PATH + 'config.json').read()
-    config = json.loads(config_data)
+if __name__ == "__main__":
+    load_config()
 
     init_pygame()
 
