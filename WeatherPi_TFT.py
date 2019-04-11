@@ -240,21 +240,20 @@ class Weather(WeatherModule):
         if precip_porobability:
             precip_porobability = self.percentage_text(
                 precip_porobability * 100)
-            precip_type = _(currently["precipType"])
+            precip_type = currently["precipType"]
             color = self.precip_color(currently["precipType"])
         else:
             precip_porobability = self.percentage_text(
                 precip_porobability * 100)
-            precip_type = _("Precipitation")
+            precip_type = "Precipitation"
             color = ORANGE
 
         weather_icon = self.load_icon("{}.png".format(currently["icon"]))
 
         self.draw_text(summary, font_s_bold, color, (0, 5), "center")
-        self.draw_text(temperature, font_l_bold, color, (0, 25), "right")
-        self.draw_text(precip_porobability, font_l_bold,
-                       color, (120, 55), "right")
-        self.draw_text(precip_type, font_s_bold, color, (0, 90), "right")
+        self.draw_text(temperature, font_l, color, (0, 25), "right")
+        self.draw_text(precip_porobability, font_l, color, (120, 55), "right")
+        self.draw_text(_(precip_type), font_s_bold, color, (0, 90), "right")
         self.draw_image(weather_icon, (10, 5))
 
         if precip_type == "rain":
@@ -265,7 +264,7 @@ class Weather(WeatherModule):
         print("summary: {}".format(summary))
         print("temperature: {}".format(temperature))
         print("{}: {}".format(_(precip_type), precip_porobability))
-        print("precip_type: {} ; color: {}".format(precip_type, color))
+        print("precip_type: {} ; color: {}".format(_(precip_type), color))
 
 
 class DailyWeatherForecast(WeatherModule):
