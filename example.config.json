@@ -1,13 +1,16 @@
 {
-  "FORECAST_IO_KEY": "xxxxxxxxxxxxxxxxxxxxxxxxx",
-  "FORECAST_LANGUAGE": "en",
-  "FORECAST_UNITS": "si",
-  "FORECAST_LAT": 40.705565,
-  "FORECAST_LON": -74.1180865,
-  "FORECAST_EXCLUDES": "flags",
+  "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxx",
+  "latitude": 35.746289,
+  "longitude": 139.667028,
 
-  "FONT_SMALL": "Roboto-Medium.ttf",
-  "FONT_BIG": "Roboto-Medium.ttf",
-  "FONT_SMALL_BOLD": "Roboto-Bold.ttf",
-  "FONT_BIG_BOLD": "Roboto-Bold.ttf"
+  "language": "en",
+  "units": "si",
+
+  "forecast_days": 3,
+
+  "display_width": 240,
+  "display_height": 320,
+
+  "font_regular": "Roboto-Medium.ttf",
+  "font_bold": "Roboto-Bold.ttf"
 }
