@@ -2,5 +2,4 @@
 
 cd `dirname $0`
 
-export SDL_FBDEV=/dev/fb0
 ./WeatherPi_TFT.py

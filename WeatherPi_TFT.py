@@ -14,63 +14,45 @@ import threading
 import time
 
 
-class Update:
-    @staticmethod
-    def get_weather():
-        global threads, CONNECTION
+class RepeatedTimer(threading.Timer):
+    def __init__(self, interval, function, args=[], kwargs={}):
+        super().__init__(interval, self.run, args, kwargs)
+        self.thread = None
+        self.function = function
 
-        thread = threading.Timer(300, Update.get_weather)
-        thread.start()
-        threads.append(thread)
+    def run(self):
+        self.thread = threading.Timer(self.interval, self.run)
+        self.thread.start()
+        self.function(*self.args, **self.kwargs)
 
-        try:
-            url = "https://api.forecast.io/forecast/{}/{},{}".format(
-                config["FORECAST_IO_KEY"], config["FORECAST_LAT"],
-                config["FORECAST_LON"])
-            data = requests.get(url,
-                                params={
-                                    "lang": config["FORECAST_LANGUAGE"],
-                                    "units": config["FORECAST_UNITS"],
-                                    "exclude": config["FORECAST_EXCLUDES"]
-                                }).json()
-            weather_file = "{}/logs/latest_weather.json".format(sys.path[0])
-            with open(weather_file, "w") as f:
-                json.dump(data, f, indent=2, sort_keys=True)
+    def cancel(self):
+        if self.thread is not None:
+            self.thread.cancel()
+            self.thread.join()
+            del self.thread
 
-            CONNECTION = True
-            logging.debug("weather data saved")
 
-        except Exception as e:
-            CONNECTION = False
-            logging.debug("get_weather failed")
-            logging.debug(e.message)
+def weather_forecast():
+    global weather_data
 
-    @staticmethod
-    def load_weather():
-        global threads, weather_data, PATH_ERROR, REFRESH
+    try:
+        data = requests.get(
+            "https://api.forecast.io/forecast/{}/{},{}".format(
+                config["api_key"], config["latitude"], config["longitude"]),
+            params={
+                "lang": config["language"],
+                "units": config["units"],
+                "exclude": "minutely,hourly,flags"}).json()
+        weather_file = "{}/logs/latest_weather.json".format(sys.path[0])
+        with open(weather_file, "w") as f:
+            json.dump(data, f, indent=2, sort_keys=True)
+        weather_data = data
 
-        thread = threading.Timer(30, Update.load_weather)
-        thread.start()
-        threads.append(thread)
+        logging.debug("weather forecast updated")
 
-        PATH_ERROR = False
-        REFRESH = True
-        try:
-            weather_file = "{}/logs/latest_weather.json".format(sys.path[0])
-            with open(weather_file, "r") as f:
-                data = json.loads(f.read())
-            weather_data = data
-            logging.debug("weather data loaded")
-
-        except Exception as e:
-            REFRESH = False
-            logging.debug("load_weather failed")
-            logging.debug(e.message)
-
-    @staticmethod
-    def run():
-        Update.get_weather()
-        Update.load_weather()
+    except Exception as e:
+        logging.debug("weather forecast failed")
+        logging.debug(e.message)
 
 
 class WeatherModule:
@@ -84,10 +66,10 @@ class WeatherModule:
         return datetime.datetime.fromtimestamp(int(timestamp)).strftime(format)
 
     def temparature_text(self, value):
-        return ("{}°C" if config["FORECAST_UNITS"] == "si" else "{}°F").format(value)
+        return ("{}°C" if config["units"] == "si" else "{}°F").format(value)
 
     def speed_text(self, value):
-        return ("{} km/h" if config["FORECAST_UNITS"] == "si" else "{} mi/h").format(value)
+        return ("{} km/h" if config["units"] == "si" else "{} mi/h").format(value)
 
     def percentage_text(self, value):
         return "{}%".format(value)
@@ -129,11 +111,8 @@ class WeatherModule:
     def load_icon(self, icon):
         file = "{}/icons/{}".format(sys.path[0], icon)
         if os.path.isfile(file):
-            logging.debug("load icon: {}".format(icon))
             return pygame.image.load(file)
         else:
-            global PATH_ERROR
-            PATH_ERROR = True
             logging.debug("{} not found.".format(file))
             return None
 
@@ -141,7 +120,7 @@ class WeatherModule:
         """
         :param image: image to draw
         :param position: render relative position (x, y)
-        :param angle:
+        :param angle: counterclockwise  degrees angle
         """
         if image:
             (x, y) = position
@@ -154,27 +133,11 @@ class WeatherModule:
 
 
 class Background(WeatherModule):
-    def __init__(self, rect):
-        super().__init__(rect)
-        self.wifi_icon = self.load_icon("wifi.png")
-        self.no_wifi_icon = self.load_icon("no-wifi.png")
-        self.fresh_icon = self.load_icon("refresh.png")
-        self.no_fresh_icon = self.load_icon("no-refresh.png")
-        self.path_icon = self.load_icon("path.png")
-        self.no_path_icon = self.load_icon("no-path.png")
-
     def draw(self):
         self.clean()
-        self.draw_image(
-            self.wifi_icon if CONNECTION else self.no_wifi_icon, (225, 0))
-        self.draw_image(
-            self.fresh_icon if REFRESH else self.no_fresh_icon, (225, 15))
-        self.draw_image(
-            self.no_path_icon if PATH_ERROR else self.path_icon, (225, 30))
-
-        logging.debug("CONNECTION: {}".format(CONNECTION))
-        logging.debug("REFRESH: {}".format(REFRESH))
-        logging.debug("PATH ERROR: {}".format(PATH_ERROR))
+        if weather_data is None:
+            self.draw_text("waiting for weather forecast data ...",
+                           font_s, white, (0, self.rect.height / 2), "center")
 
 
 class Clock(WeatherModule):
@@ -188,9 +151,6 @@ class Clock(WeatherModule):
         self.draw_text(locale_time, font_l_bold, white, (10, 19))
         self.draw_text(locale_second, font_s_bold, white, (92, 19))
 
-        logging.debug("Day: {}".format(locale_date))
-        logging.debug("Time: {}".format(locale_time))
-
 
 class Weather(WeatherModule):
     def __init__(self, rect):
@@ -199,6 +159,9 @@ class Weather(WeatherModule):
         self.snow_icon = self.load_icon("precipsnow.png")
 
     def draw(self):
+        if weather_data is None:
+            return
+
         currently = weather_data["currently"]
         summary = currently["summary"]
         temperature = self.temparature_text(currently["temperature"])
@@ -218,9 +181,9 @@ class Weather(WeatherModule):
 
         weather_icon = self.load_icon("{}.png".format(currently["icon"]))
 
-        self.draw_text(summary, font_s_bold, color, (0, 5), "center")
-        self.draw_text(temperature, font_m, color, (0, 25), "right")
-        self.draw_text(precip_porobability, font_m, color, (120, 55), "right")
+        self.draw_text(summary, font_s_bold, color, (120, 5))
+        self.draw_text(temperature, font_l, color, (0, 25), "right")
+        self.draw_text(precip_porobability, font_l, color, (120, 55), "right")
         self.draw_text(_(precip_type), font_s_bold, color, (0, 90), "right")
         self.draw_image(weather_icon, (10, 5))
 
@@ -242,6 +205,9 @@ class DailyWeatherForecast(WeatherModule):
         self.day = day
 
     def draw(self):
+        if weather_data is None:
+            return
+
         weather = weather_data["daily"]["data"][self.day + 1]
         day_of_week = self.strftime(weather["time"], "%a")
         temperature = "{} | {}".format(
@@ -257,13 +223,15 @@ class DailyWeatherForecast(WeatherModule):
 class WeatherForcecast(WeatherModule):
     def __init__(self, rect):
         super().__init__(rect)
-        self.forecast_days = config["FORECAST_DAYS"]
+        self.forecast_days = config["forecast_days"]
         self.forecast_modules = []
         for i in range(self.forecast_days):
             self.forecast_modules.append(DailyWeatherForecast(
                 (self.rect.x + i * self.rect.width, self.rect.y, self.rect.width, self.rect.height), i))
 
     def draw(self):
+        if weather_data is None:
+            return
         for module in self.forecast_modules:
             module.draw()
 
@@ -275,6 +243,9 @@ class SunriseSuset(WeatherModule):
         self.sunset_icon = self.load_icon("sunset.png")
 
     def draw(self):
+        if weather_data is None:
+            return
+
         daily = weather_data["daily"]["data"]
         surise = self.strftime(int(daily[0]["sunriseTime"]), "%H:%M")
         sunset = self.strftime(int(daily[0]["sunsetTime"]), "%H:%M")
@@ -289,6 +260,9 @@ class SunriseSuset(WeatherModule):
 
 class MoonPhase(WeatherModule):
     def draw(self):
+        if weather_data is None:
+            return
+
         daily = weather_data["daily"]["data"]
         moon_phase = int((float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25)
         moon_icon = self.load_icon("moon-{}.png".format(moon_phase))
@@ -305,6 +279,8 @@ class Wind(WeatherModule):
         self.arrow_icon = self.load_icon("arrow.png")
 
     def draw(self):
+        if weather_data is None:
+            return
         currently = weather_data["currently"]
         wind_speed = self.speed_text(
             round((float(currently["windSpeed"]) * 1.609344), 1))
@@ -328,8 +304,8 @@ def init_pygame():
     pygame.init()
     pygame.mouse.set_visible(False)
     screen = pygame.display.set_mode(
-        (config["DISPLAY_WIDTH"], config["DISPLAY_HEIGHT"]))
-    pygame.display.set_caption(__file__)
+        (config["display_width"], config["display_height"]))
+    pygame.display.set_caption("WeatherPi")
 
     # initialize color
     global white, black, red, blue, orange
@@ -341,8 +317,8 @@ def init_pygame():
 
     # initialize font
     global font_s, font_m, font_l, font_s_bold, font_m_bold, font_l_bold
-    font_regular = "{}/fonts/{}".format(sys.path[0], config["FONT_REGULAR"])
-    font_bold = "{}/fonts/{}".format(sys.path[0], config["FONT_BOLD"])
+    font_regular = "{}/fonts/{}".format(sys.path[0], config["font_regular"])
+    font_bold = "{}/fonts/{}".format(sys.path[0], config["font_bold"])
     font_s = pygame.font.Font(font_regular, 14)
     font_m = pygame.font.Font(font_regular, 22)
     font_l = pygame.font.Font(font_regular, 30)
@@ -360,17 +336,14 @@ def main():
     trans.install()
 
     # initialize logging
-    logging.basicConfig(filename='logger.log', level=logging.DEBUG)
+    logging.basicConfig(filename="WeatherPi.log", level=logging.DEBUG)
 
-    # initialize threads
-    global threads
-    threads = []
+    # initialize thread
+    timer_thread = None
 
-    # initialize flags
-    global CONNECTION, REFRESH, PATH_ERROR
-    CONNECTION = True
-    REFRESH = True
-    PATH_ERROR = False
+    # initialize weather data
+    global weather_data
+    weather_data = None
 
     try:
         # load config.json
@@ -381,9 +354,9 @@ def main():
         # init pygame
         init_pygame()
 
-        # start update thread
-        weather_data = {}
-        Update.run()
+        # start weather forecast thread
+        timer_thread = RepeatedTimer(300, weather_forecast)
+        timer_thread.start()
 
         # load modules
         modules = [
@@ -398,6 +371,7 @@ def main():
 
         running = True
         while running:
+            # draw modules
             for module in modules:
                 module.draw()
             pygame.display.update()
@@ -419,9 +393,8 @@ def main():
         logging.debug(e.message)
 
     finally:
-        for thread in threads:
-            thread.cancel()
-            thread.join()
+        if timer_thread:
+            timer_thread.cancel()
         pygame.quit()
         quit()
 
