@@ -45,10 +45,6 @@ coverage.xml
 *,cover
 .hypothesis/
 
-# Translations
-*.mo
-*.pot
-
 # Django stuff:
 *.log
 local_settings.py
@@ -88,15 +84,5 @@ ENV/
 # Rope project settings
 .ropeproject
 /.gitignore
-/start.sh
-/icons/debug.bmp
-/icons/list.txt
-/icons/download.py
-/fonts/PressStart2P.ttf
-/fonts/Pixel-Noir.ttf
-/fonts/Pixel-Noir Skinny Caps.ttf
-/.idea/*
-/.idea/dictionaries/*
-/.idea/inspectionProfiles/*
 /config.json
 /logs/latest_weather.json
