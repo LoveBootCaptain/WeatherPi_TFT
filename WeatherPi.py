@@ -332,7 +332,7 @@ def main():
     (language_code, encoding) = locale.getdefaultlocale()
     locale.setlocale(locale.LC_ALL, (language_code, encoding))
     trans = gettext.translation(
-        "messages", localedir="locale", languages=[language_code], fallback=True)
+        "messages", localedir="{}/locale".format(sys.path[0]), languages=[language_code], fallback=True)
     trans.install()
 
     # initialize logging
