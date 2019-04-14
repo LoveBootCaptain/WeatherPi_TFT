@@ -119,16 +119,19 @@ class WeatherModule:
     def clean(self):
         self.screen.fill(self.color("black"), rect=self.rect)
 
-    def draw_text(self, text, font, color, position, align="left"):
+    def draw_text(self, text, style, size, color, position, align="left"):
         """
         :param text: text to draw
-        :param font: font object
-        :param color: rgb color tuple
+        :param style: font style. ["regular", "bold"]
+        :param size: font size. ["small", "medium", "large"]
+        :param color: color name or RGB color tuple
         :param position: render relative position (x, y)
-        :param align: text align. "left", "center", "right"
+        :param align: text align. ["left", "center", "right"]
         """
         (x, y) = position
+        font = self.font(style, size)
         size = font.size(text)
+        color = self.color(color) if isinstance(color, str) else color
         if align == "center":
             x = (self.rect.width - size[0]) / 2
         elif align == "right":

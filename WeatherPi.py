@@ -59,7 +59,7 @@ class Background(WeatherModule):
         self.clean()
         if weather is None:
             self.draw_text("waiting for weather forecast data ...",
-                           self.font("regular", "small"), self.color("white"), (0, self.rect.height / 2), "center")
+                           "regular", "small", "white", (0, self.rect.height / 2), "center")
 
 
 class Clock(WeatherModule):
@@ -69,12 +69,9 @@ class Clock(WeatherModule):
         locale_time = Utils.strftime(timestamp, "%H:%M")
         locale_second = Utils.strftime(timestamp, "%S")
 
-        self.draw_text(locale_date, self.font("bold", "small"),
-                       self.color("white"), (10, 4))
-        self.draw_text(locale_time, self.font("regular", "large"),
-                       self.color("white"), (10, 19))
-        self.draw_text(locale_second, self.font(
-            "regular", "medium"), self.color("white"), (92, 19))
+        self.draw_text(locale_date, "bold", "small", "white", (10, 4))
+        self.draw_text(locale_time, "regular", "large", "white", (10, 19))
+        self.draw_text(locale_second, "regular", "medium", "white", (92, 19))
 
 
 class Weather(WeatherModule):
@@ -91,8 +88,8 @@ class Weather(WeatherModule):
         summary = currently["summary"]
         temperature = currently["temperature"]
         humidity = currently["humidity"]
-        color = Utils.heat_color(temperature, humidity, self.units)
 
+        color = Utils.heat_color(temperature, humidity, self.units)
         temperature = Utils.temparature_text(round(temperature, 1), self.units)
 
         # If precipIntensity is zero, then this property will not be defined
@@ -101,23 +98,16 @@ class Weather(WeatherModule):
             precip_porobability = Utils.percentage_text(
                 round(precip_porobability * 100, 1))
             precip_type = currently["precipType"]
-            #color = Utils.precip_color(currently["precipType"])
         else:
-            precip_porobability = Utils.percentage_text(
-                precip_porobability * 100)
+            precip_porobability = Utils.percentage_text(0)
             precip_type = "Precipitation"
-            #color = self.color("orange")
 
         weather_icon = self.load_icon("{}.png".format(currently["icon"]))
 
-        self.draw_text(summary, self.font("bold", "small"),
-                       self.color("white"), (120, 5))
-        self.draw_text(temperature, self.font(
-            "regular", "large"), color, (0, 25), "right")
-        self.draw_text(precip_porobability, self.font(
-            "regular", "large"), color, (120, 55), "right")
-        self.draw_text(_(precip_type), self.font(
-            "bold", "small"), color, (0, 90), "right")
+        self.draw_text(summary, "bold", "small", "white", (120, 5))
+        self.draw_text(temperature, "regular", "large", color, (0, 25), "right")
+        self.draw_text(precip_porobability, "regular", "large", color, (120, 55), "right")
+        self.draw_text(_(precip_type), "bold", "small", color, (0, 90), "right")
         self.draw_image(weather_icon, (10, 5))
 
         if precip_type == "rain":
@@ -136,10 +126,8 @@ class DailyWeatherForecast(WeatherModule):
         temperature = "{} | {}".format(
             int(weather["temperatureMin"]), int(weather["temperatureMax"]))
         weather_icon = self.load_icon("mini_{}.png".format(weather["icon"]))
-        self.draw_text(day_of_week, self.font("bold", "small"),
-                       self.color("orange"), (0, 0), "center")
-        self.draw_text(temperature, self.font("bold", "small"),
-                       self.color("white"), (0, 15), "center")
+        self.draw_text(day_of_week, "bold", "small", "orange", (0, 0), "center")
+        self.draw_text(temperature, "bold", "small", "white", (0, 15), "center")
         self.draw_image(weather_icon, (15, 35))
 
 
@@ -178,10 +166,8 @@ class SunriseSuset(WeatherModule):
 
         self.draw_image(self.sunrise_icon, (10, 20))
         self.draw_image(self.sunset_icon, (10, 50))
-        self.draw_text(surise, self.font("bold", "small"), self.color(
-            "white"), (0, 25), "right")
-        self.draw_text(sunset, self.font("bold", "small"), self.color(
-            "white"), (0, 55), "right")
+        self.draw_text(surise, "bold", "small", "white", (0, 25), "right")
+        self.draw_text(sunset, "bold", "small", "white", (0, 55), "right")
 
 
 class MoonPhase(WeatherModule):
@@ -211,10 +197,8 @@ class Wind(WeatherModule):
         wind_bearing = currently["windBearing"]
         angle = 360 - wind_bearing + 180
 
-        self.draw_text("N", self.font("bold", "small"), self.color(
-            "white"), (0, 10), "center")
-        self.draw_text(wind_speed, self.font("bold", "small"),
-                       self.color("white"), (0, 60), "center")
+        self.draw_text("N", "bold", "small", "white", (0, 10), "center")
+        self.draw_text(wind_speed, "bold", "small", "white", (0, 60), "center")
         self.draw_image(self.circle_icon, (25, 30))
         self.draw_image(self.arrow_icon, (25, 35), angle)
 
