@@ -3,14 +3,52 @@
   "latitude": 35.746289,
   "longitude": 139.667028,
 
-  "language": "en",
+  "locale": "en_US.UTF-8",
   "units": "si",
 
-  "forecast_days": 3,
+  "display": [240, 320],
+  "fonts": {
+    "regular": "Roboto-Medium.ttf",
+    "bold": "Roboto-Bold.ttf"
+  },
 
-  "display_width": 240,
-  "display_height": 320,
-
-  "font_regular": "Roboto-Medium.ttf",
-  "font_bold": "Roboto-Bold.ttf"
+  "modules": [
+    {
+      "module": "Clock",
+      "config": {
+        "rect": [0, 0, 120, 50]
+      }
+    },
+    {
+      "module": "Weather",
+      "config": {
+        "rect": [0, 50, 240, 110]
+      }
+    },
+    {
+      "module": "WeatherForecast",
+      "config": {
+        "rect": [0, 160, 240, 80],
+        "forecast_days": 3
+      }
+    },
+    {
+      "module": "SunriseSuset",
+      "config": {
+        "rect": [0, 240, 80, 80]
+      }
+    },
+    {
+      "module": "MoonPhase",
+      "config": {
+        "rect": [80, 240, 80, 80]
+      }
+    },
+    {
+      "module": "Wind",
+      "config": {
+        "rect": [160, 240, 80, 80]
+      }
+    }
+  ]
 }

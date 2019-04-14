@@ -220,13 +220,6 @@ class Wind(WeatherModule):
 
 
 def main():
-    # initialize locale, gettext
-    (language_code, encoding) = locale.getdefaultlocale()
-    locale.setlocale(locale.LC_ALL, (language_code, encoding))
-    trans = gettext.translation(
-        "messages", localedir="locale", languages=[language_code], fallback=True)
-    trans.install()
-
     # initialize thread
     timer_thread = None
 
@@ -239,10 +232,18 @@ def main():
         with open("{}/config.json".format(sys.path[0]), "r") as f:
             config = json.loads(f.read())
 
+        # initialize locale, gettext
+        (language_code, encoding) = config["locale"].split(".")
+        language = language_code.split("_")[0]
+        locale.setlocale(locale.LC_ALL, (language_code, encoding))
+        trans = gettext.translation(
+            "messages", localedir="locale", languages=[language_code], fallback=True)
+        trans.install()
+
         # start weather forecast thread
         timer_thread = RepeatedTimer(300, weather_forecast, [
             config["api_key"], config["latitude"], config["longitude"],
-            config["language"], config["units"]
+            language, config["units"]
         ])
         timer_thread.start()
 
@@ -269,7 +270,6 @@ def main():
         }
 
         # load modules
-        language = config["language"]
         units = config["units"]
         modules = [Background(screen, fonts, language, units, {
                               "rect": screen.get_rect()})]
