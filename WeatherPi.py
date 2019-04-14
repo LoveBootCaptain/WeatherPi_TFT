@@ -65,16 +65,16 @@ class Background(WeatherModule):
 class Clock(WeatherModule):
     def draw(self, weather):
         timestamp = time.time()
-        locale_date = Utils.strftime(timestamp, "%x")
+        locale_date = Utils.strftime(timestamp, "%a, %x")
         locale_time = Utils.strftime(timestamp, "%H:%M")
         locale_second = Utils.strftime(timestamp, "%S")
 
         self.draw_text(locale_date, self.font("bold", "small"),
                        self.color("white"), (10, 4))
-        self.draw_text(locale_time, self.font("bold", "large"),
+        self.draw_text(locale_time, self.font("regular", "large"),
                        self.color("white"), (10, 19))
         self.draw_text(locale_second, self.font(
-            "bold", "small"), self.color("white"), (92, 19))
+            "regular", "medium"), self.color("white"), (92, 19))
 
 
 class Weather(WeatherModule):
@@ -93,13 +93,13 @@ class Weather(WeatherModule):
         humidity = currently["humidity"]
         color = Utils.heat_color(temperature, humidity, self.units)
 
-        temperature = Utils.temparature_text(temperature, self.units)
+        temperature = Utils.temparature_text(round(temperature, 1), self.units)
 
         # If precipIntensity is zero, then this property will not be defined
         precip_porobability = currently["precipProbability"]
         if precip_porobability:
             precip_porobability = Utils.percentage_text(
-                precip_porobability * 100)
+                round(precip_porobability * 100, 1))
             precip_type = currently["precipType"]
             #color = Utils.precip_color(currently["precipType"])
         else:
