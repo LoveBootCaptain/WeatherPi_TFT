@@ -1,17 +1,17 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import datetime
 import gettext
+import importlib
 import json
 import locale
-import logging
 import os
 import pygame
 import requests
 import sys
 import threading
 import time
+from modules.WeatherModule import WeatherModule, Utils
 
 
 class RepeatedTimer(threading.Timer):
@@ -32,159 +32,92 @@ class RepeatedTimer(threading.Timer):
             del self.thread
 
 
-def weather_forecast():
+def weather_forecast(api_key, latitude, longitude, language, units):
     global weather_data
 
     try:
-        data = requests.get(
+        resopnse = requests.get(
             "https://api.forecast.io/forecast/{}/{},{}".format(
-                config["api_key"], config["latitude"], config["longitude"]),
+                api_key, latitude, longitude),
             params={
-                "lang": config["language"],
-                "units": config["units"],
-                "exclude": "minutely,hourly,flags"}).json()
-        weather_file = "{}/logs/latest_weather.json".format(sys.path[0])
-        with open(weather_file, "w") as f:
-            json.dump(data, f, indent=2, sort_keys=True)
-        weather_data = data
+                "lang": language,
+                "units": units,
+                "exclude": "minutely,hourly,flags"
+            })
+        resopnse.raise_for_status()
 
-        logging.debug("weather forecast updated")
+        data = resopnse.json()
+        weather_data = data
+        print("weather forecast updated")
 
     except Exception as e:
-        logging.debug("weather forecast failed")
-        logging.debug(e.message)
-
-
-class WeatherModule:
-    def __init__(self, rect):
-        """
-        :param rect: module area (top, left, width, height)
-        """
-        self.rect = pygame.Rect(rect)
-
-    def strftime(self, timestamp, format):
-        return datetime.datetime.fromtimestamp(int(timestamp)).strftime(format)
-
-    def temparature_text(self, value):
-        return ("{}°C" if config["units"] == "si" else "{}°F").format(value)
-
-    def speed_text(self, value):
-        return ("{} km/h" if config["units"] == "si" else "{} mi/h").format(value)
-
-    def percentage_text(self, value):
-        return "{}%".format(value)
-
-    def precip_color(self, precip_type):
-        if precip_type == "rain":
-            return blue
-        elif precip_type == "snow":
-            return white
-        elif precip_type == "sleet":
-            return red
-        else:
-            return orange
-
-    def draw(self):
-        screen.fill(white, rect=self.rect)
-
-    def clean(self):
-        screen.fill(black, rect=self.rect)
-
-    def draw_text(self, text, font, color, position, align="left"):
-        """
-        :param text: text to draw
-        :param font: font object
-        :param color: rgb color tuple
-        :param position: render relative position (x, y)
-        :param align: text align. "left", "center", "right"
-        """
-        (x, y) = position
-        size = font.size(text)
-        if align == "center":
-            x = (self.rect.width - size[0]) / 2
-        elif align == "right":
-            x = self.rect.width - size[0]
-        screen.blit(
-            font.render(text, True, color),
-            (self.rect.left + x, self.rect.top + y))
-
-    def load_icon(self, icon):
-        file = "{}/icons/{}".format(sys.path[0], icon)
-        if os.path.isfile(file):
-            return pygame.image.load(file)
-        else:
-            logging.debug("{} not found.".format(file))
-            return None
-
-    def draw_image(self, image, position, angle=0):
-        """
-        :param image: image to draw
-        :param position: render relative position (x, y)
-        :param angle: counterclockwise  degrees angle
-        """
-        if image:
-            (x, y) = position
-            if angle:
-                (w, h) = image.get_size()
-                image = pygame.transform.rotate(image, angle)
-                x = x + (w - image.get_width()) / 2
-                y = h + (h - image.get_height()) / 2
-            screen.blit(image, (self.rect.left + x, self.rect.top + y))
+        print("weather forecast failed: {}".format(e))
 
 
 class Background(WeatherModule):
-    def draw(self):
+    def draw(self, weather):
         self.clean()
-        if weather_data is None:
+        if weather is None:
             self.draw_text("waiting for weather forecast data ...",
-                           font_s, white, (0, self.rect.height / 2), "center")
+                           self.font("regular", "small"), self.color("white"), (0, self.rect.height / 2), "center")
 
 
 class Clock(WeatherModule):
-    def draw(self):
+    def draw(self, weather):
         timestamp = time.time()
-        locale_date = self.strftime(timestamp, "%x")
-        locale_time = self.strftime(timestamp, "%H:%M")
-        locale_second = self.strftime(timestamp, "%S")
+        locale_date = Utils.strftime(timestamp, "%x")
+        locale_time = Utils.strftime(timestamp, "%H:%M")
+        locale_second = Utils.strftime(timestamp, "%S")
 
-        self.draw_text(locale_date, font_s_bold, white, (10, 4))
-        self.draw_text(locale_time, font_l_bold, white, (10, 19))
-        self.draw_text(locale_second, font_s_bold, white, (92, 19))
+        self.draw_text(locale_date, self.font("bold", "small"),
+                       self.color("white"), (10, 4))
+        self.draw_text(locale_time, self.font("bold", "large"),
+                       self.color("white"), (10, 19))
+        self.draw_text(locale_second, self.font(
+            "bold", "small"), self.color("white"), (92, 19))
 
 
 class Weather(WeatherModule):
-    def __init__(self, rect):
-        super().__init__(rect)
+    def __init__(self, screen, fonts, language, units, config):
+        super().__init__(screen, fonts, language, units, config)
         self.rain_icon = self.load_icon("preciprain.png")
         self.snow_icon = self.load_icon("precipsnow.png")
 
-    def draw(self):
+    def draw(self, weather):
         if weather_data is None:
             return
 
-        currently = weather_data["currently"]
+        currently = weather["currently"]
         summary = currently["summary"]
-        temperature = self.temparature_text(currently["temperature"])
+        temperature = currently["temperature"]
+        humidity = currently["humidity"]
+        color = Utils.heat_color(temperature, humidity, self.units)
+
+        temperature = Utils.temparature_text(temperature, self.units)
 
         # If precipIntensity is zero, then this property will not be defined
         precip_porobability = currently["precipProbability"]
         if precip_porobability:
-            precip_porobability = self.percentage_text(
+            precip_porobability = Utils.percentage_text(
                 precip_porobability * 100)
             precip_type = currently["precipType"]
-            color = self.precip_color(currently["precipType"])
+            #color = Utils.precip_color(currently["precipType"])
         else:
-            precip_porobability = self.percentage_text(
+            precip_porobability = Utils.percentage_text(
                 precip_porobability * 100)
             precip_type = "Precipitation"
-            color = orange
+            #color = self.color("orange")
 
         weather_icon = self.load_icon("{}.png".format(currently["icon"]))
 
-        self.draw_text(summary, font_s_bold, color, (120, 5))
-        self.draw_text(temperature, font_l, color, (0, 25), "right")
-        self.draw_text(precip_porobability, font_l, color, (120, 55), "right")
-        self.draw_text(_(precip_type), font_s_bold, color, (0, 90), "right")
+        self.draw_text(summary, self.font("bold", "small"),
+                       self.color("white"), (120, 5))
+        self.draw_text(temperature, self.font(
+            "regular", "large"), color, (0, 25), "right")
+        self.draw_text(precip_porobability, self.font(
+            "regular", "large"), color, (120, 55), "right")
+        self.draw_text(_(precip_type), self.font(
+            "bold", "small"), color, (0, 90), "right")
         self.draw_image(weather_icon, (10, 5))
 
         if precip_type == "rain":
@@ -192,139 +125,98 @@ class Weather(WeatherModule):
         elif precip_type == "show":
             self.draw_image(self.snow_icon, (120, 65))
 
-        logging.debug("summary: {}".format(summary))
-        logging.debug("temperature: {}".format(temperature))
-        logging.debug("{}: {}".format(_(precip_type), precip_porobability))
-        logging.debug("precip_type: {} ; color: {}".format(
-            _(precip_type), color))
-
 
 class DailyWeatherForecast(WeatherModule):
-    def __init__(self, rect, day):
-        super().__init__(rect)
-        self.day = day
-
-    def draw(self):
+    def draw(self, weather, day):
         if weather_data is None:
             return
 
-        weather = weather_data["daily"]["data"][self.day + 1]
-        day_of_week = self.strftime(weather["time"], "%a")
+        weather = weather["daily"]["data"][day]
+        day_of_week = Utils.strftime(weather["time"], "%a")
         temperature = "{} | {}".format(
             int(weather["temperatureMin"]), int(weather["temperatureMax"]))
         weather_icon = self.load_icon("mini_{}.png".format(weather["icon"]))
-        self.draw_text(day_of_week, font_s_bold, orange, (0, 0), "center")
-        self.draw_text(temperature, font_s_bold, white, (0, 15), "center")
+        self.draw_text(day_of_week, self.font("bold", "small"),
+                       self.color("orange"), (0, 0), "center")
+        self.draw_text(temperature, self.font("bold", "small"),
+                       self.color("white"), (0, 15), "center")
         self.draw_image(weather_icon, (15, 35))
 
-        logging.debug("forecast: {} ; {}".format(day_of_week, temperature))
 
-
-class WeatherForcecast(WeatherModule):
-    def __init__(self, rect):
-        super().__init__(rect)
+class WeatherForecast(WeatherModule):
+    def __init__(self, screen, fonts, language, units, config):
+        super().__init__(screen, fonts, language, units, config)
         self.forecast_days = config["forecast_days"]
         self.forecast_modules = []
+        width = self.rect.width / self.forecast_days
         for i in range(self.forecast_days):
+            config["rect"] = [self.rect.x + i * width,
+                              self.rect.y, width, self.rect.height]
             self.forecast_modules.append(DailyWeatherForecast(
-                (self.rect.x + i * self.rect.width, self.rect.y, self.rect.width, self.rect.height), i))
+                screen, fonts, language, units, config))
 
-    def draw(self):
+    def draw(self, weather):
         if weather_data is None:
             return
-        for module in self.forecast_modules:
-            module.draw()
+        for i in range(self.forecast_days):
+            self.forecast_modules[i].draw(weather, i + 1)
 
 
 class SunriseSuset(WeatherModule):
-    def __init__(self, rect):
-        super().__init__(rect)
+    def __init__(self, screen, fonts, language, units, config):
+        super().__init__(screen, fonts, language, units, config)
         self.sunrise_icon = self.load_icon("sunrise.png")
         self.sunset_icon = self.load_icon("sunset.png")
 
-    def draw(self):
+    def draw(self, weather):
         if weather_data is None:
             return
 
-        daily = weather_data["daily"]["data"]
-        surise = self.strftime(int(daily[0]["sunriseTime"]), "%H:%M")
-        sunset = self.strftime(int(daily[0]["sunsetTime"]), "%H:%M")
+        daily = weather["daily"]["data"]
+        surise = Utils.strftime(int(daily[0]["sunriseTime"]), "%H:%M")
+        sunset = Utils.strftime(int(daily[0]["sunsetTime"]), "%H:%M")
 
         self.draw_image(self.sunrise_icon, (10, 20))
         self.draw_image(self.sunset_icon, (10, 50))
-        self.draw_text(surise, font_s_bold, white, (0, 25), "right")
-        self.draw_text(sunset, font_s_bold, white, (0, 55), "right")
-
-        logging.debug("sunrise: {} ; sunset {}".format(surise, sunset))
+        self.draw_text(surise, self.font("bold", "small"), self.color(
+            "white"), (0, 25), "right")
+        self.draw_text(sunset, self.font("bold", "small"), self.color(
+            "white"), (0, 55), "right")
 
 
 class MoonPhase(WeatherModule):
-    def draw(self):
+    def draw(self, weather):
         if weather_data is None:
             return
 
-        daily = weather_data["daily"]["data"]
+        daily = weather["daily"]["data"]
         moon_phase = int((float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25)
         moon_icon = self.load_icon("moon-{}.png".format(moon_phase))
 
         self.draw_image(moon_icon, (10, 10))
 
-        logging.debug("moon phase: {}".format(moon_phase))
-
 
 class Wind(WeatherModule):
-    def __init__(self, rect):
-        super().__init__(rect)
+    def __init__(self, screen, fonts, language, units, config):
+        super().__init__(screen, fonts, language, units, config)
         self.circle_icon = self.load_icon("circle.png")
         self.arrow_icon = self.load_icon("arrow.png")
 
-    def draw(self):
+    def draw(self, weather):
         if weather_data is None:
             return
-        currently = weather_data["currently"]
-        wind_speed = self.speed_text(
-            round((float(currently["windSpeed"]) * 1.609344), 1))
+        currently = weather["currently"]
+        wind_speed = Utils.speed_text(
+            round((float(currently["windSpeed"]) * 1.609344), 1), self.units)
         wind_bearing = currently["windBearing"]
         angle = 360 - wind_bearing + 180
 
-        self.draw_text("N", font_s_bold, white, (0, 10), "center")
-        self.draw_text(wind_speed, font_s_bold, white, (0, 60), "center")
+        self.draw_text("N", self.font("bold", "small"), self.color(
+            "white"), (0, 10), "center")
+        self.draw_text(wind_speed, self.font("bold", "small"),
+                       self.color("white"), (0, 60), "center")
         self.draw_image(self.circle_icon, (25, 30))
         self.draw_image(self.arrow_icon, (25, 35), angle)
-
-        logging.debug("wind speed: {}".format(wind_speed))
-        logging.debug("wind bearing: {}({})".format(wind_bearing, angle))
-
-
-def init_pygame():
-    os.putenv("SDL_FBDEV", "/dev/fb1")
-
-    # initialize screen
-    global screen
-    pygame.init()
-    pygame.mouse.set_visible(False)
-    screen = pygame.display.set_mode(
-        (config["display_width"], config["display_height"]))
-    pygame.display.set_caption("WeatherPi")
-
-    # initialize color
-    global white, black, red, blue, orange
-    white = pygame.Color("white")[:3]
-    black = pygame.Color("black")[:3]
-    red = pygame.Color("red")[:3]
-    blue = pygame.Color("blue")[:3]
-    orange = pygame.Color("orange")[:3]
-
-    # initialize font
-    global font_s, font_m, font_l, font_s_bold, font_m_bold, font_l_bold
-    font_regular = "{}/fonts/{}".format(sys.path[0], config["font_regular"])
-    font_bold = "{}/fonts/{}".format(sys.path[0], config["font_bold"])
-    font_s = pygame.font.Font(font_regular, 14)
-    font_m = pygame.font.Font(font_regular, 22)
-    font_l = pygame.font.Font(font_regular, 30)
-    font_s_bold = pygame.font.Font(font_bold, 14)
-    font_m_bold = pygame.font.Font(font_bold, 22)
-    font_l_bold = pygame.font.Font(font_bold, 30)
 
 
 def main():
@@ -335,9 +227,6 @@ def main():
         "messages", localedir="locale", languages=[language_code], fallback=True)
     trans.install()
 
-    # initialize logging
-    logging.basicConfig(filename="WeatherPi.log", level=logging.DEBUG)
-
     # initialize thread
     timer_thread = None
 
@@ -347,50 +236,73 @@ def main():
 
     try:
         # load config.json
-        global config
         with open("{}/config.json".format(sys.path[0]), "r") as f:
             config = json.loads(f.read())
 
-        # init pygame
-        init_pygame()
-
         # start weather forecast thread
-        timer_thread = RepeatedTimer(300, weather_forecast)
+        timer_thread = RepeatedTimer(300, weather_forecast, [
+            config["api_key"], config["latitude"], config["longitude"],
+            config["language"], config["units"]
+        ])
         timer_thread.start()
 
-        # load modules
-        modules = [
-            Background((0, 0, 240, 320)),
-            Clock((0, 0, 120, 50)),
-            Weather((0, 50, 240, 110)),
-            WeatherForcecast((0, 160, 80, 80)),
-            SunriseSuset((0, 240, 80, 80)),
-            MoonPhase((80, 240, 80, 80)),
-            Wind((160, 240, 80, 80))
-        ]
+        # initialize pygame
+        os.putenv("SDL_FBDEV", "/dev/fb1")
+        pygame.init()
+        pygame.mouse.set_visible(False)
+        screen = pygame.display.set_mode(config["display"])
 
+        # load fonts
+        regular = "{}/fonts/{}".format(sys.path[0], config["fonts"]["regular"])
+        bold = "{}/fonts/{}".format(sys.path[0], config["fonts"]["bold"])
+        fonts = {
+            "regular": {
+                "small": pygame.font.Font(regular, 14),
+                "medium": pygame.font.Font(regular, 22),
+                "large": pygame.font.Font(regular, 30),
+            },
+            "bold": {
+                "small": pygame.font.Font(bold, 14),
+                "medium": pygame.font.Font(bold, 22),
+                "large": pygame.font.Font(bold, 30),
+            }
+        }
+
+        # load modules
+        language = config["language"]
+        units = config["units"]
+        modules = [Background(screen, fonts, language, units, {
+                              "rect": screen.get_rect()})]
+        for module in config["modules"]:
+            name = module["module"]
+            conf = module["config"]
+            if name in globals():
+                print("load built-in module: {}".format(name))
+                m = (globals()[name])
+            else:
+                print("load external module: {}".format(name))
+                m = getattr(importlib.import_module(
+                    "modules.{}".format(name)), name)
+            modules.append((m)(screen, fonts, language, units, conf))
+
+        # main loop
         running = True
         while running:
-            # draw modules
             for module in modules:
-                module.draw()
+                module.draw(weather_data)
             pygame.display.update()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                    break
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-                        break
-                    elif event.key == pygame.K_SPACE:
-                        logging.debug("SPACE")
 
             time.sleep(1)
 
     except Exception as e:
-        logging.debug(e.message)
+        print(e)
 
     finally:
         if timer_thread:
