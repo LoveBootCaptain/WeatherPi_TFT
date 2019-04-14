@@ -5,6 +5,7 @@ import gettext
 import importlib
 import json
 import locale
+import logging
 import os
 import pygame
 import requests
@@ -12,6 +13,9 @@ import sys
 import threading
 import time
 from modules.WeatherModule import WeatherModule, Utils
+
+logging.basicConfig(level=logging.INFO, stream=sys.stdout,
+                    format="%(asctime)s %(levelname)s %(message)s")
 
 
 class RepeatedTimer(threading.Timer):
@@ -48,10 +52,10 @@ def weather_forecast(api_key, latitude, longitude, language, units):
 
         data = resopnse.json()
         weather_data = data
-        print("weather forecast updated")
+        logging.info("weather forecast updated")
 
     except Exception as e:
-        print("weather forecast failed: {}".format(e))
+        logging.error("weather forecast failed: {}".format(e))
 
 
 class Background(WeatherModule):
@@ -105,9 +109,12 @@ class Weather(WeatherModule):
         weather_icon = self.load_icon("{}.png".format(currently["icon"]))
 
         self.draw_text(summary, "bold", "small", "white", (120, 5))
-        self.draw_text(temperature, "regular", "large", color, (0, 25), "right")
-        self.draw_text(precip_porobability, "regular", "large", color, (120, 55), "right")
-        self.draw_text(_(precip_type), "bold", "small", color, (0, 90), "right")
+        self.draw_text(temperature, "regular", "large",
+                       color, (0, 25), "right")
+        self.draw_text(precip_porobability, "regular",
+                       "large", color, (120, 55), "right")
+        self.draw_text(_(precip_type), "bold", "small",
+                       color, (0, 90), "right")
         self.draw_image(weather_icon, (10, 5))
 
         if precip_type == "rain":
@@ -126,8 +133,10 @@ class DailyWeatherForecast(WeatherModule):
         temperature = "{} | {}".format(
             int(weather["temperatureMin"]), int(weather["temperatureMax"]))
         weather_icon = self.load_icon("mini_{}.png".format(weather["icon"]))
-        self.draw_text(day_of_week, "bold", "small", "orange", (0, 0), "center")
-        self.draw_text(temperature, "bold", "small", "white", (0, 15), "center")
+        self.draw_text(day_of_week, "bold", "small",
+                       "orange", (0, 0), "center")
+        self.draw_text(temperature, "bold", "small",
+                       "white", (0, 15), "center")
         self.draw_image(weather_icon, (15, 35))
 
 
@@ -215,6 +224,7 @@ def main():
         # load config.json
         with open("{}/config.json".format(sys.path[0]), "r") as f:
             config = json.loads(f.read())
+        logging.info("config.json loaded")
 
         # initialize locale, gettext
         (language_code, encoding) = config["locale"].split(".")
@@ -230,12 +240,14 @@ def main():
             language, config["units"]
         ])
         timer_thread.start()
+        logging.info("weather forecast thread started")
 
         # initialize pygame
         os.putenv("SDL_FBDEV", "/dev/fb1")
         pygame.init()
         pygame.mouse.set_visible(False)
         screen = pygame.display.set_mode(config["display"])
+        logging.info("pygame initialized")
 
         # load fonts
         regular = "{}/fonts/{}".format(sys.path[0], config["fonts"]["regular"])
@@ -252,6 +264,7 @@ def main():
                 "large": pygame.font.Font(bold, 30),
             }
         }
+        logging.info("fonts loaded")
 
         # load modules
         units = config["units"]
@@ -261,13 +274,14 @@ def main():
             name = module["module"]
             conf = module["config"]
             if name in globals():
-                print("load built-in module: {}".format(name))
+                logging.info("load built-in module: {}".format(name))
                 m = (globals()[name])
             else:
-                print("load external module: {}".format(name))
+                logging.info("load external module: {}".format(name))
                 m = getattr(importlib.import_module(
                     "modules.{}".format(name)), name)
             modules.append((m)(screen, fonts, language, units, conf))
+        logging.info("modules loaded")
 
         # main loop
         running = True

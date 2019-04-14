@@ -1,8 +1,12 @@
 
 import datetime
+import logging
 import os
 import pygame
 import sys
+
+logging.basicConfig(level=logging.INFO, stream=sys.stdout,
+                    format="%(asctime)s %(levelname)s %(message)s")
 
 
 class Utils:
@@ -145,7 +149,7 @@ class WeatherModule:
         if os.path.isfile(file):
             return pygame.image.load(file)
         else:
-            print("{} not found.".format(file))
+            logging.error("{} not found.".format(file))
             return None
 
     def draw_image(self, image, position, angle=0):
