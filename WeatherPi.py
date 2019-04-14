@@ -14,9 +14,6 @@ import threading
 import time
 from modules.WeatherModule import WeatherModule, Utils
 
-logging.basicConfig(level=logging.INFO, stream=sys.stdout,
-                    format="%(asctime)s %(levelname)s %(message)s")
-
 
 class RepeatedTimer(threading.Timer):
     def __init__(self, interval, function, args=[], kwargs={}):
@@ -213,6 +210,10 @@ class Wind(WeatherModule):
 
 
 def main():
+    # initialize logger
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout,
+                        format="%(asctime)s %(levelname)s %(message)s")
+
     # initialize thread
     timer_thread = None
 
@@ -300,7 +301,7 @@ def main():
             time.sleep(1)
 
     except Exception as e:
-        print(e)
+        logging.error(e)
 
     finally:
         if timer_thread:
