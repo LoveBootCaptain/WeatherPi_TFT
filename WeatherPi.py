@@ -74,11 +74,10 @@ def main():
         logging.info("config.json loaded")
 
         # initialize locale, gettext
-        (language_code, encoding) = config["locale"].split(".")
-        language = language_code.split("_")[0]
-        locale.setlocale(locale.LC_ALL, (language_code, encoding))
+        language = config["locale"].split("_")[0]
+        locale.setlocale(locale.LC_ALL, config["locale"])
         trans = gettext.translation("messages", localedir="{}/locale".format(
-            sys.path[0]), languages=[language_code], fallback=True)
+            sys.path[0]), languages=[language], fallback=True)
         trans.install()
 
         # start weather forecast thread
