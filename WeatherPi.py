@@ -129,7 +129,7 @@ class DailyWeatherForecast(WeatherModule):
         day_of_week = Utils.strftime(weather["time"], "%a")
         temperature = "{} | {}".format(
             int(weather["temperatureMin"]), int(weather["temperatureMax"]))
-        weather_icon = self.load_icon("mini_{}.png".format(weather["icon"]))
+        weather_icon = self.load_icon("mini-{}.png".format(weather["icon"]))
         self.draw_text(day_of_week, "bold", "small",
                        "orange", (0, 0), "center")
         self.draw_text(temperature, "bold", "small",
