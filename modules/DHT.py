@@ -15,6 +15,8 @@ from modules.WeatherModule import WeatherModule, Utils
 #   }
 #  }
 #
+
+
 class DHT(WeatherModule):
     sensors = {
         "DHT11": Adafruit_DHT.DHT11,
@@ -25,10 +27,11 @@ class DHT(WeatherModule):
     def __init__(self, screen, fonts, language, units, config):
         super().__init__(screen, fonts, language, units, config)
         self.pin = config["pin"]
-        if config["sensor"] in DHT.sensors:
-            self.sensor = DHT.sensors[config["sensor"]]
+        sensor_type = config["sensor"]
+        if sensor_type in DHT.sensors:
+            self.sensor = DHT.sensors[sensor_type]
         else:
-            logging.error("sensor {} not supported")
+            logging.error("{} {} not supported".format(__class__, sensor_type))
             self.sensor = None
 
     def draw(self, weather):
