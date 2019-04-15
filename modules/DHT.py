@@ -11,7 +11,8 @@ from modules.WeatherModule import WeatherModule, Utils
 #   "config": {
 #     "rect": [x, y, width, height],
 #     "sensor": "DHT11",
-#     "pin": 14
+#     "pin": 14,
+#     "correction_value": -8
 #   }
 #  }
 #
@@ -27,6 +28,7 @@ class DHT(WeatherModule):
     def __init__(self, screen, fonts, language, units, config):
         super().__init__(screen, fonts, language, units, config)
         self.pin = config["pin"]
+        self.correction_value = config["correction_value"]
         sensor_type = config["sensor"]
         if sensor_type in DHT.sensors:
             self.sensor = DHT.sensors[sensor_type]
@@ -39,6 +41,10 @@ class DHT(WeatherModule):
             return
 
         humidity, celsius = Adafruit_DHT.read_retry(self.sensor, self.pin)
+        # workaround:
+        #
+        #　Adjusted because the temperature to be measured is too high
+        celsius = celsius + self.correction_value
         color = Utils.heat_color(celsius, humidity, "si")
 
         message = "{} {}".format(Utils.temparature_text(
