@@ -1,3 +1,4 @@
+import gettext
 import time
 from modules.WeatherModule import WeatherModule, Utils
 
@@ -27,18 +28,10 @@ class Weather(WeatherModule):
         super().__init__(screen, fonts, language, units, config)
         self.rain_icon = self.load_icon("preciprain.png")
         self.snow_icon = self.load_icon("precipsnow.png")
-        self.weather_icons = {
-            "clear-day": self.load_icon("clear-day.png"),
-            "clear-night": self.load_icon("clear-night.png"),
-            "cloudy": self.load_icon("cloudy.png"),
-            "fog": self.load_icon("fog.png"),
-            "partly-cloudy-day": self.load_icon("partly-cloudy-day.png"),
-            "partly-cloudy-night": self.load_icon("partly-cloudy-night.png"),
-            "rain": self.load_icon("rain.png"),
-            "sleet": self.load_icon("sleet.png"),
-            "snow": self.load_icon("snow.png"),
-            "wind": self.load_icon("wind.png")
-        }
+        self.weather_icons = {}
+        for weather in ("clear-day", "clear-night", "cloudy", "fog", "partly-cloudy-day", "partly-cloudy-night", "rain", "sleet", "snow", "wind"):
+            self.weather_icons[weather] = self.load_icon("{}.png".format(weather))
+
 
     def draw(self, weather):
         if weather is None:
@@ -56,12 +49,12 @@ class Weather(WeatherModule):
         if precip_porobability:
             precip_porobability = Utils.percentage_text(
                 round(precip_porobability * 100, 1))
-            precip_type = currently["precipType"]
+            precip_type=currently["precipType"]
         else:
-            precip_porobability = Utils.percentage_text(0)
-            precip_type = "Precipitation"
+            precip_porobability=Utils.percentage_text(0)
+            precip_type="Precipitation"
 
-        weather_icon = self.weather_icons[currently["icon"]]
+        weather_icon=self.weather_icons[currently["icon"]]
 
         self.draw_text(summary, "bold", "small", "white", (120, 5))
         self.draw_text(temperature, "regular", "large",
@@ -81,7 +74,11 @@ class Weather(WeatherModule):
 class DailyWeatherForecast(WeatherModule):
     def __init__(self, screen, fonts, language, units, config):
         super().__init__(screen, fonts, language, units, config)
-        self.weather_icons = {
+        self.weather_icons = {}
+        for weather in ("clear-day", "clear-night", "cloudy", "fog", "partly-cloudy-day", "partly-cloudy-night", "rain", "sleet", "snow", "wind"):
+            self.weather_icons[weather] = self.load_icon("mini-{}.png".format(weather))
+
+        self.weather_icons={
             "clear-day": self.load_icon("mini-clear-day.png"),
             "clear-night": self.load_icon("mini-clear-night.png"),
             "cloudy": self.load_icon("mini-cloudy.png"),
@@ -101,7 +98,7 @@ class DailyWeatherForecast(WeatherModule):
         day_of_week = Utils.strftime(daily["time"], "%a")
         temperature = "{} | {}".format(
             int(daily["temperatureMin"]), int(daily["temperatureMax"]))
-        weather_icon = self.weather_icons[daily["icon"]]
+        weather_icon=self.weather_icons[daily["icon"]]
 
         self.draw_text(day_of_week, "bold", "small",
                        "orange", (0, 0), "center")
@@ -113,11 +110,11 @@ class DailyWeatherForecast(WeatherModule):
 class WeatherForecast(WeatherModule):
     def __init__(self, screen, fonts, language, units, config):
         super().__init__(screen, fonts, language, units, config)
-        self.forecast_days = config["forecast_days"]
-        self.forecast_modules = []
-        width = self.rect.width / self.forecast_days
+        self.forecast_days=config["forecast_days"]
+        self.forecast_modules=[]
+        width=self.rect.width / self.forecast_days
         for i in range(self.forecast_days):
-            config["rect"] = [self.rect.x + i * width,
+            config["rect"]=[self.rect.x + i * width,
                               self.rect.y, width, self.rect.height]
             self.forecast_modules.append(DailyWeatherForecast(
                 screen, fonts, language, units, config))

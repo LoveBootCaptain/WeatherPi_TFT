@@ -1,3 +1,4 @@
+import gettext
 from modules.WeatherModule import WeatherModule, Utils
 
 
