@@ -1,4 +1,5 @@
 import Adafruit_DHT
+import gettext
 import logging
 import sys
 from modules.WeatherModule import WeatherModule, Utils

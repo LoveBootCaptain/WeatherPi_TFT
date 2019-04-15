@@ -26,5 +26,5 @@ msgstr "雪"
 msgid "rain"
 msgstr "雨"
 
-
-
+msgid "Indoor"
+msgstr "室内"
