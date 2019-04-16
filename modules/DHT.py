@@ -3,6 +3,8 @@ import gettext
 import logging
 import sys
 from modules.WeatherModule import WeatherModule, Utils
+from modules.RepeatedTimer import RepeatedTimer
+
 
 # Adafruit temperature/humidity sensor module
 #
@@ -28,29 +30,52 @@ class DHT(WeatherModule):
 
     def __init__(self, screen, fonts, language, units, config):
         super().__init__(screen, fonts, language, units, config)
-        self.pin = config["pin"]
-        self.correction_value = config["correction_value"]
-        sensor_type = config["sensor"]
-        if sensor_type in DHT.sensors:
-            self.sensor = DHT.sensors[sensor_type]
-        else:
-            logging.error("{} {} not supported".format(__class__, sensor_type))
-            self.sensor = None
+        self.sensor = None
+        self.pin = None
+        self.correction_value = None
+        self.timer_thread = None
+
+        if config["sensor"] in DHT.sensors:
+            self.sensor = DHT.sensors[config["sensor"]]
+        if isinstance(config["pin"], int):
+            self.pin = config["pin"]
+        if isinstance(config["correction_value"], int):
+            self.correction_value = config["correction_value"]
+        if self.sensor is None or self.pin is None or self.correction_value is None:
+            raise ValueError(__class__.__name__)
+
+        # start sensor thread
+        self.timer_thread = RepeatedTimer(
+            10, Adafruit_DHT.read_retry, [self.sensor, self.pin])
+        self.timer_thread.start()
+        logging.info("{}: sensor thread started".format(__class__.__name__))
+
+    def quit(self):
+        if self.timer_thread:
+            logging.info("{}: sensor thread stopped".format(
+                __class__.__name__))
+            self.timer_thread.quit()
 
     def draw(self, weather):
-        if not self.sensors:
+        if self.timer_thread is None:
+            return
+        result = self.timer_thread.result()
+        if result is None:
             return
 
-        humidity, celsius = Adafruit_DHT.read_retry(self.sensor, self.pin)
+        (humidity, celsius) = result
+        if humidity is None or celsius is None:
+            logging.info("{}: No data from sensor".format(__class__.__name__))
+            return
+
         # workaround:
-        #
         #　Adjusted because the temperature to be measured is too high
         celsius = celsius + self.correction_value
         color = Utils.heat_color(celsius, humidity, "si")
 
         message = "{} {}".format(Utils.temparature_text(
             celsius, self.units), Utils.percentage_text(humidity))
-        logging.debug("{} {} {}".format(__class__, message, color))
+        logging.debug("{} {} {}".format(__class__.__name__, message, color))
 
         self.draw_text(_("Indoor"), "regular", "small", "white", (5, 5))
         self.draw_text(message, "regular", "small", color, (5, 25))

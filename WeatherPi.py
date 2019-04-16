@@ -13,29 +13,10 @@ import sys
 import threading
 import time
 from modules.BuiltIn import Background, Clock, Weather, WeatherForecast, SunriseSuset, MoonPhase, Wind
-
-
-class RepeatedTimer(threading.Timer):
-    def __init__(self, interval, function, args=[], kwargs={}):
-        super().__init__(interval, self.run, args, kwargs)
-        self.thread = None
-        self.function = function
-
-    def run(self):
-        self.thread = threading.Timer(self.interval, self.run)
-        self.thread.start()
-        self.function(*self.args, **self.kwargs)
-
-    def cancel(self):
-        if self.thread is not None:
-            self.thread.cancel()
-            self.thread.join()
-            del self.thread
+from modules.RepeatedTimer import RepeatedTimer
 
 
 def weather_forecast(api_key, latitude, longitude, language, units):
-    global weather_data
-
     try:
         resopnse = requests.get(
             "https://api.forecast.io/forecast/{}/{},{}".format(
@@ -46,13 +27,13 @@ def weather_forecast(api_key, latitude, longitude, language, units):
                 "exclude": "minutely,hourly,flags"
             })
         resopnse.raise_for_status()
-
         data = resopnse.json()
-        weather_data = data
         logging.info("weather forecast updated")
+        return data
 
     except Exception as e:
         logging.error("weather forecast failed: {}".format(e))
+        return None
 
 
 def main():
@@ -63,9 +44,8 @@ def main():
     # initialize thread
     timer_thread = None
 
-    # initialize weather data
-    global weather_data
-    weather_data = None
+    # initialize modules
+    modules = []
 
     try:
         # load config.json
@@ -98,18 +78,10 @@ def main():
         # load fonts
         regular = "{}/fonts/{}".format(sys.path[0], config["fonts"]["regular"])
         bold = "{}/fonts/{}".format(sys.path[0], config["fonts"]["bold"])
-        fonts = {
-            "regular": {
-                "small": pygame.font.Font(regular, 14),
-                "medium": pygame.font.Font(regular, 22),
-                "large": pygame.font.Font(regular, 30),
-            },
-            "bold": {
-                "small": pygame.font.Font(bold, 14),
-                "medium": pygame.font.Font(bold, 22),
-                "large": pygame.font.Font(bold, 30),
-            }
-        }
+        fonts = {"regular": {}, "bold": {}}
+        for (style, size) in [["small", 14], ["medium", 22], ["large", 30]]:
+            fonts["regular"][style] = pygame.font.Font(regular, size)
+            fonts["bold"][style] = pygame.font.Font(bold, size)
         logging.info("fonts loaded")
 
         # load modules
@@ -132,8 +104,9 @@ def main():
         # main loop
         running = True
         while running:
+            weather = timer_thread.result()
             for module in modules:
-                module.draw(weather_data)
+                module.draw(weather)
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -150,7 +123,10 @@ def main():
 
     finally:
         if timer_thread:
-            timer_thread.cancel()
+            logging.info("weather forecast thread stopped")
+            timer_thread.quit()
+        for module in modules:
+            module.quit()
         pygame.quit()
         quit()
 

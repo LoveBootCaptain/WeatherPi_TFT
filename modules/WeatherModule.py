@@ -107,6 +107,9 @@ class WeatherModule:
         self.config = config
         self.rect = pygame.Rect(config["rect"])
 
+    def quit(self):
+        pass
+
     def color(self, name):
         return pygame.Color(name)[:3]
 
