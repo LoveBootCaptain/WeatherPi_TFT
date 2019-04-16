@@ -101,20 +101,22 @@ TODO: write a tutorial for connecting to WiFi via terminal
 * when your connected to your wifi open up a terminal and type:
 ```bash
 sudo apt-get update -y && sudo apt-get upgrade -y
+sudo apt-get install rng-tools -y
 ```
 
 ## install and configure WeatherPi_TFT
 
 ```bash
-git clone https://github.com/LoveBootCaptain/WeatherPi_TFT.git
-cd WeatherPi_TFT
+git clone https://github.com/miyaichi/WeatherPi.git
+cd WeatherPi
 rm -rf docs/
 ```
 
 ### install the dependencies
 
+if you want to use Adafruit temperature/humidity sensor.
 ```
-TODO: write a requirements.txt
+sudo pip3 install Adafruit_DHT
 ```
 
 ### get an api key from darksky / forecast.io
@@ -127,18 +129,17 @@ TODO: write a requirements.txt
 * create a new config-file
 ```bash
 cd
-cd WeatherPi_TFT
+cd WeatherPi
 cp example.config.json config.json
 ```
 * edit the config.json file
 ```
-nano config.json
+vim config.json
 ```
-* replace `xxxxxxxxxxxxxxxxxxxxxxxxx` in  `"FORECAST_IO_KEY": "xxxxxxxxxxxxxxxxxxxxxxxxx"` with your own API key
-* replace `en` in `"FORECAST_LANGUAGE": "en"` with your preferred language
-* replace `si` in `"FORECAST_UNITS": "si"` with your preferred unit format
-* replace `40.705565` and `-74.1180865` in `"FORECAST_LAT": 40.705565` and `"FORECAST_LON": -74.1180865` with the coordinates of your preferred forecast-location (this example-location data is from new york city)
-* replace `flags` in `"FORECAST_EXCLUDES": "flags"` with whatever you want to exclude in the API-respond
+* replace `xxxxxxxxxxxxxxxxxxxxxxxxx` in  `"api_key": "xxxxxxxxxxxxxxxxxxxxxxxxx"` with your own API key
+* replace `en_US.UTF-8` in `"locale": "en_US.UTF-8"` with your preferred language
+* replace `si` in `"units": "si"` with your preferred unit format
+* replace `40.705565` and `-74.1180865` in `"latitude": 35.746289` and `"longitude": 139.667028` with the coordinates of your preferred forecast-location (this example-location data is from new york city)
 * for language-support, units, lat , lon and excludes please refer to -> **[DarkSky API Docs](https://darksky.net/dev/docs/forecast)**
 
 ### set up the TFT
@@ -159,12 +160,12 @@ fbcon=map:10 fbcon=font:VGA8x8 logo.nologo
 
 ```bash
 cd
-cd WeatherPi_TFT
-sudo cp WeatherPi_TFT_Service.sh /etc/init.d/WeatherPiTFT
+cd WeatherPi
+sudo cp WeatherPi_Service.sh /etc/init.d/WeatherPi
 sudo cp PiButtons_Service.sh /etc/init.d/PiButtons
-sudo chmod +x /etc/init.d/WeatherPiTFT
+sudo chmod +x /etc/init.d/WeatherPi
 sudo chmod +x /etc/init.d/PiButtons
-sudo chmod +x Weatherpi_TFT.py
+sudo chmod +x Weatherpi.py
 sudo chmod +x PiButtons.py
 ```
 
