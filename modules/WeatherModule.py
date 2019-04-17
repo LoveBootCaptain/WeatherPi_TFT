@@ -155,9 +155,8 @@ class WeatherModule:
 
     def get_darksky_icon(self, name, size):
         try:
-            url = "https://darksky.net/images/weather-icons/{}.png".format(
-                name)
-            response = requests.get(url)
+           response = requests.get(
+                "https://darksky.net/images/weather-icons/{}.png".format(name))
             response.raise_for_status()
 
             image = pygame.image.load(io.BytesIO(response.content))
