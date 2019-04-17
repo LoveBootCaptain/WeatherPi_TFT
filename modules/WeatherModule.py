@@ -109,7 +109,7 @@ class Utils:
             color = "orenge"
         elif uv_index < 11:
             color = "red"
-        elif uv_index < 6:
+        else
             color = "violet"
         return pygame.Color(color)[:3]
 
