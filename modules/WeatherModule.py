@@ -155,11 +155,14 @@ class WeatherModule:
 
     def get_darksky_icon(self, name, size):
         try:
-            response = requests.get(
-                "https://darksky.net/images/weather-icons/{}.png".format(name))
-            response.raise_for_status()
-
-            image = pygame.image.load(io.BytesIO(response.content))
+            file = "{}/icons/{}.png".format(sys.path[0], name)
+            if os.path.isfile(file):
+                image = pygame.image.load(file)
+            else:
+                response = requests.get(
+                    "https://darksky.net/images/weather-icons/{}.png".format(name))
+                response.raise_for_status()
+                image = pygame.image.load(io.BytesIO(response.content))
 
             pixels = pygame.PixelArray(image)
             pixels.replace(pygame.Color("black"), pygame.Color("dimgray"))
