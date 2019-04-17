@@ -11,7 +11,7 @@ import pygame
 import requests
 import sys
 import time
-from modules.BuiltIn import Background, Clock, Weather, WeatherForecast, SunriseSuset, MoonPhase, Wind
+from modules.BuiltIn import Alerts, Clock, Weather, WeatherForecast, SunriseSuset, MoonPhase, Wind
 from modules.RepeatedTimer import RepeatedTimer
 
 
@@ -88,8 +88,7 @@ def main():
 
         # load modules
         units = config["units"]
-        modules = [Background(screen, fonts, language, units, {
-            "rect": screen.get_rect()})]
+        modules = []
         for module in config["modules"]:
             name = module["module"]
             conf = module["config"]
@@ -106,6 +105,7 @@ def main():
         # main loop
         running = True
         while running:
+            screen.fill(pygame.Color("black"))
             weather = timer_thread.result()
             for module in modules:
                 module.draw(weather)

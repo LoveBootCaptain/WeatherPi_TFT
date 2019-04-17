@@ -99,6 +99,19 @@ class Utils:
                 break
         return color
 
+    @staticmethod
+    def uv_color(uv_index):
+        if uv_index < 3:
+            color = "green"
+        elif uv_index < 6:
+            color = "yellow"
+        elif uv_index < 8:
+            color = "orenge"
+        elif uv_index < 11:
+            color = "red"
+        elif uv_index < 6:
+            color = "violet"
+        return pygame.Color(color)[:3]
 
 class WeatherModule:
     def __init__(self, screen, fonts, language, units, config):
@@ -159,6 +172,7 @@ class WeatherModule:
             if os.path.isfile(file):
                 image = pygame.image.load(file)
             else:
+                # get icons from DarkSky
                 response = requests.get(
                     "https://darksky.net/images/weather-icons/{}.png".format(name))
                 response.raise_for_status()

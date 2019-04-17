@@ -4,13 +4,19 @@ import time
 from modules.WeatherModule import WeatherModule, Utils
 
 
-class Background(WeatherModule):
+class Alerts(WeatherModule):
     def draw(self, weather):
-        self.clean()
         if weather is None:
-            self.draw_text("waiting for weather forecast data ...", "regular",
-                           "small", "white", (0, self.rect.height / 2),
-                           "center")
+            message = "waiting for weather forecast data ..."
+        elif "alerts" in weather:
+            message = weather["alerts"]["title"]
+        else:
+            message = None
+
+        if message:
+            logging.info(message)
+            self.draw_text(message, "regular", "small", "white",
+                           (0, self.rect.height / 2), "center")
 
 
 class Clock(WeatherModule):
@@ -32,8 +38,8 @@ class Weather(WeatherModule):
         self.snow_icon = self.load_icon("precipsnow.png")
         self.weather_icons = {}
         for name in ("clear-day", "clear-night", "cloudy", "fog",
-                        "partly-cloudy-day", "partly-cloudy-night", "rain",
-                        "sleet", "snow", "wind"):
+                     "partly-cloudy-day", "partly-cloudy-night", "rain",
+                     "sleet", "snow", "wind"):
             self.weather_icons[name] = self.get_darksky_icon(name, 100)
 
     def draw(self, weather):
@@ -102,8 +108,8 @@ class WeatherForecast(WeatherModule):
         super().__init__(screen, fonts, language, units, config)
         weather_icons = {}
         for name in ("clear-day", "clear-night", "cloudy", "fog",
-                        "partly-cloudy-day", "partly-cloudy-night", "rain",
-                        "sleet", "snow", "wind"):
+                     "partly-cloudy-day", "partly-cloudy-night", "rain",
+                     "sleet", "snow", "wind"):
             weather_icons[name] = self.get_darksky_icon(name, 50)
 
         self.forecast_days = config["forecast_days"]
