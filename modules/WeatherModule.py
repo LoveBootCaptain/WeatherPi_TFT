@@ -155,7 +155,7 @@ class WeatherModule:
 
     def get_darksky_icon(self, name, size):
         try:
-           response = requests.get(
+            response = requests.get(
                 "https://darksky.net/images/weather-icons/{}.png".format(name))
             response.raise_for_status()
 
