@@ -6,6 +6,7 @@
   "locale": "en_US.UTF-8",
   "units": "si",
 
+  "SDL_FBDEV": "/dev/fb1",
   "display": [240, 320],
   "fonts": {
     "regular": "Roboto-Medium.ttf",

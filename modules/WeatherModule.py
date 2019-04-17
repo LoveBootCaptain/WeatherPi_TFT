@@ -1,9 +1,11 @@
-
 import datetime
+import io
 import logging
 import os
 import pygame
+import requests
 import sys
+
 
 class Utils:
     color_maps = [
@@ -149,6 +151,32 @@ class WeatherModule:
             return pygame.image.load(file)
         else:
             logging.error("{} not found.".format(file))
+            return None
+
+    def get_darksky_icon(self, name, size):
+        try:
+            url = "https://darksky.net/images/weather-icons/{}.png".format(
+                name)
+            response = requests.get(url)
+            response.raise_for_status()
+
+            image = pygame.image.load(io.BytesIO(response.content))
+
+            pixels = pygame.PixelArray(image)
+            pixels.replace(pygame.Color("black"), pygame.Color("dimgray"))
+            del pixels
+
+            (w, h) = image.get_size()
+            if w >= h:
+                (w, h) = (size, int(size / w * h))
+            else:
+                (w, h) = (int(size / w * h), size)
+            image = pygame.transform.scale(image, (w, h))
+
+            return image
+
+        except Exception as e:
+            logging.error(e)
             return None
 
     def draw_image(self, image, position, angle=0):

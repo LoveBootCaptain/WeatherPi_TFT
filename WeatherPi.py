@@ -10,7 +10,6 @@ import os
 import pygame
 import requests
 import sys
-import threading
 import time
 from modules.BuiltIn import Background, Clock, Weather, WeatherForecast, SunriseSuset, MoonPhase, Wind
 from modules.RepeatedTimer import RepeatedTimer
@@ -48,8 +47,11 @@ def main():
     modules = []
 
     try:
-        # load config.json
-        with open("{}/config.json".format(sys.path[0]), "r") as f:
+        # load config file
+        file = "/boot/WeatherPi.json"
+        if not os.path.exists(file):
+            file = "{}/config.json".format(sys.path[0])
+        with open(file, "r") as f:
             config = json.loads(f.read())
         logging.info("config.json loaded")
 
@@ -69,7 +71,7 @@ def main():
         logging.info("weather forecast thread started")
 
         # initialize pygame
-        os.putenv("SDL_FBDEV", "/dev/fb1")
+        os.putenv("SDL_FBDEV", config["SDL_FBDEV"])
         pygame.init()
         pygame.mouse.set_visible(False)
         screen = pygame.display.set_mode(config["display"])

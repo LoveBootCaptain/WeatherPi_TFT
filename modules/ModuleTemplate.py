@@ -1,4 +1,5 @@
 import gettext
+import logging
 from modules.WeatherModule import WeatherModule, Utils
 
 
