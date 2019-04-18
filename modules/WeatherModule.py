@@ -109,9 +109,10 @@ class Utils:
             color = "orenge"
         elif uv_index < 11:
             color = "red"
-        else
+        else:
             color = "violet"
         return pygame.Color(color)[:3]
+
 
 class WeatherModule:
     def __init__(self, screen, fonts, language, units, config):
@@ -154,9 +155,10 @@ class WeatherModule:
             x = (self.rect.width - size[0]) / 2
         elif align == "right":
             x = self.rect.width - size[0]
-        self.screen.blit(
-            font.render(text, True, color),
-            (self.rect.left + x, self.rect.top + y))
+        (width, height) = (x + size[0], size[1])
+        self.screen.blit(font.render(text, True, color),
+                         (self.rect.left + x, self.rect.top + y))
+        return width, height
 
     def load_icon(self, icon):
         file = "{}/icons/{}".format(sys.path[0], icon)
