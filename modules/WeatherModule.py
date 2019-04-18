@@ -166,7 +166,7 @@ class WeatherModule:
             logging.error("{} not found.".format(file))
             return None
 
-    def get_darksky_icon(self, name, size):
+    def load_weather_icon(self, name, size):
         try:
             file = "{}/icons/{}.png".format(sys.path[0], name)
             if os.path.isfile(file):

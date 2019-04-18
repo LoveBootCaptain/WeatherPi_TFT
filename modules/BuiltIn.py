@@ -40,7 +40,7 @@ class Weather(WeatherModule):
         for name in ("clear-day", "clear-night", "cloudy", "fog",
                      "partly-cloudy-day", "partly-cloudy-night", "rain",
                      "sleet", "snow", "wind"):
-            self.weather_icons[name] = self.get_darksky_icon(name, 100)
+            self.weather_icons[name] = self.load_weather_icon(name, 100)
 
     def draw(self, weather):
         if weather is None:
@@ -110,7 +110,7 @@ class WeatherForecast(WeatherModule):
         for name in ("clear-day", "clear-night", "cloudy", "fog",
                      "partly-cloudy-day", "partly-cloudy-night", "rain",
                      "sleet", "snow", "wind"):
-            weather_icons[name] = self.get_darksky_icon(name, 50)
+            weather_icons[name] = self.load_weather_icon(name, 50)
 
         self.forecast_days = config["forecast_days"]
         self.forecast_modules = []
