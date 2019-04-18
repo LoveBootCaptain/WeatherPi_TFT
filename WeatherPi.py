@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import gettext
+import hashlib
 import importlib
 import json
 import locale
@@ -27,7 +28,8 @@ def weather_forecast(api_key, latitude, longitude, language, units):
             })
         resopnse.raise_for_status()
         data = resopnse.json()
-        logging.info("weather forecast updated")
+        hash = hashlib.md5(json.dumps(data).encode()).hexdigest()
+        logging.info("weather forecast updated. hash: {}".format(hash))
         return data
 
     except Exception as e:

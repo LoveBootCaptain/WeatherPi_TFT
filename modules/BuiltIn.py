@@ -26,9 +26,9 @@ class Clock(WeatherModule):
         locale_time = Utils.strftime(timestamp, "%H:%M")
         locale_second = Utils.strftime(timestamp, "%S")
 
-        self.draw_text(locale_date, "bold", "small", "white", (10, 4))
-        self.draw_text(locale_time, "regular", "large", "white", (10, 19))
-        self.draw_text(locale_second, "regular", "medium", "white", (92, 19))
+        self.draw_text(locale_date, "bold", "small", "white", (10, 0))
+        self.draw_text(locale_time, "regular", "large", "white", (10, 20))
+        self.draw_text(locale_second, "regular", "medium", "gray", (92, 20))
 
 
 class Weather(WeatherModule):
@@ -47,38 +47,38 @@ class Weather(WeatherModule):
             return
 
         currently = weather["currently"]
-        summary = currently["summary"]
+        daily = weather["daily"]["data"][0]
+
+        short_summary = currently["summary"]
+        icon = currently["icon"]
         temperature = currently["temperature"]
         humidity = currently["humidity"]
+        apparent_temperature = currently["apparentTemperature"]
+        long_summary = daily["summary"]
+        uv_index = currently["uvIndex"]
+        temperature_high = daily["temperatureHigh"]
+        temperature_low = daily["temperatureLow"]
 
         color = Utils.heat_color(temperature, humidity, self.units)
-        temperature = Utils.temparature_text(round(temperature, 1), self.units)
-
-        # If precipIntensity is zero, then this property will not be defined
-        precip_porobability = currently["precipProbability"]
-        if precip_porobability:
-            precip_porobability = Utils.percentage_text(
-                round(precip_porobability * 100, 1))
-            precip_type = currently["precipType"]
-        else:
-            precip_porobability = Utils.percentage_text(0)
-            precip_type = "Precipitation"
-
         weather_icon = self.weather_icons[currently["icon"]]
 
-        self.draw_text(summary, "bold", "small", "white", (120, 5))
-        self.draw_text(temperature, "regular", "large", color, (0, 25),
-                       "right")
-        self.draw_text(precip_porobability, "regular", "large", color,
-                       (120, 55), "right")
-        self.draw_text(
-            _(precip_type), "bold", "small", color, (0, 90), "right")
-        self.draw_image(weather_icon, (10, 5))
+        message1 = "{} {}".format(
+            Utils.temparature_text(int(temperature), self.units),
+            short_summary)
+        message2 = "Feel: {}  {}-{}".format(
+            Utils.temparature_text(int(apparent_temperature), self.units),
+            Utils.temparature_text(int(temperature_low), self.units),
+            Utils.temparature_text(int(temperature_high), self.units))
+        message3 = "H: {}  UV: {}".format(
+            Utils.percentage_text(int(humidity * 100)), int(uv_index))
+        message4 = "{}".format(long_summary)
 
-        if precip_type == "rain":
-            self.draw_image(self.rain_icon, (120, 65))
-        elif precip_type == "show":
-            self.draw_image(self.snow_icon, (120, 65))
+        self.draw_image(weather_icon, (0, 0))
+        self.draw_text(message1, "bold", "medium", color, (100, 0))
+        self.draw_text(message2, "regular", "small", "white", (100, 30))
+        self.draw_text(message3, "regular", "small", "white", (100, 50))
+        self.draw_text(message4, "regular", "small", "white", (100, 70))
+
 
 
 class DailyWeatherForecast(WeatherModule):
