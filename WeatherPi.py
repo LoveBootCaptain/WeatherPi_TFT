@@ -28,11 +28,12 @@ def weather_forecast(api_key, latitude, longitude, language, units):
             })
         resopnse.raise_for_status()
         data = resopnse.json()
-        return data
+        hash = hashlib.md5(json.dumps(data).encode()).hexdigest()
+        return data, hssh
 
     except Exception as e:
         logging.error("weather forecast failed: {}".format(e))
-        return None
+        return None, None
 
 
 def main():
@@ -112,10 +113,10 @@ def main():
         last_hash = None
         while running:
             # weather data check
-            weather = timer_thread.result()
-            hash = hashlib.md5(json.dumps(weather).encode()).hexdigest()
-            updated = False
-            if last_hash != hash:
+            weather, hash = timer_thread.result()
+            if last_hash == hash:
+                updated = False
+            else:
                 logging.info("weather data updated")
                 last_hash = hash
                 updated = True
