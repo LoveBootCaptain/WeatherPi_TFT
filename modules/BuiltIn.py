@@ -30,7 +30,8 @@ class Clock(WeatherModule):
 
         self.clear_surface()
         self.draw_text(locale_date, "bold", "small", "white", (0, 0))
-        (w, h) = self.draw_text(locale_time, "regular", "large", "white", (0, 20))
+        (w, h) = self.draw_text(locale_time, "regular", "large", "white",
+                                (0, 20))
         self.draw_text(locale_second, "regular", "medium", "gray", (w, 20))
         self.update_screen(screen)
 
@@ -84,27 +85,26 @@ class Weather(WeatherModule):
         message2 = "Feel Like {}   Low {} High {}".format(
             apparent_temperature, temperature_low, temperature_high)
         if self.text_size(message2, "bold", "small")[0] > text_width:
-            message2 = "Feel {}  {} - {}".format(apparent_temperature,
-                                                 temperature_low, temperature_high)
+            message2 = "Feel {}  {} - {}".format(
+                apparent_temperature, temperature_low, temperature_high)
         message3 = "Relative Humidity {}  Air Pressure {}  UVindex {}".format(
             humidity, pressure, uv_index)
         if self.text_size(message3, "bold", "small")[0] > text_width:
             message3 = "{}  {}  UV {}".format(humidity, pressure, uv_index)
-        message4s = self.text_warp(
-            long_summary, text_width, "bold", "small")
+        message4s = self.text_warp(long_summary, text_width, "bold", "small")
         message4s = message4s[:3]
 
         self.clear_surface()
         self.draw_image(weather_icon, (0, 0))
         self.draw_text(message1, "bold", "medium", heat_color, (text_x, 0))
         self.draw_text(message2, "bold", "small", "white", (text_x, 25))
-        (w, h) = self.draw_text(
-            message3[:-1], "bold", "small", "white", (text_x, 40))
+        (w, h) = self.draw_text(message3[:-1], "bold", "small", "white",
+                                (text_x, 40))
         self.draw_text(uv_index, "bold", "small", uv_color, (w, 40))
         height = 55 + (15 * (3 - len(message4s))) / 2
         for message in message4s:
-            (w, h) = self.draw_text(message, "bold",
-                                    "small", "white", (text_x, height))
+            (w, h) = self.draw_text(message, "bold", "small", "white",
+                                    (text_x, height))
             height += h
         self.update_screen(screen)
 
@@ -131,8 +131,8 @@ class DailyWeatherForecast(WeatherModule):
         message = "{} - {}".format(temperature_low, temperature_high)
 
         self.clear_surface()
-        self.draw_text(day_of_week, "bold", "small",
-                       "orange", (0, 0), "center")
+        self.draw_text(day_of_week, "bold", "small", "orange", (0, 0),
+                       "center")
         self.draw_text(message, "bold", "small", "white", (0, 15), "center")
         self.draw_image(weather_icon, (15, 35))
         self.update_screen(screen)
@@ -151,8 +151,9 @@ class WeatherForecast(WeatherModule):
         self.forecast_modules = []
         width = self.rect.width / self.forecast_days
         for i in range(self.forecast_days):
-            config["rect"] = [self.rect.x + i * width,
-                              self.rect.y, width, self.rect.height]
+            config["rect"] = [
+                self.rect.x + i * width, self.rect.y, width, self.rect.height
+            ]
             self.forecast_modules.append(
                 DailyWeatherForecast(fonts, language, units, config,
                                      weather_icons))

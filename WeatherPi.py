@@ -37,8 +37,10 @@ def weather_forecast(api_key, latitude, longitude, language, units):
 
 def main():
     # initialize logger
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout,
-                        format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=logging.INFO,
+        stream=sys.stdout,
+        format="%(asctime)s %(levelname)s %(message)s")
 
     # initialize thread
     timer_thread = None
@@ -58,8 +60,11 @@ def main():
         # initialize locale, gettext
         language = config["locale"].split("_")[0]
         locale.setlocale(locale.LC_ALL, config["locale"])
-        trans = gettext.translation("messages", localedir="{}/locale".format(
-            sys.path[0]), languages=[language], fallback=True)
+        trans = gettext.translation(
+            "messages",
+            localedir="{}/locale".format(sys.path[0]),
+            languages=[language],
+            fallback=True)
         trans.install()
 
         # start weather forecast thread
@@ -97,8 +102,8 @@ def main():
                 m = (globals()[name])
             else:
                 logging.info("load external module: {}".format(name))
-                m = getattr(importlib.import_module(
-                    "modules.{}".format(name)), name)
+                m = getattr(
+                    importlib.import_module("modules.{}".format(name)), name)
             modules.append((m)(fonts, language, units, conf))
         logging.info("modules loaded")
 

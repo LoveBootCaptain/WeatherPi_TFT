@@ -206,7 +206,8 @@ class WeatherModule:
             else:
                 # get icons from DarkSky and save to file
                 response = requests.get(
-                    "https://darksky.net/images/weather-icons/{}.png".format(name))
+                    "https://darksky.net/images/weather-icons/{}.png".format(
+                        name))
                 response.raise_for_status()
                 image = pygame.image.load(io.BytesIO(response.content))
                 pygame.image.save(image, file)

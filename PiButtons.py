@@ -23,7 +23,8 @@ def restart_service(shutdown):
     os.system('sudo service WeatherPiTFT restart')
 
 
-GPIO.add_event_detect(19, GPIO.FALLING, callback=restart_service, bouncetime=1000)
+GPIO.add_event_detect(
+    19, GPIO.FALLING, callback=restart_service, bouncetime=1000)
 GPIO.add_event_detect(26, GPIO.FALLING, callback=shutdown_pi, bouncetime=1000)
 
 if __name__ == '__main__':

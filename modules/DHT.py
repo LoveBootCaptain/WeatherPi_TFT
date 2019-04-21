@@ -5,7 +5,6 @@ import sys
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 
-
 # Adafruit temperature/humidity sensor module
 #
 # example config:
@@ -45,15 +44,15 @@ class DHT(WeatherModule):
             raise ValueError(__class__.__name__)
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(
-            20, Adafruit_DHT.read_retry, [self.sensor, self.pin])
+        self.timer_thread = RepeatedTimer(20, Adafruit_DHT.read_retry,
+                                          [self.sensor, self.pin])
         self.timer_thread.start()
         logging.info("{}: sensor thread started".format(__class__.__name__))
 
     def quit(self):
         if self.timer_thread:
-            logging.info("{}: sensor thread stopped".format(
-                __class__.__name__))
+            logging.info(
+                "{}: sensor thread stopped".format(__class__.__name__))
             self.timer_thread.quit()
 
     def draw(self, screen, weather, updated):
@@ -77,8 +76,8 @@ class DHT(WeatherModule):
         temparature = Utils.temparature_text(celsius, self.units)
         humidity = Utils.percentage_text(humidity)
 
-        logging.debug("{} {} {} {}".format(
-            __class__.__name__, temparature, humidity, color))
+        logging.debug("{} {} {} {}".format(__class__.__name__, temparature,
+                                           humidity, color))
 
         message = "{}  {}".format(temparature, humidity)
         font = "medium"
