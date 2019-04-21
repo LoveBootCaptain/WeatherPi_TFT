@@ -28,8 +28,6 @@ def weather_forecast(api_key, latitude, longitude, language, units):
             })
         resopnse.raise_for_status()
         data = resopnse.json()
-        hash = hashlib.md5(json.dumps(data).encode()).hexdigest()
-        logging.info("weather forecast updated. hash: {}".format(hash))
         return data
 
     except Exception as e:
@@ -101,18 +99,28 @@ def main():
                 logging.info("load external module: {}".format(name))
                 m = getattr(importlib.import_module(
                     "modules.{}".format(name)), name)
-            modules.append((m)(screen, fonts, language, units, conf))
+            modules.append((m)(fonts, language, units, conf))
         logging.info("modules loaded")
 
         # main loop
         running = True
+        last_hash = None
         while running:
-            screen.fill(pygame.Color("black"))
+            # weather data check
             weather = timer_thread.result()
+            hash = hashlib.md5(json.dumps(weather).encode()).hexdigest()
+            updated = False
+            if last_hash != hash:
+                logging.info("weather data updated")
+                last_hash = hash
+                updated = True
+
+            # update screen
             for module in modules:
-                module.draw(weather)
+                module.draw(screen, weather, updated)
             pygame.display.update()
 
+            # event check
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False

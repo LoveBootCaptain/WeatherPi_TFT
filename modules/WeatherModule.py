@@ -64,7 +64,7 @@ class Utils:
 
     @staticmethod
     def temparature_text(value, units):
-        return ("{}°C" if units == "si" else "{}°F").format(value)
+        return ("{}°c" if units == "si" else "{}°f").format(value)
 
     @staticmethod
     def heat_index(f, h):
@@ -119,13 +119,13 @@ class Utils:
 
 
 class WeatherModule:
-    def __init__(self, screen, fonts, language, units, config):
-        self.screen = screen
+    def __init__(self, fonts, language, units, config):
         self.fonts = fonts
         self.language = language
         self.units = units
         self.config = config
         self.rect = pygame.Rect(config["rect"])
+        self.surface = pygame.Surface((self.rect.width, self.rect.height))
 
     def quit(self):
         pass
@@ -137,13 +137,33 @@ class WeatherModule:
         return self.fonts[style][size]
 
     def draw(self, weather):
-        self.screen.fill(self.color("white"), rect=self.rect)
+        return self.rect, self.surface
 
-    def clean(self):
-        self.screen.fill(self.color("black"), rect=self.rect)
+    def clear_surface(self):
+        self.surface.fill(pygame.Color("black"))
+
+    def update_screen(self, screen):
+        screen.blit(self.surface, (self.rect.left, self.rect.top))
 
     def text_size(self, text, style, size):
         return self.font(style, size).size(text)
+
+    def text_warp(self, text, width, style, size):
+        font = self.font(style, size)
+        lines = []
+        cur_line = ""
+        cur_width = 0
+        for c in text:
+            (w, h) = font.size(c)
+            if cur_width + w > width:
+                lines.append(cur_line)
+                cur_line = ""
+                cur_width = 0
+            cur_line += c
+            cur_width += w
+        if cur_line:
+            lines.append(cur_line)
+        return lines
 
     def draw_text(self, text, style, size, color, position, align="left"):
         """
@@ -154,6 +174,9 @@ class WeatherModule:
         :param position: render relative position (x, y)
         :param align: text align. ["left", "center", "right"]
         """
+        if not text:
+            return
+
         (x, y) = position
         font = self.font(style, size)
         size = font.size(text)
@@ -163,8 +186,8 @@ class WeatherModule:
         elif align == "right":
             x = self.rect.width - size[0]
         (width, height) = (x + size[0], size[1])
-        self.screen.blit(font.render(text, True, color),
-                         (self.rect.left + x, self.rect.top + y))
+        self.surface.blit(font.render(text, True, color), (x, y))
+
         return width, height
 
     def load_icon(self, icon):
@@ -181,11 +204,13 @@ class WeatherModule:
             if os.path.isfile(file):
                 image = pygame.image.load(file)
             else:
-                # get icons from DarkSky
+                # get icons from DarkSky and save to file
                 response = requests.get(
                     "https://darksky.net/images/weather-icons/{}.png".format(name))
                 response.raise_for_status()
                 image = pygame.image.load(io.BytesIO(response.content))
+                with open(file, "wb") as f:
+                    f.write(image)
 
             pixels = pygame.PixelArray(image)
             pixels.replace(pygame.Color("black"), pygame.Color("dimgray"))
@@ -210,11 +235,13 @@ class WeatherModule:
         :param position: render relative position (x, y)
         :param angle: counterclockwise  degrees angle
         """
-        if image:
-            (x, y) = position
-            if angle:
-                (w, h) = image.get_size()
-                image = pygame.transform.rotate(image, angle)
-                x = x + (w - image.get_width()) / 2
-                y = h + (h - image.get_height()) / 2
-            self.screen.blit(image, (self.rect.left + x, self.rect.top + y))
+        if not image:
+            return
+
+        (x, y) = position
+        if angle:
+            (w, h) = image.get_size()
+            image = pygame.transform.rotate(image, angle)
+            x = x + (w - image.get_width()) / 2
+            y = h + (h - image.get_height()) / 2
+        self.surface.blit(image, (x, y))

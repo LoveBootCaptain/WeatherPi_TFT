@@ -28,8 +28,8 @@ class DHT(WeatherModule):
         "AM2302": Adafruit_DHT.AM2302
     }
 
-    def __init__(self, screen, fonts, language, units, config):
-        super().__init__(screen, fonts, language, units, config)
+    def __init__(self, fonts, language, units, config):
+        super().__init__(fonts, language, units, config)
         self.sensor = None
         self.pin = None
         self.correction_value = None
@@ -56,9 +56,10 @@ class DHT(WeatherModule):
                 __class__.__name__))
             self.timer_thread.quit()
 
-    def draw(self, weather):
+    def draw(self, screen, weather, updated):
         if self.timer_thread is None:
             return
+
         result = self.timer_thread.result()
         if result is None:
             return
@@ -71,11 +72,20 @@ class DHT(WeatherModule):
         # workaround:
         #　Adjusted because the temperature to be measured is too high
         celsius = celsius + self.correction_value
+
         color = Utils.heat_color(celsius, humidity, "si")
+        temparature = Utils.temparature_text(celsius, self.units)
+        humidity = Utils.percentage_text(humidity)
 
-        message = "{} {}".format(Utils.temparature_text(
-            celsius, self.units), Utils.percentage_text(humidity))
-        logging.debug("{} {} {}".format(__class__.__name__, message, color))
+        logging.debug("{} {} {} {}".format(
+            __class__.__name__, temparature, humidity, color))
 
-        self.draw_text(_("Indoor"), "regular", "small", "white", (5, 5))
-        self.draw_text(message, "regular", "small", color, (5, 25))
+        message = "{}  {}".format(temparature, humidity)
+        font = "medium"
+        if self.text_size(message, "regular", font)[0] > self.rect.width:
+            font = "small"
+
+        self.clear_surface()
+        self.draw_text(_("Indoor"), "regular", font, "white", (0, 0))
+        self.draw_text(message, "regular", "small", color, (0, 29))
+        self.update_screen(screen)
