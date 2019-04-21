@@ -54,6 +54,7 @@ class Weather(WeatherModule):
         temperature = currently["temperature"]
         humidity = currently["humidity"]
         apparent_temperature = currently["apparentTemperature"]
+        pressure = currently["pressure"]
         long_summary = daily["summary"]
         uv_index = currently["uvIndex"]
         temperature_high = daily["temperatureHigh"]
@@ -61,16 +62,31 @@ class Weather(WeatherModule):
 
         color = Utils.heat_color(temperature, humidity, self.units)
         weather_icon = self.weather_icons[currently["icon"]]
+        
+        temperature = Utils.temparature_text(int(temperature), self.units)
+        apparent_temperature = Utils.temparature_text(int(apparent_temperature), self.units)
+        temperature_low = Utils.temparature_text(int(temperature_low), self.units)
+        temperature_high), self.units)) = Utils.temparature_text(int(temperature_high), self.units))), self.units)
+        humidity = Utils.percentage_text(int(humidity * 100))
+        uv_index = int(ux_index)
+        pressure = Utils.presure_text(pressure)
 
         message1 = "{} {}".format(
-            Utils.temparature_text(int(temperature), self.units),
-            short_summary)
-        message2 = "Feel: {}  {}-{}".format(
-            Utils.temparature_text(int(apparent_temperature), self.units),
-            Utils.temparature_text(int(temperature_low), self.units),
-            Utils.temparature_text(int(temperature_high), self.units))
-        message3 = "RH: {}  UV: {}".format(
-            Utils.percentage_text(int(humidity * 100)), int(uv_index))
+            temperature), short_summary)
+            
+        message2 = "Feel Like {} Low {} High {}".format(
+            apparent_temperature,
+            temperature_low,
+            temperature_high)
+        if self.text_size(message2, "regular", "small") > self.rect.width - 100:
+            message2 = "Feel {}  {}-{}".format(apparent_temperature,temperature_low, temperature_high)
+            
+        message3 = "Relative Humidity {}  Air Pressure {}  UVindex {}".format(
+            humidity, pressure, uv_index)
+        if self.text_size(message3, "regular", "small") > self.rect.width - 100:
+            message3 = "RH {}  {} UV {}".format(
+            humidity, pressure, uv_index)
+
         message4 = "{}".format(long_summary)
 
         self.draw_image(weather_icon, (0, 0))

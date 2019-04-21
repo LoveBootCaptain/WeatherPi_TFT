@@ -55,6 +55,10 @@ class Utils:
         return "{}%".format(value)
 
     @staticmethod
+    def pressure_text(value):
+        return "{}pa".format(value)
+
+    @staticmethod
     def speed_text(value, units):
         return ("{} km/h" if units == "si" else "{} mi/h").format(value)
 
@@ -137,6 +141,9 @@ class WeatherModule:
 
     def clean(self):
         self.screen.fill(self.color("black"), rect=self.rect)
+
+    def text_size(self, text, style, size):
+        return self.font(style, size).size(text)
 
     def draw_text(self, text, style, size, color, position, align="left"):
         """
