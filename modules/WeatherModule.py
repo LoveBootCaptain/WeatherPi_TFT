@@ -209,8 +209,7 @@ class WeatherModule:
                     "https://darksky.net/images/weather-icons/{}.png".format(name))
                 response.raise_for_status()
                 image = pygame.image.load(io.BytesIO(response.content))
-                with open(file, "wb") as f:
-                    f.write(image)
+                pygame.image.save(image, file)
 
             pixels = pygame.PixelArray(image)
             pixels.replace(pygame.Color("black"), pygame.Color("dimgray"))
