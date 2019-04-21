@@ -62,25 +62,25 @@ class Weather(WeatherModule):
 
         color = Utils.heat_color(temperature, humidity, self.units)
         weather_icon = self.weather_icons[currently["icon"]]
-        
+
         temperature = Utils.temparature_text(int(temperature), self.units)
         apparent_temperature = Utils.temparature_text(int(apparent_temperature), self.units)
         temperature_low = Utils.temparature_text(int(temperature_low), self.units)
-        temperature_high), self.units)) = Utils.temparature_text(int(temperature_high), self.units))), self.units)
+        temperature_high = Utils.temparature_text(int(temperature_high), self.units)
         humidity = Utils.percentage_text(int(humidity * 100))
         uv_index = int(ux_index)
         pressure = Utils.presure_text(pressure)
 
         message1 = "{} {}".format(
             temperature), short_summary)
-            
+
         message2 = "Feel Like {} Low {} High {}".format(
             apparent_temperature,
             temperature_low,
             temperature_high)
         if self.text_size(message2, "regular", "small") > self.rect.width - 100:
             message2 = "Feel {}  {}-{}".format(apparent_temperature,temperature_low, temperature_high)
-            
+
         message3 = "Relative Humidity {}  Air Pressure {}  UVindex {}".format(
             humidity, pressure, uv_index)
         if self.text_size(message3, "regular", "small") > self.rect.width - 100:
