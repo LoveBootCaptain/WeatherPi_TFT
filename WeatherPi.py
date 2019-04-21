@@ -106,6 +106,8 @@ def main():
         running = True
         last_hash = None
         while running:
+            start = time.time()
+            
             # weather data check
             weather = timer_thread.result()
             hash = hashlib.md5(json.dumps(weather).encode()).hexdigest()
@@ -119,6 +121,9 @@ def main():
             for module in modules:
                 module.draw(screen, weather, updated)
             pygame.display.update()
+
+            elapsed_time = time.time() - start
+            print ("elapsed_time:{0}".format(elapsed_time) + "[sec]")
 
             # event check
             for event in pygame.event.get():

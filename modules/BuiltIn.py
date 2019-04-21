@@ -30,8 +30,8 @@ class Clock(WeatherModule):
 
         self.clear_surface()
         self.draw_text(locale_date, "regular", "small", "white", (0, 0))
-        (w, h) = self.draw_text(locale_time, "regular", "large", "white", (0, 29))
-        self.draw_text(locale_second, "regular", "medium", "gray", (w, 29))
+        (w, h) = self.draw_text(locale_time, "regular", "large", "white", (0, 20))
+        self.draw_text(locale_second, "regular", "medium", "gray", (w, 20))
         self.update_screen(screen)
 
 

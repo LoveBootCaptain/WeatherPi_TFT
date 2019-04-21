@@ -46,7 +46,7 @@ class DHT(WeatherModule):
 
         # start sensor thread
         self.timer_thread = RepeatedTimer(
-            10, Adafruit_DHT.read_retry, [self.sensor, self.pin])
+            20, Adafruit_DHT.read_retry, [self.sensor, self.pin])
         self.timer_thread.start()
         logging.info("{}: sensor thread started".format(__class__.__name__))
 
@@ -87,5 +87,5 @@ class DHT(WeatherModule):
 
         self.clear_surface()
         self.draw_text(_("Indoor"), "regular", font, "white", (0, 0))
-        self.draw_text(message, "regular", "small", color, (0, 29))
+        self.draw_text(message, "regular", "small", color, (0, 20))
         self.update_screen(screen)
