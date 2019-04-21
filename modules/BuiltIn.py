@@ -69,7 +69,7 @@ class Weather(WeatherModule):
             Utils.temparature_text(int(apparent_temperature), self.units),
             Utils.temparature_text(int(temperature_low), self.units),
             Utils.temparature_text(int(temperature_high), self.units))
-        message3 = "H: {}  UV: {}".format(
+        message3 = "RH: {}  UV: {}".format(
             Utils.percentage_text(int(humidity * 100)), int(uv_index))
         message4 = "{}".format(long_summary)
 
