@@ -6,6 +6,7 @@ import os
 import pygame
 import requests
 import sys
+from functools import lru_cache
 
 
 class Utils:
@@ -198,6 +199,7 @@ class WeatherModule:
 
         return width, height
 
+    @lru_cache()
     def load_icon(self, icon):
         file = "{}/icons/{}".format(sys.path[0], icon)
         if os.path.isfile(file):
@@ -206,19 +208,15 @@ class WeatherModule:
             logging.error("{} not found.".format(file))
             return None
 
+    @lru_cache()
     def load_weather_icon(self, name, size):
         try:
-            file = "{}/icons/{}.png".format(sys.path[0], name)
-            if os.path.isfile(file):
-                image = pygame.image.load(file)
-            else:
-                # get icons from DarkSky and save to file
-                response = requests.get(
-                    "https://darksky.net/images/weather-icons/{}.png".format(
-                        name))
-                response.raise_for_status()
-                image = pygame.image.load(io.BytesIO(response.content))
-                pygame.image.save(image, file)
+            # get icons from DarkSky
+            response = requests.get(
+                "https://darksky.net/images/weather-icons/{}.png".format(
+                    name))
+            response.raise_for_status()
+            image = pygame.image.load(io.BytesIO(response.content))
 
             pixels = pygame.PixelArray(image)
             pixels.replace(pygame.Color("black"), pygame.Color("dimgray"))
@@ -237,6 +235,7 @@ class WeatherModule:
             logging.error(e)
             return None
 
+    @lru_cache()
     def load_moon_icon(self, age, size):
         image = pygame.Surface((size, size))
         radius = int(size / 2)
@@ -252,19 +251,13 @@ class WeatherModule:
             x = radius * math.sin(alpha)
             l = radius * math.cos(theta) * math.sin(alpha)
             if age < 15:
-                pygame.draw.line(image,
-                                 pygame.Color("darkgray"),
-                                 (radius + l, radius + y),
-                                 (radius - x, radius + y))
+                start_pos = (radius + l, radius + y)
+                end_pos = (radius - x, radius + y)
             else:
-                pygame.draw.line(image,
-                                 pygame.Color("darkgray"),
-                                 (radius - l, radius + y),
-                                 (radius + x, radius + y))
+                start_pos = (radius - l, radius + y)
+                end_pos = (radius + x, radius + y)
+            pygame.draw.line(image, pygame.Color("dimgray"), start_pos, endpos)
 
-        # draw contour
-        pygame.draw.circle(image,
-                           pygame.Color("gray"), (radius, radius), radius, 1)
         return image
 
     def draw_image(self, image, position, angle=0):

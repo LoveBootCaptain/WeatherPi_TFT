@@ -37,14 +37,6 @@ class Clock(WeatherModule):
 
 
 class Weather(WeatherModule):
-    def __init__(self, fonts, language, units, config):
-        super().__init__(fonts, language, units, config)
-        self.weather_icons = {}
-        for name in ("clear-day", "clear-night", "cloudy", "fog",
-                     "partly-cloudy-day", "partly-cloudy-night", "rain",
-                     "sleet", "snow", "wind"):
-            self.weather_icons[name] = self.load_weather_icon(name, 100)
-
     def draw(self, screen, weather, updated):
         if weather is None or not updated:
             return
@@ -65,7 +57,7 @@ class Weather(WeatherModule):
 
         heat_color = Utils.heat_color(temperature, humidity, self.units)
         uv_color = Utils.uv_color(uv_index)
-        weather_icon = self.weather_icons[currently["icon"]]
+        weather_icon = self.load_weather_icon(currently["icon"], 100)
 
         temperature = Utils.temparature_text(int(temperature), self.units)
         apparent_temperature = Utils.temparature_text(
@@ -110,10 +102,6 @@ class Weather(WeatherModule):
 
 
 class DailyWeatherForecast(WeatherModule):
-    def __init__(self, fonts, language, units, config, weather_icons):
-        super().__init__(fonts, language, units, config)
-        self.weather_icons = weather_icons
-
     def draw(self, screen, weather, day):
         if weather is None:
             return
@@ -121,8 +109,8 @@ class DailyWeatherForecast(WeatherModule):
         daily = weather["daily"]["data"][day]
         temperature_high = daily["temperatureHigh"]
         temperature_low = daily["temperatureLow"]
-        weather_icon = self.weather_icons[daily["icon"]]
 
+        weather_icon = self.load_weather_icon(daily["icon"], 50)
         day_of_week = Utils.strftime(daily["time"], "%a")
         temperature_low = Utils.temparature_text(
             int(temperature_low), self.units)
@@ -141,11 +129,6 @@ class DailyWeatherForecast(WeatherModule):
 class WeatherForecast(WeatherModule):
     def __init__(self, fonts, language, units, config):
         super().__init__(fonts, language, units, config)
-        weather_icons = {}
-        for name in ("clear-day", "clear-night", "cloudy", "fog",
-                     "partly-cloudy-day", "partly-cloudy-night", "rain",
-                     "sleet", "snow", "wind"):
-            weather_icons[name] = self.load_weather_icon(name, 50)
 
         self.forecast_days = config["forecast_days"]
         self.forecast_modules = []
@@ -155,8 +138,7 @@ class WeatherForecast(WeatherModule):
                 self.rect.x + i * width, self.rect.y, width, self.rect.height
             ]
             self.forecast_modules.append(
-                DailyWeatherForecast(fonts, language, units, config,
-                                     weather_icons))
+                DailyWeatherForecast(fonts, language, units, config))
 
     def draw(self, screen, weather, updated):
         if weather is None or not updated:
@@ -167,22 +149,20 @@ class WeatherForecast(WeatherModule):
 
 
 class SunriseSuset(WeatherModule):
-    def __init__(self, fonts, language, units, config):
-        super().__init__(fonts, language, units, config)
-        self.sunrise_icon = self.load_icon("sunrise.png")
-        self.sunset_icon = self.load_icon("sunset.png")
-
     def draw(self, screen, weather, updated):
         if weather is None or not updated:
             return
 
         daily = weather["daily"]["data"]
+
         surise = Utils.strftime(int(daily[0]["sunriseTime"]), "%H:%M")
         sunset = Utils.strftime(int(daily[0]["sunsetTime"]), "%H:%M")
+        sunrise_icon = self.load_icon("sunrise.png")
+        sunset_icon = self.load_icon("sunset.png")
 
         self.clear_surface()
-        self.draw_image(self.sunrise_icon, (0, 20))
-        self.draw_image(self.sunset_icon, (0, 50))
+        self.draw_image(sunrise_icon, (0, 20))
+        self.draw_image(sunset_icon, (0, 50))
         self.draw_text(surise, "bold", "small", "white", (0, 25), "right")
         self.draw_text(sunset, "bold", "small", "white", (0, 55), "right")
         self.update_screen(screen)
@@ -194,32 +174,32 @@ class MoonPhase(WeatherModule):
             return
 
         daily = weather["daily"]["data"]
+
         moon_phase = (float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25
+        moon_icon = self.load_moon_icon(moon_phase, 60)
 
         self.clear_surface()
-        self.draw_image(self.load_moon_icon(moon_phase, 60), (10, 10))
+        self.draw_image(moon_icon, (10, 10))
         self.update_screen(screen)
 
 
 class Wind(WeatherModule):
-    def __init__(self, fonts, language, units, config):
-        super().__init__(fonts, language, units, config)
-        self.circle_icon = self.load_icon("circle.png")
-        self.arrow_icon = self.load_icon("arrow.png")
-
     def draw(self, screen, weather, updated):
         if weather is None or not updated:
             return
 
         currently = weather["currently"]
+
         wind_speed = Utils.speed_text(
             round((float(currently["windSpeed"]) * 1.609344), 1), self.units)
         wind_bearing = currently["windBearing"]
         angle = 360 - wind_bearing + 180
+        circle_icon = self.load_icon("circle.png")
+        arrow_icon = self.load_icon("arrow.png")
 
         self.clear_surface()
         self.draw_text("N", "bold", "small", "white", (0, 10), "center")
         self.draw_text(wind_speed, "bold", "small", "white", (0, 60), "center")
-        self.draw_image(self.circle_icon, (25, 30))
-        self.draw_image(self.arrow_icon, (25, 35), angle)
+        self.draw_image(circle_icon, (25, 30))
+        self.draw_image(arrow_icon, (25, 35), angle)
         self.update_screen(screen)
