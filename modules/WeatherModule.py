@@ -256,7 +256,7 @@ class WeatherModule:
             else:
                 start_pos = (radius - l, radius + y)
                 end_pos = (radius + x, radius + y)
-            pygame.draw.line(image, pygame.Color("dimgray"), start_pos, endpos)
+            pygame.draw.line(image, pygame.Color("dimgray"), start_pos, end_pos)
 
         return image
 

@@ -177,9 +177,11 @@ class MoonPhase(WeatherModule):
 
         moon_phase = (float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25
         moon_icon = self.load_moon_icon(moon_phase, 60)
+        moon_phase = str(round(moon_phase, 1))
 
         self.clear_surface()
-        self.draw_image(moon_icon, (10, 10))
+        self.draw_image(moon_icon, (10, 0))
+        self.draw_text(moon_phase, "bold", "small", "white", (0, 65), "center")
         self.update_screen(screen)
 
 
@@ -199,7 +201,7 @@ class Wind(WeatherModule):
 
         self.clear_surface()
         self.draw_text("N", "bold", "small", "white", (0, 10), "center")
-        self.draw_text(wind_speed, "bold", "small", "white", (0, 60), "center")
+        self.draw_text(wind_speed, "bold", "small", "white", (0, 65), "center")
         self.draw_image(circle_icon, (25, 30))
         self.draw_image(arrow_icon, (25, 35), angle)
         self.update_screen(screen)
