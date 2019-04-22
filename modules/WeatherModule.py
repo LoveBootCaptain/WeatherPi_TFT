@@ -110,7 +110,7 @@ class Utils:
         elif uv_index < 6:
             color = "yellow"
         elif uv_index < 8:
-            color = "orenge"
+            color = "orange"
         elif uv_index < 11:
             color = "red"
         else:
@@ -165,7 +165,7 @@ class WeatherModule:
             lines.append(cur_line)
         return lines
 
-    def draw_text(self, text, style, size, color, position, align="left"):
+    def draw_text(self, text, style, size, color, position, align="left", background=None):
         """
         :param text: text to draw
         :param style: font style. ["regular", "bold"]
@@ -186,7 +186,7 @@ class WeatherModule:
         elif align == "right":
             x = self.rect.width - size[0]
         (width, height) = (x + size[0], size[1])
-        self.surface.blit(font.render(text, True, color), (x, y))
+        self.surface.blit(font.render(text, True, color, background), (x, y))
 
         return width, height
 
