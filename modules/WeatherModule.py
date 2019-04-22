@@ -1,6 +1,7 @@
 import datetime
 import io
 import logging
+import math
 import os
 import pygame
 import requests
@@ -165,7 +166,14 @@ class WeatherModule:
             lines.append(cur_line)
         return lines
 
-    def draw_text(self, text, style, size, color, position, align="left", background=None):
+    def draw_text(self,
+                  text,
+                  style,
+                  size,
+                  color,
+                  position,
+                  align="left",
+                  background=None):
         """
         :param text: text to draw
         :param style: font style. ["regular", "bold"]
@@ -228,6 +236,36 @@ class WeatherModule:
         except Exception as e:
             logging.error(e)
             return None
+
+    def load_moon_icon(self, age, size):
+        image = pygame.Surface((size, size))
+        radius = int(size / 2)
+
+        # drow full moon
+        pygame.draw.circle(image,
+                           pygame.Color("white"), (radius, radius), radius)
+
+        # draw shadow
+        theta = age / 14.765 * math.pi
+        for y in range(-radius, radius, 1):
+            alpha = math.acos(y / radius)
+            x = radius * math.sin(alpha)
+            l = radius * math.cos(theta) * math.sin(alpha)
+            if age < 15:
+                pygame.draw.line(image,
+                                 pygame.Color("darkgray"),
+                                 (radius + l, radius + y),
+                                 (radius - x, radius + y))
+            else:
+                pygame.draw.line(image,
+                                 pygame.Color("darkgray"),
+                                 (radius - l, radius + y),
+                                 (radius + x, radius + y))
+
+        # draw contour
+        pygame.draw.circle(image,
+                           pygame.Color("gray"), (radius, radius), radius, 1)
+        return image
 
     def draw_image(self, image, position, angle=0):
         """

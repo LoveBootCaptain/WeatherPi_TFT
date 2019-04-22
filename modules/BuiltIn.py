@@ -189,22 +189,15 @@ class SunriseSuset(WeatherModule):
 
 
 class MoonPhase(WeatherModule):
-    def __init__(self, fonts, language, units, config):
-        super().__init__(fonts, language, units, config)
-        self.moon_icons = {}
-        for i in range(28):
-            self.moon_icons[str(i)] = self.load_icon("moon-{}.png".format(i))
-
     def draw(self, screen, weather, updated):
         if weather is None or not updated:
             return
 
         daily = weather["daily"]["data"]
-        moon_phase = int((float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25)
-        moon_icon = self.moon_icons[str(moon_phase)]
+        moon_phase = (float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25
 
         self.clear_surface()
-        self.draw_image(moon_icon, (10, 10))
+        self.draw_image(self.load_moon_icon(moon_phase, 60), (10, 10))
         self.update_screen(screen)
 
 
