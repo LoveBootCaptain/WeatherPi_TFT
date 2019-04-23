@@ -1,0 +1,61 @@
+{
+  "darksky_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxx",
+  "latitude": 35.746289,
+  "longitude": 139.667028,
+
+  "locale": "en_US.UTF-8",
+  "units": "si",
+
+  "SDL_FBDEV": "/dev/fb1",
+  "display": [480, 320],
+  "fonts": {
+    "regular": "Roboto-Medium.ttf",
+    "bold": "Roboto-Bold.ttf"
+  },
+
+  "modules": [
+    {
+      "module": "Clock",
+      "config": {
+        "rect": [0, 0, 140, 60]
+      }
+    },
+    {
+      "module": "Weather",
+      "config": {
+        "rect": [0, 60, 480, 100]
+      }
+    },
+    {
+      "module": "WeatherForecast",
+      "config": {
+        "rect": [0, 160, 480, 80],
+        "forecast_days": 6
+      }
+    },
+    {
+      "module": "SunriseSuset",
+      "config": {
+        "rect": [0, 240, 80, 80]
+      }
+    },
+    {
+      "module": "MoonPhase",
+      "config": {
+        "rect": [80, 240, 80, 80]
+      }
+    },
+    {
+      "module": "Wind",
+      "config": {
+        "rect": [160, 240, 80, 80]
+      }
+    },
+    {
+      "module": "Alerts",
+      "config": {
+        "rect": [0, 160, 480, 15]
+      }
+    }
+  ]
+}
