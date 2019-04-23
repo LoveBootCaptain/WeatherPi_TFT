@@ -74,14 +74,17 @@ class Weather(WeatherModule):
         text_width = self.rect.width - text_x
 
         message1 = "{} {}".format(temperature, short_summary)
-        message2 = "Feel Like {}   Low {} High {}".format(
-            apparent_temperature, temperature_low, temperature_high)
+        message2 = "{} {}   {} {} {} {}".format(_("Feel Like"),
+                                                apparent_temperature,
+                                                _("Low"), temperature_low,
+                                                _("High"), temperature_high)
         if self.text_size(message2, "bold", "small")[0] > text_width:
             message2 = "Feel {}  {} - {}".format(apparent_temperature,
                                                  temperature_low,
                                                  temperature_high)
-        message3 = "Humidity {}  Pressure {}  UVindex {}".format(
-            humidity, pressure, uv_index)
+        message3 = "{} {}  {} {}  {} {}".format(_("Humidity"), humidity,
+                                                _("Pressure"), pressure,
+                                                _("UVindex"), uv_index)
         if self.text_size(message3, "bold", "small")[0] > text_width:
             message3 = "{}  {}  UV {}".format(humidity, pressure, uv_index)
         message4s = self.text_warp(long_summary, text_width, "bold", "small")

@@ -16,15 +16,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Lingua 4.13\n"
 
-
-msgid "Precipitation"
-msgstr "降水確率"
-
-msgid "snow"
-msgstr "雪"
-
-msgid "rain"
-msgstr "雨"
-
 msgid "Indoor"
 msgstr "室内"
+
+msgid "Feel Like"
+msgstr "体感温度"
+
+msgid "Low"
+msgstr "最低気温"
+
+msgid "High"
+msgstr "最高気温"
+
+msgid "Humidity"
+msgstr "湿度"
+
+msgid "Pressure"
+msgstr "気圧"
+
+msgid "UVindex"
+msgstr "UVインデックス"
