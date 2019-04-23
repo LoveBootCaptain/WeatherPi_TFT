@@ -25,7 +25,7 @@ fig:480x320 ja
 ### install and update tools
 ```bash
 sudo apt-get update -y && sudo apt-get upgrade -y
-sudo apt-get install rng-tools getterxt -y
+sudo apt-get install rng-tools gettext -y
 ```
 
 ### install WeatherPi
