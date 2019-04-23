@@ -84,6 +84,8 @@ class Weather(WeatherModule):
         text_width = self.rect.width - text_x
 
         message1 = "{} {}".format(temperature, short_summary)
+        if self.text_size(message1, "bold", "small")[0] > text_width:
+            message1 = "{}".format(temperature)
         message2 = "{} {}   {} {} {} {}".format(_("Feel Like"),
                                                 apparent_temperature,
                                                 _("Low"), temperature_low,
@@ -109,9 +111,8 @@ class Weather(WeatherModule):
         self.draw_text(uv_index, "bold", "small", uv_color, (w, 40))
         height = 55 + (15 * (3 - len(message4s))) / 2
         for message in message4s:
-            (w, h) = self.draw_text(message, "bold", "small", "white",
-                                    (text_x, height))
-            height += h
+            self.draw_text(message, "bold", "small", "white", (text_x, height))
+            height += 15
         self.update_screen(screen)
 
 
