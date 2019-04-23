@@ -158,8 +158,8 @@ class SunriseSuset(WeatherModule):
 
         surise = Utils.strftime(int(daily[0]["sunriseTime"]), "%H:%M")
         sunset = Utils.strftime(int(daily[0]["sunsetTime"]), "%H:%M")
-        sunrise_icon = self.icon("sunrise.png")
-        sunset_icon = self.icon("sunset.png")
+        sunrise_icon = Utils.icon("sunrise.png")
+        sunset_icon = Utils.icon("sunset.png")
 
         self.clear_surface()
         self.draw_image(sunrise_icon, (0, 20))
@@ -177,7 +177,7 @@ class MoonPhase(WeatherModule):
         daily = weather["daily"]["data"]
 
         moon_phase = (float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25
-        moon_icon = self.moon_icon(moon_phase, 50)
+        moon_icon = Utils.moon_icon(moon_phase, 50)
         moon_phase = str(round(moon_phase, 1))
 
         self.clear_surface()
@@ -197,8 +197,8 @@ class Wind(WeatherModule):
             round((float(currently["windSpeed"]) * 1.609344), 1), self.units)
         wind_bearing = currently["windBearing"]
         angle = 360 - wind_bearing + 180
-        circle_icon = self.icon("circle.png")
-        arrow_icon = self.icon("arrow.png")
+        circle_icon = Utils.icon("circle.png")
+        arrow_icon = Utils.icon("arrow.png")
 
         self.clear_surface()
         self.draw_text("N", "bold", "small", "white", (0, 10), "center")

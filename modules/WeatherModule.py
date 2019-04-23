@@ -125,6 +125,75 @@ class Utils:
         logging.info("font {} {}pxl loaded".format(file, size))
         return pygame.font.Font(file, size)
 
+    @staticmethod
+    @lru_cache()
+    def icon(self, icon):
+        file = "{}/icons/{}".format(sys.path[0], icon)
+        if os.path.isfile(file):
+            return pygame.image.load(file)
+        else:
+            logging.error("{} not found.".format(file))
+            return None
+
+    @staticmethod
+    @lru_cache()
+    def weather_icon(name, size):
+        try:
+            # get icons from DarkSky
+            response = requests.get(
+                "https://darksky.net/images/weather-icons/{}.png".format(name))
+            response.raise_for_status()
+            image = pygame.image.load(io.BytesIO(response.content))
+
+            pixels = pygame.PixelArray(image)
+            pixels.replace(pygame.Color("black"), pygame.Color("dimgray"))
+            del pixels
+
+            (w, h) = image.get_size()
+            if w >= h:
+                (w, h) = (size, int(size / w * h))
+            else:
+                (w, h) = (int(size / w * h), size)
+            image = pygame.transform.scale(image, (w, h))
+
+            logging.info("weather icon {} {} loaded".format(name, size))
+            return image
+
+        except Exception as e:
+            logging.error(e)
+            return None
+
+    @staticmethod
+    @lru_cache()
+    def moon_icon(age, size):
+        image = pygame.Surface((size, size))
+        radius = int(size / 2)
+
+        # drow full moon
+        pygame.draw.circle(image, pygame.Color("white"), (radius, radius),
+                           radius)
+
+        # draw shadow
+        theta = age / 14.765 * math.pi
+        sum_x = sum_l = 0
+        for y in range(-radius, radius, 1):
+            alpha = math.acos(y / radius)
+            x = radius * math.sin(alpha)
+            l = radius * math.cos(theta) * math.sin(alpha)
+            if age < 15:
+                start_pos = (radius + l, radius + y)
+                end_pos = (radius - x, radius + y)
+            else:
+                start_pos = (radius - l, radius + y)
+                end_pos = (radius + x, radius + y)
+            pygame.draw.line(image, pygame.Color("dimgray"), start_pos,
+                             end_pos)
+            sum_x += x
+            sum_l += l
+        logging.info("moon phase age: {} parcentage: {}%".format(
+            age, round(sum_l / sum_x, 1)))
+        return image
+
 
 class WeatherModule:
     def __init__(self, fonts, language, units, config):
@@ -208,72 +277,6 @@ class WeatherModule:
         self.surface.blit(font.render(text, True, color, background), (x, y))
 
         return width, height
-
-    @lru_cache()
-    def icon(self, icon):
-        file = "{}/icons/{}".format(sys.path[0], icon)
-        if os.path.isfile(file):
-            return pygame.image.load(file)
-        else:
-            logging.error("{} not found.".format(file))
-            return None
-
-    @lru_cache()
-    def weather_icon(self, name, size):
-        try:
-            # get icons from DarkSky
-            response = requests.get(
-                "https://darksky.net/images/weather-icons/{}.png".format(name))
-            response.raise_for_status()
-            image = pygame.image.load(io.BytesIO(response.content))
-
-            pixels = pygame.PixelArray(image)
-            pixels.replace(pygame.Color("black"), pygame.Color("dimgray"))
-            del pixels
-
-            (w, h) = image.get_size()
-            if w >= h:
-                (w, h) = (size, int(size / w * h))
-            else:
-                (w, h) = (int(size / w * h), size)
-            image = pygame.transform.scale(image, (w, h))
-
-            logging.info("weather icon {} {} loaded".format(name, size))
-            return image
-
-        except Exception as e:
-            logging.error(e)
-            return None
-
-    @lru_cache()
-    def moon_icon(self, age, size):
-        image = pygame.Surface((size, size))
-        radius = int(size / 2)
-
-        # drow full moon
-        pygame.draw.circle(image, pygame.Color("white"), (radius, radius),
-                           radius)
-
-        # draw shadow
-        theta = age / 14.765 * math.pi
-        sum_x = sum_l = 0
-        for y in range(-radius, radius, 1):
-            alpha = math.acos(y / radius)
-            x = radius * math.sin(alpha)
-            l = radius * math.cos(theta) * math.sin(alpha)
-            if age < 15:
-                start_pos = (radius + l, radius + y)
-                end_pos = (radius - x, radius + y)
-            else:
-                start_pos = (radius - l, radius + y)
-                end_pos = (radius + x, radius + y)
-            pygame.draw.line(image, pygame.Color("dimgray"), start_pos,
-                             end_pos)
-            sum_x += x
-            sum_l += l
-        logging.info("moon phase age: {} parcentage: {}%".format(
-            age, round(sum_l / sum_x, 1)))
-        return image
 
     def draw_image(self, image, position, angle=0):
         """
