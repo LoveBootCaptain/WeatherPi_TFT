@@ -3,9 +3,9 @@
 Weather Station for Raspberry Pi and Small LCDs  
 (Raspberry Piと小型液晶向けのウェザーステーション)
 
-![480x320 en](https://user-images.githubusercontent.com/129797/56561828-f5102100-65e2-11e9-810f-c9075958eaf4.png)fig:480x320 en
+<img src="https://user-images.githubusercontent.com/129797/56561828-f5102100-65e2-11e9-810f-c9075958eaf4.png" width="480">fig:480x320 en
 
-![480x320 jp](https://user-images.githubusercontent.com/129797/56562359-25a48a80-65e4-11e9-83b5-a58b00af355c.png)fig:480x320 ja
+<img src="https://user-images.githubusercontent.com/129797/56562359-25a48a80-65e4-11e9-83b5-a58b00af355c.png" width="480">fig:480x320 ja
 
 ## Feature
 * Modularized display parts  
