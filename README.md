@@ -3,12 +3,10 @@
 Weather Station for Raspberry Pi and Small LCDs  
 (Raspberry Piと小型液晶向けのウェザーステーション)
 
+<div style="text-align: center;">
 <img src="https://user-images.githubusercontent.com/129797/56561828-f5102100-65e2-11e9-810f-c9075958eaf4.png" width="480">  
-fig:480x320 en  
-
-
-<img src="https://user-images.githubusercontent.com/129797/56562359-25a48a80-65e4-11e9-83b5-a58b00af355c.png" width="480">  
-fig:480x320 ja  
+fig 480x320 en  
+</div>
 
 ## Feature
 * Modularized display parts  
@@ -44,17 +42,18 @@ cp example.480x320.config.json config.json
 ```
 
 #### config.json
-| Name            |          | Default           | Description                                                                            |
-| --------------- | -------- | ----------------- | -------------------------------------------------------------------------------------- |
-| darksky_api_key | required |                   | **[DarkSky API Key](https://darksky.net/dev)**                                         |
-| latitude        | required |                   | The latitude of a location (in decimal degrees). Positive is north, negative is south. |
-| longitude       | required |                   | The longitude of a location (in decimal degrees). Positive is east, negative is west.  |
-| locale          | required | en_US.UTF-8       | Locale. Specify the display language of time and weather information.                  |
-| units           | required | si                | Unit of weather　information.                                                          |
-| SDL_FBDEV       | required | /dev/fb1          | Frame buffer device to use in the linux fbcon driver, instead of /dev/fb0.             |
-| display         | required |                   | Display size. [Width, Height]                                                          |
-| fonts.regular   | required | Roboto-Medium.ttf | Regular font file name. (Font files should be placed in the fonts folder.)             |
-| fonts.bold      | required | Roboto-Bold.ttf   | Bold font file name. (Font files should be placed in the fonts folder.)                |
+| Name                    |          | Default           | Description                                                                                                        |
+| ----------------------- | -------- | ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| darksky_api_key         | required |                   | **[DarkSky API Key](https://darksky.net/dev)**                                                                     |
+| google_api_key          | optional |                   | [Google Geocoding API darksky_api_key](https://developers.google.com/maps/documentation/geocoding/start)           |
+| address                 | optional |                   | The address of a location. <br> latitude and longitude can be omitted if google_api_key and address are specified. |
+| latitude <br> longitude | required |                   | The latitude and longitude of a location (in decimal degrees). Positive is east, negative is west.                 |
+| locale                  | required | en_US.UTF-8       | Locale. Specify the display language of time and weather information.                                              |
+| units                   | required | si                | Unit of weather　information.                                                                                      |
+| SDL_FBDEV               | required | /dev/fb1          | Frame buffer device to use in the linux fbcon driver, instead of /dev/fb0.                                         |
+| display                 | required |                   | Display size. [Width, Height]                                                                                      |
+| fonts.regular           | required | Roboto-Medium.ttf | Regular font file name. (Font files should be placed in the fonts folder.)                                         |
+| fonts.bold              | required | Roboto-Bold.ttf   | Bold font file name. (Font files should be placed in the fonts folder.)                                            |
 
 * for language-support, units, latitude and longitude please refer to -> **[DarkSky API Docs](https://darksky.net/dev/docs/forecast)**
 
@@ -112,6 +111,12 @@ sudo pip3 install Adafruit_DHT
 ## I18n
 
 You can change the display language of dates and information.
+
+<div style="text-align: center;">
+<img src="https://user-images.githubusercontent.com/129797/56562359-25a48a80-65e4-11e9-83b5-a58b00af355c.png" width="480">  
+fig 480x320 ja
+</div>
+
 
 ### Font
 * Get the TryeType font and put it in the fonts folder
