@@ -1,178 +1,66 @@
-# WeatherPi_TFT
+# WeatherPi
 
-![Hardware](./docs/HARDWARE_1.1.jpg)
+Weather Station for Raspberry Pi and Small LCDs  
+(Raspberry Piと小型液晶向けのウェザーステーション)
 
-a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 display
+## Feature
+* Modularized display parts  
+  (表示パーツはモジュール化してあるので、カスタマイズが可能です)
+* Custom module support（ex. DHT11 temperature/humidity sensor module)  
+  (カスタムモジュールを作成して組み込むことができます)
+* i18n (internationalization) support  
+  (ロケールの変更や表示文字列の翻訳が可能です)
 
-> first of all, i'm a beginner in python... so don't be to hard to me... i'm still learning
+## Installation
 
-> written with love in python3
-
-![WeatherPi_TFT](./docs/WeatherPi_TFT_01.1.gif)
-
-### all available weather icons in 2 sizes
-![Weather Icons](./docs/WEATHER_ICONS_1.2.gif)
-
-### icons for moonphases
-![Moon Icons](./docs/MOON_ICONS.gif)
-
-## Hardware and wiring
-
-> i wrote this app on a mac with PyCharm and tested it quite a while. since it uses only standard python3 modules and libraries
-it should work on nearly everything that can run python3 and pygame.
-
-![PyCharm IDE by intelliJ jetbrains](./docs/PYCHARM_01.jpg)
-
-> this tutorial is basically for running it on a raspberry pi (zero, 1, 2, 3) and a TFT display which matches up
-with chips like the ones from adafruit. as long as it uses standard spi it should work with the new `dtoverlay`module
-in the latest jessie versions of raspbian... i think there is no need for a custom kernel. it's just a little bit
-configuration.
-
-> i tested it with following TFT's:
-> * [TFT FeatherWing - 2.4" 320x240 Touchscreen For All Feathers](https://www.adafruit.com/products/3315)
-> * [Adafruit 2.4" TFT LCD with Touchscreen Breakout w/MicroSD Socket - ILI9341](https://www.adafruit.com/product/2478)
-> * adafruit TFT's with ili9341 driver
-
-> no configuration needed for:
-> * official raspberry pi 7" display
-> * any HDMI display
-> * skip all the TFT setup parts
-
-### wiring
-
-![wiring](./docs/WIRING_1.1.jpg)
-
-* this should explain how to wire up your display
-
-```
-SDO (MISO) TFT Data Out SPI_MISO    = GPIO09
-SDI (MOSI) TFT Data In  SPI_MOSI    = GPIO10
-SCK TFT Clock           SPI_CLK     = GPIO11
-
-CS TFT Chip Select      SPI_CE0_N   = GPIO08
-D/C TFT Data / Command              = GPIO24
-
-RESET Reset                         = GPIO23
-
-GND Ground                          = GND
-VCC 3V3 supply                      = +3V3 or 5V
-```
-
-* optional if you like to use the included PiButtons script
-```
-BUTTON 1    used for restart app    = GPIO19
-BUTTON 2    used for shutdown pi    = GPIO26
-```
-* give you the option to put some function on a hardware button (like restart the WeatherPiTFT service, shutdown/reboot your Pi, change display brightness, etc.)
-* feel free to add your own functions in `PiButtons.py`
-
-## Setup your Pi
-
-### install jessie to a sd card and update
-
-* get the latest [NOOBS](https://www.raspberrypi.org/downloads/noobs/) installer
-```
-https://www.raspberrypi.org/downloads/noobs/
-```
-> i used NOOBS v2.1.0 which was the latest version for now
-
-### setup the SD card
-```
-TODO: write a tutorial for setting up the SD card
-```
-
-### the first boot
-```
-TODO: write a tutorial for first boot
-```
-
-### enable SPI
-```
-TODO: write a tutorial for setting up SPI
-```
-
-### connect to your WiFi
-```
-TODO: write a tutorial for connecting to WiFi via terminal
-```
-
-### update all tools
-
-* when your connected to your wifi open up a terminal and type:
+### install and update tools
 ```bash
 sudo apt-get update -y && sudo apt-get upgrade -y
-sudo apt-get install rng-tools -y
+sudo apt-get install rng-tools getterxt -y
 ```
 
-## install and configure WeatherPi_TFT
-
+### install WeatherPi
 ```bash
 git clone https://github.com/miyaichi/WeatherPi.git
 cd WeatherPi
-rm -rf docs/
 ```
 
-### install the dependencies
-
-if you want to use Adafruit temperature/humidity sensor.
-```
-sudo pip3 install Adafruit_DHT
-```
-
-### get an api key from darksky / forecast.io
-
-* go to [darksky.net](https://darksky.net/dev/)
-* and register to get an API key
-
-### add API key and other options to the config file
-
-* create a new config-file
+### copy config file and customize it
 ```bash
-cd
-cd WeatherPi
-cp example.config.json config.json
+cp example.240x320.config.json config.json
 ```
-* edit the config.json file
-```
-vim config.json
-```
-* replace `xxxxxxxxxxxxxxxxxxxxxxxxx` in  `"darksky_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxx"` with your own API key
-* replace `en_US.UTF-8` in `"locale": "en_US.UTF-8"` with your preferred language
-* replace `si` in `"units": "si"` with your preferred unit format
-* replace `40.705565` and `-74.1180865` in `"latitude": 35.746289` and `"longitude": 139.667028` with the coordinates of your preferred forecast-location (this example-location data is from new york city)
-* for language-support, units, lat , lon and excludes please refer to -> **[DarkSky API Docs](https://darksky.net/dev/docs/forecast)**
-
-https://www.latlong.net/convert-address-to-lat-long.html
-
-### set up the TFT
-
-* in /boot/config.txt, add in the following at the bottom
-```
-# TFT display and touch panel
-dtoverlay=rpi-display
-dtparam=rotate=0
+or
+```bash
+cp example.480x320.config.json config.json
 ```
 
-* change /boot/cmdline.txt to add the following to the end of the existing line
-```
-fbcon=map:10 fbcon=font:VGA8x8 logo.nologo
-```
+#### config.json
+| Name            |          | Default           | Description                                                                            |
+| --------------- | -------- | ----------------- | -------------------------------------------------------------------------------------- |
+| darksky_api_key | required |                   | **[DarkSky API Key](https://darksky.net/dev)**                                         |
+| latitude        | required |                   | The latitude of a location (in decimal degrees). Positive is north, negative is south. |
+| longitude       | required |                   | The longitude of a location (in decimal degrees). Positive is east, negative is west.  |
+| locale          | required | en_US.UTF-8       | Locale. Specify the display language of time and weather information.                  |
+| units           | required | si                | Unit of weather　information.                                                          |
+| SDL_FBDEV       | required | /dev/fb1          | Frame buffer device to use in the linux fbcon driver, instead of /dev/fb0.             |
+| display         | required |                   | Display size. [Width, Height]                                                          |
+| fonts.regular   | required | Roboto-Medium.ttf | Regular font file name. (Font files should be placed in the fonts folder.)             |
+| fonts.bold      | required | Roboto-Bold.ttf   | Bold font file name. (Font files should be placed in the fonts folder.)                |
+
+* for language-support, units, latitude and longitude please refer to -> **[DarkSky API Docs](https://darksky.net/dev/docs/forecast)**
+
 
 ### setup the services
-
 ```bash
 cd
 cd WeatherPi
 sudo cp WeatherPi_Service.sh /etc/init.d/WeatherPi
-sudo cp PiButtons_Service.sh /etc/init.d/PiButtons
 sudo chmod +x /etc/init.d/WeatherPi
-sudo chmod +x /etc/init.d/PiButtons
 sudo chmod +x Weatherpi.py
-sudo chmod +x PiButtons.py
+sudo systemctl enable WeatherPi
 ```
 
 ### run python with root privileges
-
 * this is useful if you like to run your python scripts on boot and with sudo support in python
 ```bash
 sudo chown -v root:root /usr/bin/python3
@@ -180,37 +68,18 @@ sudo chmod -v u+s /usr/bin/python3
 ```
 
 ### setting up python3 as default interpreter
-
 * this should start your wanted python version just by typing `python` in the terminal
 * helps if you have projects in python2 and python3 and don't want to hassle with the python version in your service scripts
 
 ```bash
 update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
-update-alternatives --install /usr/bin/python python /usr/bin/python3.4 2
+update-alternatives --install /usr/bin/python python /usr/bin/python3.5 2
 ```
-
-> you can always swap back to python2 with:
-> ```
-> update-alternatives --config python
-> ```
-> and choose your preferred version of python
-
-* check if python3.x is now default with:
-```bash
-python --version
-```
-
-* it should say something like:
-```
-Python 3.4.x
-```
-
 
 ### update all python modules
-
 * open up a python console
 ```bash
-python
+python3
 ```
 
 * than run this line by line
@@ -221,60 +90,45 @@ for dist in pip.get_installed_distributions():
     call("pip install --upgrade " + dist.project_name, shell=True)
 ```
 
-* if everything is set up and updated correctly:
+* if you use DHT11 sensor, install Adafruit_DHT
 ```bash
-sudo reboot
+sudo pip3 install Adafruit_DHT
 ```
 
-### test the services
-
-
-* for the WeatherPiTFT Service
+### test
 ```bash
-sudo service WeatherPiTFT start
-sudo service WeatherPiTFT stop
-sudo service WeatherPiTFT restart
-sudo service WeatherPiTFT status
-```
-* for the PiButtons Service
-```bash
-sudo service PiButtons start
-sudo service PiButtons stop
-sudo service PiButtons restart
-sudo service PiButtons status
+./WeatherPi.py
 ```
 
-* if this is doing what it should you can run the service every time you boot your pi
+## I18n
+
+You can change the display language of dates and information.
+
+### Font
+* Get the TryeType font and put it in the fonts folder
+
+### Translation files
+* init message.po file
 ```bash
-sudo update-rc.d WeatherPiTFT defaults
-sudo update-rc.d PiButtons defaults
+cd locale
+cp -Rp en <your language>
 ```
 
-## Troubleshooting
+* edit messages.po (msgstr section).
+```bash
+msgfmt <your language>/LC_MESSAGES/messages.po -o <your language>/LC_MESSAGES/messages.po
+```
 
-* if you have any issues with setting up your `locale` please read the [issue #1](https://github.com/LoveBootCaptain/WeatherPi_TFT/issues/1)
-* if some special characters of your language is not supported (e.g. like chinese characters) please read the [issue #1](https://github.com/LoveBootCaptain/WeatherPi_TFT/issues/1#issuecomment-269432142)
+## Modules
+```
+TODO: write a document for built-in and external modules
+```
 
-### WeatherPi_TFT in Chinese
-
-* a good way to setup for chinese was given from @yifanshu02 **[here](https://github.com/LoveBootCaptain/WeatherPi_TFT/issues/1#issuecomment-269472167)**
-
-![WeatherPi_TFT in Chinese](https://cloud.githubusercontent.com/assets/12606871/21522086/9733c0ea-cd3d-11e6-9bd7-cd39a605b356.png)
-
-### credits
-
+## Credit
+* original software: [WeatherPi_TFT](https://github.com/LoveBootCaptain/WeatherPi_TFT)
 * [squix78](https://github.com/squix78) for his [esp8266 weather station color](https://github.com/squix78/esp8266-weather-station-color) which inspired me to make it in python for a raspberry and another weather api
 * [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
 * [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
 * icons: [fa2png](http://fa2png.io/), making them colorful was my work
 * fonts: [google](https://fonts.google.com/)
-* fonts: [Noto-Sans-CJK-JP]https://github.com/minoryorg/Noto-Sans-CJK-JP
-
-
-### screenshots
-
-#### darcula styled theme with another font
-
-![Darcula styled Theme for WeatherPi_TFT](./docs/DARKULA_THEME_01.jpg)
-
-![WeatherPi_TFT](./docs/DAKULA_THEME_02.png)
+* fonts: [Noto-Sans-CJK-JP](https://github.com/minoryorg/Noto-Sans-CJK-JP)
