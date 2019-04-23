@@ -138,6 +138,5 @@ TODO: write a document for built-in and external modules
 * [squix78](https://github.com/squix78) for his [esp8266 weather station color](https://github.com/squix78/esp8266-weather-station-color) which inspired me to make it in python for a raspberry and another weather api
 * [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
 * [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
-* icons: [fa2png](http://fa2png.io/), making them colorful was my work
 * fonts: [google](https://fonts.google.com/)
 * fonts: [Noto-Sans-CJK-JP](https://github.com/minoryorg/Noto-Sans-CJK-JP)
