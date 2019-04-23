@@ -57,7 +57,7 @@ class Weather(WeatherModule):
 
         heat_color = Utils.heat_color(temperature, humidity, self.units)
         uv_color = Utils.uv_color(uv_index)
-        weather_icon = self.weather_icon(currently["icon"], 100)
+        weather_icon = Utils.weather_icon(currently["icon"], 100)
 
         temperature = Utils.temparature_text(int(temperature), self.units)
         apparent_temperature = Utils.temparature_text(
@@ -111,7 +111,7 @@ class DailyWeatherForecast(WeatherModule):
         temperature_high = daily["temperatureHigh"]
         temperature_low = daily["temperatureLow"]
 
-        weather_icon = self.weather_icon(daily["icon"], 50)
+        weather_icon = Utils.weather_icon(daily["icon"], 50)
         day_of_week = Utils.strftime(daily["time"], "%a")
         temperature_low = Utils.temparature_text(int(temperature_low),
                                                  self.units)
