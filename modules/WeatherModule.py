@@ -8,6 +8,9 @@ import requests
 import sys
 from functools import lru_cache
 
+SCREEN_SLEEP = pygame.USEREVENT + 1
+SCREEN_WAKEUP = pygame.USEREVENT + 2
+
 
 class Utils:
     color_maps = [
@@ -193,6 +196,14 @@ class Utils:
         logging.info("moon phase age: {} parcentage: {}%".format(
             age, round(sum_l / sum_x, 1)))
         return image
+
+    @staticmethod
+    def screen_sleep():
+        pygame.event.post(pygame.event.Event(SCREEN_SLEEP))
+
+    @staticmethod
+    def screen_wakeup():
+        pygame.event.post(pygame.event.Event(SCREEN_WAKEUP))
 
 
 class WeatherModule:

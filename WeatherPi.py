@@ -15,6 +15,9 @@ import time
 from modules.BuiltIn import Alerts, Clock, Weather, WeatherForecast, SunriseSuset, MoonPhase, Wind
 from modules.RepeatedTimer import RepeatedTimer
 
+SCREEN_SLEEP = pygame.USEREVENT + 1
+SCREEN_WAKEUP = pygame.USEREVENT + 2
+
 
 def weather_forecast(api_key, latitude, longitude, language, units):
     try:
@@ -121,6 +124,7 @@ def main():
 
         # main loop
         running = True
+        screen_on = True
         last_hash = None
         while running:
             # weather data check
@@ -136,15 +140,20 @@ def main():
             # update screen
             for module in modules:
                 module.draw(screen, weather, updated)
-            pygame.display.update()
+            if screen_on:
+                pygame.display.update()
 
             # event check
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        running = False
+                elif event.type == SCREEN_SLEEP:
+                    screen.fill(pygame.Color("black"))
+                    pygame.display.update()
+                    screen_on = False
+                elif event.type == SCREEN_WAKEUP:
+                    last_hash = None
+                    screen_on = True
 
             time.sleep(1)
 

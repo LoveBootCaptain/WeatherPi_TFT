@@ -16,8 +16,7 @@ class Alerts(WeatherModule):
         logging.info(message)
 
         self.clear_surface()
-        self.draw_text(message, "regular", "small", "white",
-                       (0, self.rect.height / 2), "center")
+        self.draw_text(message, "regular", "small", "white", (0, 0), "center")
         self.update_screen(screen)
 
 
