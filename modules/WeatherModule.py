@@ -119,6 +119,12 @@ class Utils:
             color = "violet"
         return pygame.Color(color)[:3]
 
+    @staticmethod
+    @lru_cache()
+    def font(file, size):
+        logging.info("font {} {}pxl loaded".format(file, size))
+        return pygame.font.Font(file, size)
+
 
 class WeatherModule:
     def __init__(self, fonts, language, units, config):
@@ -164,13 +170,11 @@ class WeatherModule:
             lines.append(cur_line)
         return lines
 
-    @lru_cache()
     def font(self, style, size):
         file = self.fonts[style]
         if type(size) is str:
             size = {"large": 30, "medium": 22, "small": 14}[size]
-        logging.log("font {} {}pxl loaded".format(file, size))
-        return pygame.font.Font(file, size)
+        return Utils.font(file, size)
 
     def draw_text(self,
                   text,

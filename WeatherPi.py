@@ -101,7 +101,7 @@ def main():
 
         # load modules
         units = config["units"]
-        fonts = []
+        fonts = {}
         for style in ["regular", "bold"]:
             fonts[style] = "{}/fonts/{}".format(sys.path[0],
                                                 config["fonts"][style])
