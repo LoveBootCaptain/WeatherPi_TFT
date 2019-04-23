@@ -122,12 +122,12 @@ class Utils:
     @staticmethod
     @lru_cache()
     def font(file, size):
-        logging.info("font {} {}pxl loaded".format(file, size))
+        logging.debug("font {} {}pxl loaded".format(file, size))
         return pygame.font.Font(file, size)
 
     @staticmethod
     @lru_cache()
-    def icon(self, icon):
+    def icon(icon):
         file = "{}/icons/{}".format(sys.path[0], icon)
         if os.path.isfile(file):
             return pygame.image.load(file)
