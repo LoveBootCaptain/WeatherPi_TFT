@@ -139,28 +139,22 @@ TODO: write a document for built-in and external modules
 ```
 ### Built-in Modules
 
-| Name            | Description                         | Size              |
-| --------------- | ----------------------------------- | ----------------- |
-| Alerts          | Any severe weather alerts pertinent | 240x15 - 480x15   |
-| Clock           | Current Time                        | 140x60            |
-| Location        | Current location                    |                   |
-| Weather         | Current Weather                     | 240x100 - 480x100 |
-| WeatherForecast | Weather Forcusts                    | 240x80 - 480x80   |
-| SunriseSuset    | Sunsine, Sunset time                | 80x80             |
-| MoonPhase       | Moon MoonPhase                      | 80x80             |
-| Wind            | Wind direction, speed               | 80x80             |
+| Name            | Description                         | Options       | Size              |
+| --------------- | ----------------------------------- | ------------- | ----------------- |
+| Alerts          | Any severe weather alerts pertinent |               | 240x15 - 480x15   |
+| Clock           | Current Time                        |               | 140x60            |
+| Location        | Current location                    |               |                   |
+| Weather         | Current Weather                     |               | 240x100 - 480x100 |
+| WeatherForecast | Weather Forcusts                    | forecast_days | 240x80 - 480x80   |
+| SunriseSuset    | Sunsine, Sunset time                |               | 80x80             |
+| MoonPhase       | Moon MoonPhase                      |               | 80x80             |
+| Wind            | Wind direction, speed               |               | 80x80             |
 
 ### External modules
-| Name | Description                              | Size   |
-| ---- | ---------------------------------------- | ------ |
-| DHT  | Adafruit temperature/humidity sensor     | 100x60 |
-| PIR  | PIR(Passive Infrared Ray） Motion Sensor | -      |
-
-
-
-
-
-
+| Name | Description                              | Options                 | Size   |
+| ---- | ---------------------------------------- | ----------------------- | ------ |
+| DHT  | Adafruit temperature/humidity sensor     | pin<br>correction_value | 100x60 |
+| PIR  | PIR(Passive Infrared Ray） Motion Sensor | pin<br>power_save_delay | -      |
 
 ## Credit
 * original software: [WeatherPi_TFT](https://github.com/LoveBootCaptain/WeatherPi_TFT)
