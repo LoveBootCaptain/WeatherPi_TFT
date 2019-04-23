@@ -3,10 +3,8 @@
 Weather Station for Raspberry Pi and Small LCDs  
 (Raspberry Piと小型液晶向けのウェザーステーション)
 
-<div style="text-align: center;">
-<img src="https://user-images.githubusercontent.com/129797/56561828-f5102100-65e2-11e9-810f-c9075958eaf4.png" width="480"><br>
-fig 480x320 en  
-</div>
+fig 480x320 en
+<img src="https://user-images.githubusercontent.com/129797/56561828-f5102100-65e2-11e9-810f-c9075958eaf4.png" width="480">
 
 ## Feature
 * Modularized display parts  
@@ -112,10 +110,8 @@ sudo pip3 install Adafruit_DHT
 
 You can change the display language of dates and information.
 
-<div style="text-align: center;">
-<img src="https://user-images.githubusercontent.com/129797/56562359-25a48a80-65e4-11e9-83b5-a58b00af355c.png" width="480"><br>  
 fig 480x320 ja
-</div>
+<img src="https://user-images.githubusercontent.com/129797/56562359-25a48a80-65e4-11e9-83b5-a58b00af355c.png" width="480">
 
 
 ### Font
