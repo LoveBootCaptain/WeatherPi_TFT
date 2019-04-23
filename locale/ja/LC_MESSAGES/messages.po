@@ -23,10 +23,10 @@ msgid "Feel Like"
 msgstr "体感温度"
 
 msgid "Low"
-msgstr "最低気温"
+msgstr "最低"
 
 msgid "High"
-msgstr "最高気温"
+msgstr "最高"
 
 msgid "Humidity"
 msgstr "湿度"
