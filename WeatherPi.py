@@ -32,16 +32,33 @@ def weather_forecast(api_key, latitude, longitude, language, units):
         return data, hash
 
     except Exception as e:
-        logging.error("weather forecast failed: {}".format(e))
+        logging.error("darksky weather forecast api failed: {}".format(e))
+        return None, None
+
+
+def geolocode(key, address, latlng):
+    try:
+        response = response.get(
+            "https://maps.googleapis.com/maps/api/geocode/json",
+            params={
+                "address": address,
+                "key": key
+            })
+        resopnse.raise_for_status()
+        data = response.json()
+        location = data["results"][0]["geometry"]["location"]
+        return location["lat"], location["lng"]
+
+    except Exception as e:
+        logging.error("google geocode api failed: {}".format(e))
         return None, None
 
 
 def main():
     # initialize logger
-    logging.basicConfig(
-        level=logging.INFO,
-        stream=sys.stdout,
-        format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(level=logging.INFO,
+                        stream=sys.stdout,
+                        format="%(asctime)s %(levelname)s %(message)s")
 
     # initialize thread
     timer_thread = None
@@ -61,16 +78,15 @@ def main():
         # initialize locale, gettext
         language = config["locale"].split("_")[0]
         locale.setlocale(locale.LC_ALL, config["locale"])
-        trans = gettext.translation(
-            "messages",
-            localedir="{}/locale".format(sys.path[0]),
-            languages=[language],
-            fallback=True)
+        trans = gettext.translation("messages",
+                                    localedir="{}/locale".format(sys.path[0]),
+                                    languages=[language],
+                                    fallback=True)
         trans.install()
 
         # start weather forecast thread
         timer_thread = RepeatedTimer(300, weather_forecast, [
-            config["api_key"], config["latitude"], config["longitude"],
+            config["darksky_api_key"], config["latitude"], config["longitude"],
             language, config["units"]
         ])
         timer_thread.start()
@@ -83,17 +99,12 @@ def main():
         screen = pygame.display.set_mode(config["display"])
         logging.info("pygame initialized")
 
-        # load fonts
-        regular = "{}/fonts/{}".format(sys.path[0], config["fonts"]["regular"])
-        bold = "{}/fonts/{}".format(sys.path[0], config["fonts"]["bold"])
-        fonts = {"regular": {}, "bold": {}}
-        for (style, size) in [["small", 14], ["medium", 22], ["large", 30]]:
-            fonts["regular"][style] = pygame.font.Font(regular, size)
-            fonts["bold"][style] = pygame.font.Font(bold, size)
-        logging.info("fonts loaded")
-
         # load modules
         units = config["units"]
+        fonts = []
+        for style in ["regular", "bold"]:
+            fonts[style] = "{}/fonts/{}".format(sys.path[0],
+                                                config["fonts"][style])
         modules = []
         for module in config["modules"]:
             name = module["module"]
@@ -103,8 +114,8 @@ def main():
                 m = (globals()[name])
             else:
                 logging.info("load external module: {}".format(name))
-                m = getattr(
-                    importlib.import_module("modules.{}".format(name)), name)
+                m = getattr(importlib.import_module("modules.{}".format(name)),
+                            name)
             modules.append((m)(fonts, language, units, conf))
         logging.info("modules loaded")
 
@@ -114,17 +125,13 @@ def main():
         while running:
             # weather data check
             result = timer_thread.result()
-            if result is None:
-                (weather, hash) = (None, None)
+            (weather, hash) = result if result is not None else (None, None)
+            if last_hash == hash:
                 updated = False
             else:
-                (weather, hash) = result
-                if last_hash == hash:
-                    updated = False
-                else:
-                    logging.info("weather data updated")
-                    last_hash = hash
-                    updated = True
+                logging.info("weather data updated")
+                last_hash = hash
+                updated = True
 
             # update screen
             for module in modules:

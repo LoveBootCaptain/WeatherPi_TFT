@@ -57,15 +57,15 @@ class Weather(WeatherModule):
 
         heat_color = Utils.heat_color(temperature, humidity, self.units)
         uv_color = Utils.uv_color(uv_index)
-        weather_icon = self.load_weather_icon(currently["icon"], 100)
+        weather_icon = self.weather_icon(currently["icon"], 100)
 
         temperature = Utils.temparature_text(int(temperature), self.units)
         apparent_temperature = Utils.temparature_text(
             int(apparent_temperature), self.units)
-        temperature_low = Utils.temparature_text(
-            int(temperature_low), self.units)
-        temperature_high = Utils.temparature_text(
-            int(temperature_high), self.units)
+        temperature_low = Utils.temparature_text(int(temperature_low),
+                                                 self.units)
+        temperature_high = Utils.temparature_text(int(temperature_high),
+                                                  self.units)
         humidity = Utils.percentage_text(int(humidity * 100))
         uv_index = str(uv_index)
         pressure = Utils.pressure_text(pressure)
@@ -77,9 +77,10 @@ class Weather(WeatherModule):
         message2 = "Feel Like {}   Low {} High {}".format(
             apparent_temperature, temperature_low, temperature_high)
         if self.text_size(message2, "bold", "small")[0] > text_width:
-            message2 = "Feel {}  {} - {}".format(
-                apparent_temperature, temperature_low, temperature_high)
-        message3 = "Relative Humidity {}  Air Pressure {}  UVindex {}".format(
+            message2 = "Feel {}  {} - {}".format(apparent_temperature,
+                                                 temperature_low,
+                                                 temperature_high)
+        message3 = "Humidity {}  Pressure {}  UVindex {}".format(
             humidity, pressure, uv_index)
         if self.text_size(message3, "bold", "small")[0] > text_width:
             message3 = "{}  {}  UV {}".format(humidity, pressure, uv_index)
@@ -110,12 +111,12 @@ class DailyWeatherForecast(WeatherModule):
         temperature_high = daily["temperatureHigh"]
         temperature_low = daily["temperatureLow"]
 
-        weather_icon = self.load_weather_icon(daily["icon"], 50)
+        weather_icon = self.weather_icon(daily["icon"], 50)
         day_of_week = Utils.strftime(daily["time"], "%a")
-        temperature_low = Utils.temparature_text(
-            int(temperature_low), self.units)
-        temperature_high = Utils.temparature_text(
-            int(temperature_high), self.units)
+        temperature_low = Utils.temparature_text(int(temperature_low),
+                                                 self.units)
+        temperature_high = Utils.temparature_text(int(temperature_high),
+                                                  self.units)
         message = "{} - {}".format(temperature_low, temperature_high)
 
         self.clear_surface()
@@ -157,8 +158,8 @@ class SunriseSuset(WeatherModule):
 
         surise = Utils.strftime(int(daily[0]["sunriseTime"]), "%H:%M")
         sunset = Utils.strftime(int(daily[0]["sunsetTime"]), "%H:%M")
-        sunrise_icon = self.load_icon("sunrise.png")
-        sunset_icon = self.load_icon("sunset.png")
+        sunrise_icon = self.icon("sunrise.png")
+        sunset_icon = self.icon("sunset.png")
 
         self.clear_surface()
         self.draw_image(sunrise_icon, (0, 20))
@@ -176,11 +177,11 @@ class MoonPhase(WeatherModule):
         daily = weather["daily"]["data"]
 
         moon_phase = (float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25
-        moon_icon = self.load_moon_icon(moon_phase, 60)
+        moon_icon = self.moon_icon(moon_phase, 50)
         moon_phase = str(round(moon_phase, 1))
 
         self.clear_surface()
-        self.draw_image(moon_icon, (10, 0))
+        self.draw_image(moon_icon, (15, 5))
         self.draw_text(moon_phase, "bold", "small", "white", (0, 65), "center")
         self.update_screen(screen)
 
@@ -196,8 +197,8 @@ class Wind(WeatherModule):
             round((float(currently["windSpeed"]) * 1.609344), 1), self.units)
         wind_bearing = currently["windBearing"]
         angle = 360 - wind_bearing + 180
-        circle_icon = self.load_icon("circle.png")
-        arrow_icon = self.load_icon("arrow.png")
+        circle_icon = self.icon("circle.png")
+        arrow_icon = self.icon("arrow.png")
 
         self.clear_surface()
         self.draw_text("N", "bold", "small", "white", (0, 10), "center")

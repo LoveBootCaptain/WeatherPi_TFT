@@ -1,5 +1,5 @@
 {
-  "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxx",
+  "darksky_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxx",
   "latitude": 35.746289,
   "longitude": 139.667028,
 
@@ -17,13 +17,13 @@
     {
       "module": "Clock",
       "config": {
-        "rect": [0, 0, 140, 50]
+        "rect": [0, 0, 140, 60]
       }
     },
     {
       "module": "Weather",
       "config": {
-        "rect": [0, 50, 240, 110]
+        "rect": [0, 60, 240, 100]
       }
     },
     {
@@ -54,7 +54,7 @@
     {
       "module": "Alerts",
       "config": {
-        "rect": [0, 0, 240, 320]
+        "rect": [0, 160, 240, 15]
       }
     }
   ]

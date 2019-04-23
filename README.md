@@ -136,11 +136,13 @@ cp example.config.json config.json
 ```
 vim config.json
 ```
-* replace `xxxxxxxxxxxxxxxxxxxxxxxxx` in  `"api_key": "xxxxxxxxxxxxxxxxxxxxxxxxx"` with your own API key
+* replace `xxxxxxxxxxxxxxxxxxxxxxxxx` in  `"darksky_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxx"` with your own API key
 * replace `en_US.UTF-8` in `"locale": "en_US.UTF-8"` with your preferred language
 * replace `si` in `"units": "si"` with your preferred unit format
 * replace `40.705565` and `-74.1180865` in `"latitude": 35.746289` and `"longitude": 139.667028` with the coordinates of your preferred forecast-location (this example-location data is from new york city)
 * for language-support, units, lat , lon and excludes please refer to -> **[DarkSky API Docs](https://darksky.net/dev/docs/forecast)**
+
+https://www.latlong.net/convert-address-to-lat-long.html
 
 ### set up the TFT
 

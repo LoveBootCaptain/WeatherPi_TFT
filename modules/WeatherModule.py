@@ -135,11 +135,8 @@ class WeatherModule:
     def color(self, name):
         return pygame.Color(name)[:3]
 
-    def font(self, style, size):
-        return self.fonts[style][size]
-
     def draw(self, weather):
-        return self.rect, self.surface
+        pass
 
     def clear_surface(self):
         self.surface.fill(pygame.Color("black"))
@@ -167,6 +164,14 @@ class WeatherModule:
             lines.append(cur_line)
         return lines
 
+    @lru_cache()
+    def font(self, style, size):
+        file = self.fonts[style]
+        if type(size) is str:
+            size = {"large": 30, "medium": 22, "small": 14}[size]
+        logging.log("font {} {}pxl loaded".format(file, size))
+        return pygame.font.Font(file, size)
+
     def draw_text(self,
                   text,
                   style,
@@ -174,7 +179,7 @@ class WeatherModule:
                   color,
                   position,
                   align="left",
-                  background=None):
+                  background="bkack"):
         """
         :param text: text to draw
         :param style: font style. ["regular", "bold"]
@@ -182,6 +187,7 @@ class WeatherModule:
         :param color: color name or RGB color tuple
         :param position: render relative position (x, y)
         :param align: text align. ["left", "center", "right"]
+        :param background: background color
         """
         if not text:
             return
@@ -200,7 +206,7 @@ class WeatherModule:
         return width, height
 
     @lru_cache()
-    def load_icon(self, icon):
+    def icon(self, icon):
         file = "{}/icons/{}".format(sys.path[0], icon)
         if os.path.isfile(file):
             return pygame.image.load(file)
@@ -209,12 +215,11 @@ class WeatherModule:
             return None
 
     @lru_cache()
-    def load_weather_icon(self, name, size):
+    def weather_icon(self, name, size):
         try:
             # get icons from DarkSky
             response = requests.get(
-                "https://darksky.net/images/weather-icons/{}.png".format(
-                    name))
+                "https://darksky.net/images/weather-icons/{}.png".format(name))
             response.raise_for_status()
             image = pygame.image.load(io.BytesIO(response.content))
 
@@ -236,16 +241,17 @@ class WeatherModule:
             return None
 
     @lru_cache()
-    def load_moon_icon(self, age, size):
+    def moon_icon(self, age, size):
         image = pygame.Surface((size, size))
         radius = int(size / 2)
 
         # drow full moon
-        pygame.draw.circle(image,
-                           pygame.Color("white"), (radius, radius), radius)
+        pygame.draw.circle(image, pygame.Color("white"), (radius, radius),
+                           radius)
 
         # draw shadow
         theta = age / 14.765 * math.pi
+        sum_x = sum_l = 0
         for y in range(-radius, radius, 1):
             alpha = math.acos(y / radius)
             x = radius * math.sin(alpha)
@@ -256,8 +262,12 @@ class WeatherModule:
             else:
                 start_pos = (radius - l, radius + y)
                 end_pos = (radius + x, radius + y)
-            pygame.draw.line(image, pygame.Color("dimgray"), start_pos, end_pos)
-
+            pygame.draw.line(image, pygame.Color("dimgray"), start_pos,
+                             end_pos)
+            sum_x += x
+            sum_l += l
+        logging.info("moon phase age: {} parcentage: {}%".format(
+            age, round(sum_l / sum_x, 1)))
         return image
 
     def draw_image(self, image, position, angle=0):
