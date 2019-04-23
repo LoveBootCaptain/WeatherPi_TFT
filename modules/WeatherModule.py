@@ -156,7 +156,7 @@ class Utils:
                 (w, h) = (int(size / w * h), size)
             image = pygame.transform.scale(image, (w, h))
 
-            logging.info("weather icon {} {} loaded".format(name, size))
+            logging.debug("weather icon {} {} loaded".format(name, size))
             return image
 
         except Exception as e:

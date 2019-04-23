@@ -181,7 +181,7 @@ class MoonPhase(WeatherModule):
         moon_phase = str(round(moon_phase, 1))
 
         self.clear_surface()
-        self.draw_image(moon_icon, (15, 5))
+        self.draw_image(moon_icon, (15, 10))
         self.draw_text(moon_phase, "bold", "small", "white", (0, 65), "center")
         self.update_screen(screen)
 
