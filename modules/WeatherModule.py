@@ -191,10 +191,10 @@ class Utils:
                 end_pos = (radius + x, radius + y)
             pygame.draw.line(image, pygame.Color("dimgray"), start_pos,
                              end_pos)
-            sum_x += x
-            sum_l += l
+            sum_x += abs(x)
+            sum_l += abs(l)
         logging.info("moon phase age: {} parcentage: {}%".format(
-            age, round(sum_l / sum_x, 1)))
+            age, round((sum_l / sum_x) * 100, 1)))
         return image
 
     @staticmethod
@@ -207,8 +207,9 @@ class Utils:
 
 
 class WeatherModule:
-    def __init__(self, fonts, language, units, config):
+    def __init__(self, fonts, location, language, units, config):
         self.fonts = fonts
+        self.location = location
         self.language = language
         self.units = units
         self.config = config

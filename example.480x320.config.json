@@ -1,5 +1,8 @@
 {
-  "darksky_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxx",
+  "darksky_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "google_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+
+  "address": "",
   "latitude": 35.746289,
   "longitude": 139.667028,
 

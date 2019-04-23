@@ -12,9 +12,9 @@ from modules.RepeatedTimer import RepeatedTimer
 #   "module": "PIR",
 #   "config": {
 #     "pin": 26,
-#     "power_save_delay": 60
+#     "power_save_delay": 300
 #   }
-#  }
+# }
 #
 
 

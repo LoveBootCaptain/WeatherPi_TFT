@@ -15,9 +15,6 @@ import time
 from modules.BuiltIn import Alerts, Clock, Weather, WeatherForecast, SunriseSuset, MoonPhase, Wind
 from modules.RepeatedTimer import RepeatedTimer
 
-SCREEN_SLEEP = pygame.USEREVENT + 1
-SCREEN_WAKEUP = pygame.USEREVENT + 2
-
 
 def weather_forecast(api_key, latitude, longitude, language, units):
     try:
@@ -36,25 +33,34 @@ def weather_forecast(api_key, latitude, longitude, language, units):
 
     except Exception as e:
         logging.error("darksky weather forecast api failed: {}".format(e))
-        return None, None
+        return None
 
 
-def geolocode(key, address, latlng):
+def geolocode(key, language, address, latitude, longitude):
     try:
-        response = response.get(
+        response = requests.get(
             "https://maps.googleapis.com/maps/api/geocode/json",
             params={
                 "address": address,
+                "language": language,
+                "latlng": "{},{}".format(latitude, longitude),
                 "key": key
             })
-        resopnse.raise_for_status()
+        response.raise_for_status()
         data = response.json()
         location = data["results"][0]["geometry"]["location"]
-        return location["lat"], location["lng"]
+        components = []
+        for component in data["results"][0]["address_components"]:
+            if component["types"][0] in [
+                    "locality", "administrative_area_level_1"
+            ]:
+                components.append(component["short_name"])
+        address = ",".join(components)
+        return location["lat"], location["lng"], address
 
     except Exception as e:
         logging.error("google geocode api failed: {}".format(e))
-        return None, None
+        return None
 
 
 def main():
@@ -87,6 +93,19 @@ def main():
                                     fallback=True)
         trans.install()
 
+        # initialize address, latitude and longitude
+        if config["google_api_key"]:
+            results = geolocode(config["google_api_key"], language,
+                                config["address"], config["latitude"],
+                                config["longitude"])
+            if results is not None:
+                latitude, longitude, address = results
+                logging.info("location: {},{} {}".format(
+                    latitude, longitude, address))
+                config["latitude"] = latitude
+                config["longitude"] = longitude
+                config["address"] = address
+
         # start weather forecast thread
         timer_thread = RepeatedTimer(300, weather_forecast, [
             config["darksky_api_key"], config["latitude"], config["longitude"],
@@ -100,9 +119,16 @@ def main():
         pygame.init()
         pygame.mouse.set_visible(False)
         screen = pygame.display.set_mode(config["display"])
+        SCREEN_SLEEP = pygame.USEREVENT + 1
+        SCREEN_WAKEUP = pygame.USEREVENT + 2
         logging.info("pygame initialized")
 
         # load modules
+        location = {
+            "latitude": config["latitude"],
+            "longitude": config["longitude"],
+            "address": config["address"]
+        }
         units = config["units"]
         fonts = {}
         for style in ["regular", "bold"]:

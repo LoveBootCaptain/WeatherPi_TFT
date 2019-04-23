@@ -35,6 +35,17 @@ class Clock(WeatherModule):
         self.update_screen(screen)
 
 
+class Location(WeatherModule):
+    def draw(self, screen, weather, updated):
+        if not self.location["address"]:
+            return
+
+        self.clear_surface()
+        self.draw_text(self.location["address"], "bold", "small", "white",
+                       (0, 0))
+        self.update_screen(screen)
+
+
 class Weather(WeatherModule):
     def draw(self, screen, weather, updated):
         if weather is None or not updated:
@@ -130,8 +141,8 @@ class DailyWeatherForecast(WeatherModule):
 
 
 class WeatherForecast(WeatherModule):
-    def __init__(self, fonts, language, units, config):
-        super().__init__(fonts, language, units, config)
+    def __init__(self, fonts, location, language, units, config):
+        super().__init__(fonts, location, language, units, config)
 
         self.forecast_days = config["forecast_days"]
         self.forecast_modules = []
@@ -178,9 +189,10 @@ class MoonPhase(WeatherModule):
 
         daily = weather["daily"]["data"]
 
-        moon_phase = (float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25
+        moon_phase = round((float(daily[0]["moonPhase"]) * 100 / 3.57) + 0.25,
+                           1)
         moon_icon = Utils.moon_icon(moon_phase, 50)
-        moon_phase = str(round(moon_phase, 1))
+        moon_phase = str(moon_phase)
 
         self.clear_surface()
         self.draw_image(moon_icon, (15, 10))

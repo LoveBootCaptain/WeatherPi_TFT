@@ -4,8 +4,8 @@ from modules.WeatherModule import WeatherModule, Utils
 
 
 class YourModuleClass(WeatherModule):
-    def __init__(self, fonts, language, units, config):
-        super().__init__(fonts, language, units, config)
+    def __init__(self, fonts, location, language, units, config):
+        super().__init__(fonts, location, language, units, config)
         # check config if needed
 
     def draw(self, screen, weather, updated):
