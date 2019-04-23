@@ -134,16 +134,16 @@ TODO: write a document for built-in and external modules
 ```
 ### Built-in Modules
 
-| Name            | Description           | Size              |
-| --------------- | --------------------- | ----------------- |
-| Alerts          |                       | 240x15 - 480x15   |
-| Clock           | Current Time          | 140x60            |
-| Location        | Current location      |                   |
-| Weather         | Current Weather       | 240x100 - 480x100 |
-| WeatherForecast | Weather Forcusts      | 240x80 - 480x80   |
-| SunriseSuset    | Sunsine, Sunset time  | 80x80             |
-| MoonPhase       | Moon MoonPhase        | 80x80             |
-| Wind            | Wind direction, speed | 80x80             |
+| Name            | Description                         | Size              |
+| --------------- | ----------------------------------- | ----------------- |
+| Alerts          | Any severe weather alerts pertinent | 240x15 - 480x15   |
+| Clock           | Current Time                        | 140x60            |
+| Location        | Current location                    |                   |
+| Weather         | Current Weather                     | 240x100 - 480x100 |
+| WeatherForecast | Weather Forcusts                    | 240x80 - 480x80   |
+| SunriseSuset    | Sunsine, Sunset time                | 80x80             |
+| MoonPhase       | Moon MoonPhase                      | 80x80             |
+| Wind            | Wind direction, speed               | 80x80             |
 
 ### External modules
 | Name | Description                              | Size   |
