@@ -12,7 +12,7 @@ import pygame
 import requests
 import sys
 import time
-from modules.BuiltIn import Alerts, Clock, Weather, WeatherForecast, SunriseSuset, MoonPhase, Wind
+from modules.BuiltIn import Alerts, Clock, Location, Weather, WeatherForecast, SunriseSuset, MoonPhase, Wind
 from modules.RepeatedTimer import RepeatedTimer
 
 
