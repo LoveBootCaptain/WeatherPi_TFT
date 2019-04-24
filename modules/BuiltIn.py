@@ -153,7 +153,7 @@ class WeatherForecast(WeatherModule):
                 self.rect.x + i * width, self.rect.y, width, self.rect.height
             ]
             self.forecast_modules.append(
-                DailyWeatherForecast(fonts, language, units, config))
+                DailyWeatherForecast(fonts, location, language, units, config))
 
     def draw(self, screen, weather, updated):
         if weather is None or not updated:
