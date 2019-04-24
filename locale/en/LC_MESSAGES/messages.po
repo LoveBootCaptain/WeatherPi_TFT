@@ -36,3 +36,51 @@ msgstr "Pressure"
 
 msgid "UVindex"
 msgstr "UVindex"
+
+msgid "NNE"
+msgstr "NNE"
+
+msgid "NE"
+msgstr "NE"
+
+msgid "ENE"
+msgstr "ENE"
+
+msgid "E"
+msgstr "E"
+
+msgid "ESE"
+msgstr "ESE"
+
+msgid "SE"
+msgstr "SE"
+
+msgid "SSE"
+msgstr "SSE"
+
+msgid "S"
+msgstr "S"
+
+msgid "SSW"
+msgstr "SSW"
+
+msgid "SW"
+msgstr "SW"
+
+msgid "WSW"
+msgstr "WSW"
+
+msgid "W"
+msgstr "W"
+
+msgid "WNW"
+msgstr "WNW"
+
+msgid "NW"
+msgstr "NW"
+
+msgid "NNW"
+msgstr "NNW"
+
+msgid "N"
+msgstr "N"

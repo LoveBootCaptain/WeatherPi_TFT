@@ -235,12 +235,13 @@ class Utils:
 
     @staticmethod
     @lru_cache()
-    def wind_arrow_icon(size, angle):
+    def wind_arrow_icon(wind_bearing, size):
         color = pygame.Color("white")
-        w = 0.15 * size
-        h = 0.25 * size
+        width = 0.15 * size  # arrowhead width
+        height = 0.25 * size  # arrowhead height
 
         radius = size / 2
+        angle = (360 + 90 - wind_bearing) % 360
         theta = angle / 360 * math.pi * 2
 
         a = (radius + radius * math.cos(theta + math.pi),
@@ -248,12 +249,14 @@ class Utils:
         b = (radius + radius * math.cos(theta),
              radius - radius * math.sin(theta))
 
-        bv = (b[0] - a[0], b[1] - a[1])
-        vl = math.sqrt(bv[0] * bv[0] + bv[1] * bv[1])
-        uv = (bv[0] / vl, bv[1] / vl)
+        base_vector = (b[0] - a[0], b[1] - a[1])
+        length = math.sqrt(base_vector[0]**2 + base_vector[1]**2)
+        unit_vector = (base_vector[0] / length, base_vector[1] / length)
 
-        l = (b[0] - uv[1] * w - uv[0] * h, b[1] + uv[0] * w - uv[1] * h)
-        r = (b[0] + uv[1] * w - uv[0] * h, b[1] - uv[0] * w - uv[1] * h)
+        l = (b[0] - unit_vector[1] * width - unit_vector[0] * height,
+             b[1] + unit_vector[0] * width - unit_vector[1] * height)
+        r = (b[0] + unit_vector[1] * width - unit_vector[0] * height,
+             b[1] - unit_vector[0] * width - unit_vector[1] * height)
 
         image = pygame.Surface((size, size))
         pygame.draw.line(image, color, a, b, 2)

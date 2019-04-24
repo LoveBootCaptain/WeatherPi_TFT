@@ -11,9 +11,10 @@ class Alerts(WeatherModule):
         elif "alerts" in weather:
             message = weather["alerts"]["title"]
         else:
-            return
+            message = ""
 
-        logging.info(message)
+        if message:
+            logging.info("Alert: {}".format(message))
 
         self.clear_surface()
         self.draw_text(message, "regular", "small", "white", (0, 0), "center")
@@ -207,17 +208,20 @@ class Wind(WeatherModule):
             return
 
         currently = weather["currently"]
-
-        wind_speed = Utils.speed_text(
-            round((float(currently["windSpeed"]) * 1.609344), 1), self.units)
+        wind_speed = currently["windSpeed"]
         wind_bearing = currently["windBearing"]
-        angle = (360 + 90 - wind_bearing) % 360
 
+        # The wind speed in miles per hour.
+        if self.units = "si":
+            wind_speed = round(float(wind_speed) * 1.609344), 1)
+        wind_bearing = currently["windBearing"]
+
+        wind_speed = Utils.speed_text(wind_speed, self.units)
         wind_bearing = Utils.angle_text(wind_bearing)
 
         self.clear_surface()
         self.draw_text(wind_bearing, "bold", "small", "white", (0, 10),
                        "center")
-        self.draw_image(Utils.wind_arrow_icon(30, angle), (25, 30))
+        self.draw_image(Utils.wind_arrow_icon(wind_bearing, 30), (25, 30))
         self.draw_text(wind_speed, "bold", "small", "white", (0, 65), "center")
         self.update_screen(screen)
