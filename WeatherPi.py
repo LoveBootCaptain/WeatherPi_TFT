@@ -73,7 +73,7 @@ def main():
                         const=True,
                         default=False)
     args = parser.parse_args()
-    logging.basicConfig(level=loggig.DEBUG if args.debug else logging.INFO,
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO,
                         stream=sys.stdout,
                         format="%(asctime)s %(levelname)s %(message)s")
 
