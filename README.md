@@ -103,7 +103,7 @@ sudo pip3 install Adafruit_DHT
 
 ### test
 ```bash
-./WeatherPi.py
+./WeatherPi.py [--debug]
 ```
 
 ## I18n
