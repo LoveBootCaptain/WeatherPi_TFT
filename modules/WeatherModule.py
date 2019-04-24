@@ -123,6 +123,42 @@ class Utils:
         return pygame.Color(color)[:3]
 
     @staticmethod
+    def angle_text(angle):
+        if angle > 11.25 and angle <= 33.75:
+            text = "NNE"
+        elif angle > 33.75 and angle <= 56.25:
+            text = "NE"
+        elif angle > 56.25 and angle <= 78.75:
+            text = "ENE"
+        elif angle > 78.75 and angle <= 101.25:
+            text = "E"
+        elif angle > 101.25 and angle <= 123.75:
+            text = "ESE"
+        elif angle > 123.75 and angle <= 146.25:
+            text = "SE"
+        elif angle > 146.25 and angle <= 168.75:
+            text = "SSE"
+        elif angle > 168.75 and angle <= 191.25:
+            text = "S"
+        elif angle > 191.25 and angle <= 213.75:
+            text = "SSW"
+        elif angle > 213.75 and angle <= 236.25:
+            text = "SW"
+        elif angle > 236.25 and angle <= 258.75:
+            text = "WSW"
+        elif angle > 258.75 and angle <= 281.25:
+            text = "W"
+        elif angle > 281.25 and angle <= 303.75:
+            text = "WNW"
+        elif angle > 303.75 and angle <= 326.25:
+            text = "NW"
+        elif angle > 326.25 and angle <= 348.75:
+            text = "NNW"
+        else:
+            text = "N"
+        return _(text)
+
+    @staticmethod
     @lru_cache()
     def font(file, size):
         logging.debug("font {} {}pxl loaded".format(file, size))
@@ -195,6 +231,25 @@ class Utils:
             sum_l += abs(l)
         logging.info("moon phase age: {} parcentage: {}%".format(
             age, round((sum_l / sum_x) * 100, 1)))
+        return image
+
+    @staticmethod
+    @lru_cache()
+    def arrow_icon(size):
+        color = "white"
+        s = 70
+        w = 5
+        h = 15
+
+        a = (s / 2, 0)
+        b = (s / 2, s)
+        l = (s / 2 - w, s - h)
+        r = (s / 2 + w, s - h)
+
+        image = pygame.Surface((size, size))
+        pygame.draw.line(image, color, a, b, width=1)
+        pygame.draw.polygon(image, color, [b, l, r], width=0)
+        image = pygame.transform.scale(image, (size, size))
         return image
 
     @staticmethod

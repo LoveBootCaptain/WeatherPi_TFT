@@ -215,8 +215,11 @@ class Wind(WeatherModule):
         circle_icon = Utils.icon("circle.png")
         arrow_icon = Utils.icon("arrow.png")
 
+        wind_bearing = Utils.angle_text(wind_bearing)
+
         self.clear_surface()
-        self.draw_text("N", "bold", "small", "white", (0, 10), "center")
+        self.draw_text(wind_bearing, "bold", "small", "white", (0, 10),
+                       "center")
         self.draw_text(wind_speed, "bold", "small", "white", (0, 65), "center")
         self.draw_image(circle_icon, (25, 30))
         self.draw_image(arrow_icon, (25, 35), angle)

@@ -36,3 +36,51 @@ msgstr "気圧"
 
 msgid "UVindex"
 msgstr "UVインデックス"
+
+msgid "NNE"
+msgstr "北北東"
+
+msgid "NE"
+msgstr "北東"
+
+msgid "ENE"
+msgstr "東北東"
+
+msgid "E"
+msgstr "東"
+
+msgid "ESE"
+msgstr "東南東"
+
+msgid "SE"
+msgstr "南東"
+
+msgid "SSE"
+msgstr "南南東"
+
+msgid "S"
+msgstr "南"
+
+msgid "SSW"
+msgstr "南南西"
+
+msgid "SW"
+msgstr "南西"
+
+msgid "WSW"
+msgstr "西南西"
+
+msgid "W"
+msgstr "西"
+
+msgid "WNW"
+msgstr "西北西"
+
+msgid "NW"
+msgstr "北西"
+
+msgid "NNW"
+msgstr "北北西"
+
+msgid "N"
+msgstr "北"
