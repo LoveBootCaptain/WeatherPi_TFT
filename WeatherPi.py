@@ -130,10 +130,9 @@ def main():
         screen = pygame.display.set_mode(config["display"])
         SCREEN_SLEEP = pygame.USEREVENT + 1
         SCREEN_WAKEUP = pygame.USEREVENT + 2
-        logging.info(
-            "pygame initialized. screen: {} x {} surface: {} x {}".format(
-                display_info.current_w, display_info.current_h,
-                config["display"][0], config["display"][1]))
+        logging.info("pygame initialized. display {}x{} surface {}x{}".format(
+            display_info.current_w, display_info.current_h,
+            config["display"][0], config["display"][1]))
 
         # load modules
         location = {
