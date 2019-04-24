@@ -186,8 +186,9 @@ def main():
                     pygame.display.update()
                     screen_on = False
                 elif event.type == SCREEN_WAKEUP:
-                    last_hash = None
-                    screen_on = True
+                    if not screen_on:
+                        last_hash = None
+                        screen_on = True
 
             time.sleep(1)
 

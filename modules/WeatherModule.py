@@ -235,21 +235,29 @@ class Utils:
 
     @staticmethod
     @lru_cache()
-    def arrow_icon(size):
-        color = "white"
-        s = 70
-        w = 5
-        h = 15
+    def wind_arrow_icon(size, angle):
+        color = pygame.Color("white")
+        w = 0.15 * size
+        h = 0.25 * size
 
-        a = (s / 2, 0)
-        b = (s / 2, s)
-        l = (s / 2 - w, s - h)
-        r = (s / 2 + w, s - h)
+        radius = size / 2
+        theta = angle / 360 * math.pi * 2
+
+        a = (radius + radius * math.cos(theta + math.pi),
+             radius - radius * math.sin(theta + math.pi))
+        b = (radius + radius * math.cos(theta),
+             radius - radius * math.sin(theta))
+
+        bv = (b[0] - a[0], b[1] - a[1])
+        vl = math.sqrt(bv[0] * bv[0] + bv[1] * bv[1])
+        uv = (bv[0] / vl, bv[1] / vl)
+
+        l = (b[0] - uv[1] * w - uv[0] * h, b[1] + uv[0] * w - uv[1] * h)
+        r = (b[0] + uv[1] * w - uv[0] * h, b[1] - uv[0] * w - uv[1] * h)
 
         image = pygame.Surface((size, size))
-        pygame.draw.line(image, color, a, b, width=1)
-        pygame.draw.polygon(image, color, [b, l, r], width=0)
-        image = pygame.transform.scale(image, (size, size))
+        pygame.draw.line(image, color, a, b, 2)
+        pygame.draw.polygon(image, color, [b, l, r], 0)
         return image
 
     @staticmethod
