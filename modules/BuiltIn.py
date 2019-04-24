@@ -84,7 +84,7 @@ class Weather(WeatherModule):
         text_width = self.rect.width - text_x
 
         message1 = "{} {}".format(temperature, short_summary)
-        if self.text_size(message1, "bold", "small")[0] > text_width:
+        if self.text_size(message1, "bold", "medium")[0] > text_width:
             message1 = "{}".format(temperature)
         message2 = "{} {}   {} {} {} {}".format(_("Feel Like"),
                                                 apparent_temperature,
