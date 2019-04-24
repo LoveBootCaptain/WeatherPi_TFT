@@ -213,7 +213,7 @@ class Wind(WeatherModule):
 
         # The wind speed in miles per hour.
         if self.units == "si":
-            wind_speed = round(float(wind_speed) * 1.609344), 1)
+            wind_speed = round(float(wind_speed) * 1.609344, 1)
         wind_bearing = currently["windBearing"]
 
         wind_speed = Utils.speed_text(wind_speed, self.units)
