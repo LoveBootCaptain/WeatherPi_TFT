@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import argparse
 import gettext
 import hashlib
 import importlib
@@ -65,7 +66,14 @@ def geolocode(key, language, address, latitude, longitude):
 
 def main():
     # initialize logger
-    logging.basicConfig(level=logging.INFO,
+    parser = argparse.ArgumentParser(description=__file__)
+    parser.add_argument("--debug",
+                        "-d",
+                        action="store_const",
+                        const=True,
+                        default=False)
+    args = parser.parse_args()
+    logging.basicConfig(level=loggig.DEBUG if args.debug else logging.INFO,
                         stream=sys.stdout,
                         format="%(asctime)s %(levelname)s %(message)s")
 
