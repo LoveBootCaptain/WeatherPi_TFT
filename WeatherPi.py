@@ -126,10 +126,12 @@ def main():
         os.putenv("SDL_FBDEV", config["SDL_FBDEV"])
         pygame.init()
         pygame.mouse.set_visible(False)
+        display_info = pygame.display.info()
         screen = pygame.display.set_mode(config["display"])
         SCREEN_SLEEP = pygame.USEREVENT + 1
         SCREEN_WAKEUP = pygame.USEREVENT + 2
-        logging.info("pygame initialized")
+        logging.info("pygame initialized. screen: width {} height {}".format(
+            display_info.current_w, display_info.current_h))
 
         # load modules
         location = {
