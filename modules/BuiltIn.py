@@ -214,7 +214,7 @@ class Wind(WeatherModule):
         # The wind speed in miles per hour.
         if self.units == "si":
             wind_speed = round(float(wind_speed) * 1.609344, 1)
-        wind_icon = Utils.wind_arrow_icon(int(wind_bearing), 30)
+        wind_icon = Utils.wind_arrow_icon(wind_bearing, 30)
 
         wind_speed = Utils.speed_text(wind_speed, self.units)
         wind_bearing = Utils.angle_text(wind_bearing)
@@ -222,6 +222,6 @@ class Wind(WeatherModule):
         self.clear_surface()
         self.draw_text(wind_bearing, "bold", "small", "white", (0, 10),
                        "center")
-        self.draw_image(Utils.wind_arrow_icon(wind_icon, 30), (25, 30))
+        self.draw_image(wind_icon, (25, 30))
         self.draw_text(wind_speed, "bold", "small", "white", (0, 65), "center")
         self.update_screen(screen)
