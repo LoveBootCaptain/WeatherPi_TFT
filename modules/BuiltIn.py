@@ -11,7 +11,7 @@ class Alerts(WeatherModule):
         elif "alerts" in weather:
             message = weather["alerts"]["title"]
         else:
-            message = ""
+            return
 
         if message:
             logging.info("Alert: {}".format(message))
