@@ -126,7 +126,7 @@ def main():
         os.putenv("SDL_FBDEV", config["SDL_FBDEV"])
         pygame.init()
         pygame.mouse.set_visible(False)
-        display_info = pygame.display.info()
+        display_info = pygame.display.Info()
         screen = pygame.display.set_mode(config["display"])
         SCREEN_SLEEP = pygame.USEREVENT + 1
         SCREEN_WAKEUP = pygame.USEREVENT + 2
