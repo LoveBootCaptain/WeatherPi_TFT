@@ -145,7 +145,7 @@ def main():
                 logging.info("load external module: {}".format(name))
                 m = getattr(importlib.import_module("modules.{}".format(name)),
                             name)
-            modules.append((m)(fonts, language, units, conf))
+            modules.append((m)(fonts, location, language, units, conf))
         logging.info("modules loaded")
 
         # main loop
@@ -184,7 +184,7 @@ def main():
             time.sleep(1)
 
     except Exception as e:
-        logging.error(e)
+        logging.error(e, exc_info=True)
 
     finally:
         if timer_thread:

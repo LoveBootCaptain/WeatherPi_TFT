@@ -19,7 +19,7 @@ from modules.RepeatedTimer import RepeatedTimer
 
 
 class PIR(WeatherModule):
-    def __init__(self, fonts, language, units, config):
+    def __init__(self, fonts, location, language, units, config):
         self.pin = None
         self.power_save_delay = None
         self.power_save_timer = 0

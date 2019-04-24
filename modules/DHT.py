@@ -27,8 +27,8 @@ class DHT(WeatherModule):
         "AM2302": Adafruit_DHT.AM2302
     }
 
-    def __init__(self, fonts, language, units, config):
-        super().__init__(fonts, language, units, config)
+    def __init__(self, fonts, location, language, units, config):
+        super().__init__(fonts, location, language, units, config)
         self.sensor = None
         self.pin = None
         self.correction_value = None
@@ -51,8 +51,8 @@ class DHT(WeatherModule):
 
     def quit(self):
         if self.timer_thread:
-            logging.info(
-                "{}: sensor thread stopped".format(__class__.__name__))
+            logging.info("{}: sensor thread stopped".format(
+                __class__.__name__))
             self.timer_thread.quit()
 
     def draw(self, screen, weather, updated):
