@@ -6,6 +6,12 @@ Weather Station for Raspberry Pi and Small LCDs
 fig 480x320 en
 <img src="https://user-images.githubusercontent.com/129797/56561828-f5102100-65e2-11e9-810f-c9075958eaf4.png" width="480">
 
+fig 480x320 en
+
+<img src="https://user-images.githubusercontent.com/129797/56692521-563c0f80-671d-11e9-9117-5f526896f4b2.png" width="240">
+
+fig 240x320 en
+
 ## Feature
 * Modularized display parts  
   (表示パーツはモジュール化してあるので、カスタマイズが可能です)
@@ -110,9 +116,14 @@ sudo pip3 install Adafruit_DHT
 
 You can change the display language of dates and information.
 
-fig 480x320 ja
+
 <img src="https://user-images.githubusercontent.com/129797/56562359-25a48a80-65e4-11e9-83b5-a58b00af355c.png" width="480">
 
+fig 480x320 ja
+
+<img src="https://user-images.githubusercontent.com/129797/56692520-550ae280-671d-11e9-933a-de2a0c9c4ce6.png" width="240">
+
+fig 240x320 jp
 
 ### Font
 * Get the TryeType font and put it in the fonts folder
