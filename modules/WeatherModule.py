@@ -8,9 +8,6 @@ import requests
 import sys
 from functools import lru_cache
 
-SCREEN_SLEEP = pygame.USEREVENT + 1
-SCREEN_WAKEUP = pygame.USEREVENT + 2
-
 
 class Utils:
     color_maps = [
@@ -182,11 +179,17 @@ class Utils:
     @lru_cache()
     def weather_icon(name, size):
         try:
-            # get icons from DarkSky
-            response = requests.get(
-                "https://darksky.net/images/weather-icons/{}.png".format(name))
-            response.raise_for_status()
-            image = pygame.image.load(io.BytesIO(response.content))
+            file = "{}/icons/{}.png".format(sys.path[0], name)
+            if os.path.isfile(file):
+                # get icons from local folder
+                image = pygame.image.load(file)
+            else:
+                # get icons from DarkSky
+                response = requests.get(
+                    "https://darksky.net/images/weather-icons/{}.png".format(
+                        name))
+                response.raise_for_status()
+                image = pygame.image.load(io.BytesIO(response.content))
 
             pixels = pygame.PixelArray(image)
             pixels.replace(pygame.Color("black"), pygame.Color("dimgray"))
@@ -203,7 +206,7 @@ class Utils:
             return image
 
         except Exception as e:
-            logging.error(e)
+            logging.error(e, exc_info=True)
             return None
 
     @staticmethod
@@ -264,15 +267,17 @@ class Utils:
 
         image = pygame.Surface((size, size))
         pygame.draw.line(image, color, a, b, 2)
-        pygame.draw.polygon(image, color, [b, l, r], 0)
+        pygame.draw.polygon(image, color, [b, l, r, b], 0)
         return image
 
     @staticmethod
     def screen_sleep():
+        SCREEN_SLEEP = pygame.USEREVENT + 1
         pygame.event.post(pygame.event.Event(SCREEN_SLEEP))
 
     @staticmethod
     def screen_wakeup():
+        SCREEN_WAKEUP = pygame.USEREVENT + 2
         pygame.event.post(pygame.event.Event(SCREEN_WAKEUP))
 
 
@@ -354,7 +359,6 @@ class WeatherModule:
             x = self.rect.width - size[0]
         (width, height) = (x + size[0], size[1])
         self.surface.blit(font.render(text, True, color, background), (x, y))
-
         return width, height
 
     def draw_image(self, image, position, angle=0):
