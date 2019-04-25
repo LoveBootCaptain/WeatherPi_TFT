@@ -126,11 +126,17 @@ def main():
         os.putenv("SDL_FBDEV", config["SDL_FBDEV"])
         pygame.init()
         pygame.mouse.set_visible(False)
-        display_info = pygame.display.Info()
-        screen = pygame.display.set_mode(config["display"])
+        if pygame.display.mode_ok(config["display"]):
+            display = None
+            display_info = None
+            screen = pygame.display.set_mode(config["display"])
+        else:
+            display = pygame.display.set_mode((0, 0))
+            display_info = pygame.display.Info()
+            screen = pygame.Surface(config["display"])
         SCREEN_SLEEP = pygame.USEREVENT + 1
         SCREEN_WAKEUP = pygame.USEREVENT + 2
-        logging.info("pygame initialized. display {}x{} surface {}x{}".format(
+        logging.info("pygame initialized. display {}x{} screen {}x{}".format(
             display_info.current_w, display_info.current_h,
             config["display"][0], config["display"][1]))
 
@@ -177,7 +183,17 @@ def main():
             # update screen
             for module in modules:
                 module.draw(screen, weather, updated)
+
+            # update display
             if screen_on:
+                if display:
+                    display_w, display_h = display.get_size()
+                    surface_w, surface_h = surface.get_size()
+                    if diplay_w / surface_w * surface_h <= display_h:
+                        w, h = display_w, display_w / surface_w * surface_h
+                    else:
+                        w, h = display_h / surface_h * surface_w, display_h
+                    display.blit(pygame.transform.scale(surface, (w, h), (0, 0))
                 pygame.display.update()
 
             # event check

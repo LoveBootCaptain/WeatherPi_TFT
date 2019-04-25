@@ -2,7 +2,7 @@
   "darksky_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "google_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
 
-  "address": "",  
+  "address": "",
   "latitude": 35.746289,
   "longitude": 139.667028,
 
@@ -21,6 +21,12 @@
       "module": "Clock",
       "config": {
         "rect": [0, 0, 140, 60]
+      }
+    },
+    {
+      "module": "Location",
+      "config": {
+        "rect": [140, 0, 180, 20]
       }
     },
     {

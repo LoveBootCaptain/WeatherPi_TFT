@@ -26,10 +26,9 @@
     {
       "module": "Location",
       "config": {
-        "rect": [140, 0, 340, 15]
+        "rect": [140, 0, 340, 20]
       }
     },
-
     {
       "module": "Alerts",
       "config": {
