@@ -187,12 +187,12 @@ def main():
             if screen_on:
                 if display:
                     display_w, display_h = display.get_size()
-                    screen_w, screen_h = surface.get_size()
+                    screen_w, screen_h = screen.get_size()
                     if display_w / screen_w * screen_h <= display_h:
                         w, h = display_w, int(display_w / screen_w * screen_h)
                     else:
                         w, h = int(display_h / screen_h * screen_w), display_h
-                    display.blit(pygame.transform.scale(surface, (w, h)),
+                    display.blit(pygame.transform.scale(screen, (w, h)),
                                  (0, 0))
                 pygame.display.update()
 
