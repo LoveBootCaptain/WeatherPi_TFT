@@ -65,11 +65,15 @@ class Utils:
 
     @staticmethod
     def speed_text(value, units):
-        return ("{} km/h" if units == "si" else "{} mi/h").format(value)
+        return ("{}km/h" if units == "si" else "{}mi/h").format(value)
 
     @staticmethod
     def temparature_text(value, units):
         return ("{}°c" if units == "si" else "{}°f").format(value)
+
+    @staticmethod
+    def color(name):
+        return pygame.Color(name)[:3]
 
     @staticmethod
     def heat_index(f, h):
@@ -100,7 +104,7 @@ class Utils:
         f = fahrenheit(temperature) if units == "si" else temperature
         c = celsius(Utils.heat_index(f, humidity))
 
-        color = pygame.Color("white")[:3]
+        color = Utils.color("white")
         for cm in Utils.color_maps:
             if cm["celsius_a"] <= c and c < cm["celsius_b"]:
                 color = gradation(cm["color_a"], cm["color_b"],
@@ -120,10 +124,10 @@ class Utils:
             color = "red"
         else:
             color = "violet"
-        return pygame.Color(color)[:3]
+        return Utils.color(color)
 
     @staticmethod
-    def angle_text(angle):
+    def wind_bearing_text(angle):
         if angle > 11.25 and angle <= 33.75:
             text = "NNE"
         elif angle > 33.75 and angle <= 56.25:
@@ -230,7 +234,7 @@ class Utils:
             sum_x += abs(x)
             sum_l += abs(l)
         logging.info("moon phase age: {} parcentage: {}%".format(
-            age, round((sum_l / sum_x) * 100, 1)))
+            age, round(100 - (sum_l / sum_x) * 100, 1)))
         return image
 
     @staticmethod
@@ -284,9 +288,6 @@ class WeatherModule:
 
     def quit(self):
         pass
-
-    def color(self, name):
-        return pygame.Color(name)[:3]
 
     def draw(self, weather):
         pass
@@ -346,7 +347,7 @@ class WeatherModule:
         (x, y) = position
         font = self.font(style, size)
         size = font.size(text)
-        color = self.color(color) if isinstance(color, str) else color
+        color = Utils.color(color) if isinstance(color, str) else color
         if align == "center":
             x = (self.rect.width - size[0]) / 2
         elif align == "right":

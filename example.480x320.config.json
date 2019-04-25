@@ -26,13 +26,13 @@
     {
       "module": "Location",
       "config": {
-        "rect": [140, 0, 340, 20]
+        "rect": [140, 0, 340, 15]
       }
     },
     {
       "module": "Alerts",
       "config": {
-        "rect": [140, 20, 340, 40]
+        "rect": [140, 15, 340, 45]
       }
     },
     {

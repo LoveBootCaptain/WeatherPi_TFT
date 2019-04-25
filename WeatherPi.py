@@ -194,7 +194,7 @@ def main():
                         w, h = int(display_h / screen_h * screen_w), display_h
                     display.blit(pygame.transform.scale(screen, (w, h)),
                                  (0, 0))
-                pygame.display.update()
+                pygame.display.flip()
 
             # event check
             for event in pygame.event.get():
@@ -205,7 +205,7 @@ def main():
                         display.fill(pygame.Color("black"))
                     else:
                         screen.fill(pygame.Color("black"))
-                    pygame.display.update()
+                    pygame.display.flip()
                     screen_on = False
                 elif event.type == SCREEN_WAKEUP:
                     if not screen_on:

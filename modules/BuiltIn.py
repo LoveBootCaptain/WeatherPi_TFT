@@ -217,7 +217,7 @@ class Wind(WeatherModule):
         wind_icon = Utils.wind_arrow_icon(wind_bearing, 30)
 
         wind_speed = Utils.speed_text(wind_speed, self.units)
-        wind_bearing = Utils.angle_text(wind_bearing)
+        wind_bearing = Utils.wind_bearing_text(wind_bearing)
 
         self.clear_surface()
         self.draw_text(wind_bearing, "bold", "small", "white", (0, 10),
