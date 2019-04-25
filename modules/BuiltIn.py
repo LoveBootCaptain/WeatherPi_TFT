@@ -11,7 +11,7 @@ class Alerts(WeatherModule):
         elif "alerts" in weather:
             message = weather["alerts"]["title"]
         else:
-            return
+            message = ""
 
         if message:
             logging.info("Alert: {}".format(message))
@@ -43,7 +43,7 @@ class Location(WeatherModule):
 
         self.clear_surface()
         self.draw_text(self.location["address"], "bold", "small", "white",
-                       (0, 0))
+                       (0, 0), "right")
         self.update_screen(screen)
 
 

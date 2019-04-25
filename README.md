@@ -68,7 +68,7 @@ cd
 cd WeatherPi
 sudo cp WeatherPi_Service.sh /etc/init.d/WeatherPi
 sudo chmod +x /etc/init.d/WeatherPi
-sudo chmod +x Weatherpi.py
+sudo chmod +x WeatherPi.py
 sudo systemctl enable WeatherPi
 ```
 

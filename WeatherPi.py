@@ -135,7 +135,7 @@ def main():
             screen = pygame.Surface(config["display"])
         SCREEN_SLEEP = pygame.USEREVENT + 1
         SCREEN_WAKEUP = pygame.USEREVENT + 2
-        logging.info("pygame initialized. display {} screen {}".format(
+        logging.info("pygame initialized. display {}x{} screen {}x{}".format(
             display_info.current_w, display_info.current_h,
             config["display"][0], config["display"][1]))
 
@@ -187,13 +187,13 @@ def main():
             if screen_on:
                 if display:
                     display_w, display_h = display.get_size()
-                    surface_w, surface_h = surface.get_size()
-                    if diplay_w / surface_w * surface_h <= display_h:
-                        w, h = display_w, display_w / surface_w * surface_h
+                    screen_w, screen_h = surface.get_size()
+                    if display_w / screen_w * screen_h <= display_h:
+                        w, h = display_w, int(display_w / screen_w * screen_h)
                     else:
-                        w, h = display_h / surface_h * surface_w, display_h
-                    display.blit(
-                        pygame.transform.scale(surface, (w, h), (0, 0)))
+                        w, h = int(display_h / screen_h * screen_w), display_h
+                    display.blit(pygame.transform.scale(surface, (w, h)),
+                                 (0, 0))
                 pygame.display.update()
 
             # event check
