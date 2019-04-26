@@ -36,10 +36,10 @@ class PIR(WeatherModule):
 
     def draw(self, screen, weather, updated):
         if GPIO.input(self.pin):
-            Utils.screen_wakeup()
+            Utils.display_wakeup()
             self.power_save_timer = 0
         else:
             self.power_save_timer += 1
             if self.power_save_timer > self.power_save_delay:
                 logging.info("{}: screen sleep.".format(__class__.__name__))
-                Utils.screen_sleep()
+                Utils.display_sleep()

@@ -234,8 +234,8 @@ class Utils:
                 end_pos = (radius + x, radius + y)
             pygame.draw.line(image, pygame.Color("dimgray"), start_pos,
                              end_pos)
-            sum_x += abs(x)
-            sum_l += abs(l)
+            sum_x += 2 * x
+            sum_l += end_pos[0] - start_pos[0]
         logging.info("moon phase age: {} parcentage: {}%".format(
             age, round(100 - (sum_l / sum_x) * 100, 1)))
         return image
@@ -271,14 +271,14 @@ class Utils:
         return image
 
     @staticmethod
-    def screen_sleep():
-        SCREEN_SLEEP = pygame.USEREVENT + 1
-        pygame.event.post(pygame.event.Event(SCREEN_SLEEP))
+    def display_sleep():
+        DISPLAY_SLEEP = pygame.USEREVENT + 1
+        pygame.event.post(pygame.event.Event(DISPLAY_SLEEP))
 
     @staticmethod
-    def screen_wakeup():
-        SCREEN_WAKEUP = pygame.USEREVENT + 2
-        pygame.event.post(pygame.event.Event(SCREEN_WAKEUP))
+    def display_wakeup():
+        DISPLAY_WAKEUP = pygame.USEREVENT + 2
+        pygame.event.post(pygame.event.Event(DISPLAY_WAKEUP))
 
 
 class WeatherModule:

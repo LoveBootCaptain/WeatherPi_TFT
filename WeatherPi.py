@@ -108,11 +108,11 @@ def main():
                                 config["longitude"])
             if results is not None:
                 latitude, longitude, address = results
-                logging.info("location: {},{} {}".format(
-                    latitude, longitude, address))
                 config["latitude"] = latitude
                 config["longitude"] = longitude
                 config["address"] = address
+                logging.info("location: {},{} {}".format(
+                    latitude, longitude, address))
 
         # start weather forecast thread
         timer_thread = RepeatedTimer(300, weather_forecast, [
@@ -128,16 +128,22 @@ def main():
         pygame.mouse.set_visible(False)
         display_info = pygame.display.Info()
         if pygame.display.mode_ok(config["display"]):
-            display = None
-            screen = pygame.display.set_mode(config["display"])
+            display = surface = pygame.display.set_mode(config["display"])
+            scale = None
         else:
             display = pygame.display.set_mode((0, 0))
-            screen = pygame.Surface(config["display"])
-        SCREEN_SLEEP = pygame.USEREVENT + 1
-        SCREEN_WAKEUP = pygame.USEREVENT + 2
-        logging.info("pygame initialized. display {}x{} screen {}x{}".format(
-            display_info.current_w, display_info.current_h,
-            config["display"][0], config["display"][1]))
+            surface = pygame.Surface(config["display"])
+            display_w, display_h = display.get_size()
+            surface_w, surface_h = surface.get_size()
+            if display_w / surface_w * surface_h <= display_h:
+                scale = (display_w, int(display_w / surface_w * surface_h))
+            else:
+                scale = (int(display_h / surface_h * surface_w), display_h)
+        DISPLAY_SLEEP = pygame.USEREVENT + 1
+        DISPLAY_WAKEUP = pygame.USEREVENT + 2
+        logging.info(
+            "pygame initialized. display {} surface {} scale {}".format(
+                display.get_size(), surface.get_size(), scale))
 
         # load modules
         location = {
@@ -156,18 +162,18 @@ def main():
             conf = module["config"]
             if name in globals():
                 logging.info("load built-in module: {}".format(name))
-                m = (globals()[name])
+                mod = (globals()[name])
             else:
                 logging.info("load external module: {}".format(name))
-                m = getattr(importlib.import_module("modules.{}".format(name)),
-                            name)
-            modules.append((m)(fonts, location, language, units, conf))
+                mod = getattr(
+                    importlib.import_module("modules.{}".format(name)), name)
+            modules.append((mod)(fonts, location, language, units, conf))
         logging.info("modules loaded")
 
         # main loop
-        running = True
-        screen_on = True
+        display_wakeup = True
         last_hash = None
+        running = True
         while running:
             # weather data check
             result = timer_thread.result()
@@ -179,20 +185,14 @@ def main():
                 last_hash = hash
                 updated = True
 
-            # update screen
+            # update surface
             for module in modules:
-                module.draw(screen, weather, updated)
+                module.draw(surface, weather, updated)
 
             # update display
-            if screen_on:
-                if display:
-                    display_w, display_h = display.get_size()
-                    screen_w, screen_h = screen.get_size()
-                    if display_w / screen_w * screen_h <= display_h:
-                        w, h = display_w, int(display_w / screen_w * screen_h)
-                    else:
-                        w, h = int(display_h / screen_h * screen_w), display_h
-                    display.blit(pygame.transform.scale(screen, (w, h)),
+            if display_wakeup:
+                if scale:
+                    display.blit(pygame.transform.scale(surface, scale),
                                  (0, 0))
                 pygame.display.flip()
 
@@ -200,17 +200,14 @@ def main():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                elif event.type == SCREEN_SLEEP:
-                    if display:
-                        display.fill(pygame.Color("black"))
-                    else:
-                        screen.fill(pygame.Color("black"))
+                elif event.type == DISPLAY_SLEEP:
+                    display.fill(pygame.Color("black"))
                     pygame.display.flip()
-                    screen_on = False
-                elif event.type == SCREEN_WAKEUP:
-                    if not screen_on:
+                    display_wakeup = False
+                elif event.type == DISPLAY_WAKEUP:
+                    if not display_wakeup:
                         last_hash = None
-                        screen_on = True
+                        display_wakeup = True
 
             time.sleep(1)
 
