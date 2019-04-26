@@ -128,22 +128,22 @@ def main():
         pygame.mouse.set_visible(False)
         display_info = pygame.display.Info()
         if pygame.display.mode_ok(config["display"]):
-            display = surface = pygame.display.set_mode(config["display"])
+            display = screen = pygame.display.set_mode(config["display"])
             scale = None
         else:
             display = pygame.display.set_mode((0, 0))
-            surface = pygame.Surface(config["display"])
+            screen = pygame.surface(config["display"])
             display_w, display_h = display.get_size()
-            surface_w, surface_h = surface.get_size()
-            if display_w / surface_w * surface_h <= display_h:
-                scale = (display_w, int(display_w / surface_w * surface_h))
+            screen_w, screen_h = screen.get_size()
+            if display_w / screen_w * screen_h <= display_h:
+                scale = (display_w, int(display_w / screen_w * screen_h))
             else:
-                scale = (int(display_h / surface_h * surface_w), display_h)
+                scale = (int(display_h / screen_h * screen_w), display_h)
         DISPLAY_SLEEP = pygame.USEREVENT + 1
         DISPLAY_WAKEUP = pygame.USEREVENT + 2
         logging.info(
-            "pygame initialized. display {} surface {} scale {}".format(
-                display.get_size(), surface.get_size(), scale))
+            "pygame initialized. display:{} screen:{} scale:{}".format(
+                display.get_size(), screen.get_size(), scale))
 
         # load modules
         location = {
@@ -185,14 +185,14 @@ def main():
                 last_hash = hash
                 updated = True
 
-            # update surface
+            # update screen
             for module in modules:
-                module.draw(surface, weather, updated)
+                module.draw(screen, weather, updated)
 
             # update display
             if display_wakeup:
                 if scale:
-                    display.blit(pygame.transform.scale(surface, scale),
+                    display.blit(pygame.transform.scale(screen, scale),
                                  (0, 0))
                 pygame.display.flip()
 
