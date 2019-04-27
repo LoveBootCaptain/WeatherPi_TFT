@@ -30,12 +30,14 @@ def weather_alerts(prefectures, city):
 
         data = et.fromstring(response.content)
         ns = {"ns": "http://xml.kishou.go.jp/jmaxml1/body/meteorology1/"}
-        return list(
+        alert_list = list(
             map(
                 lambda x: x.text,
                 data.findall(
-                    "ns:Body/ns:Warning//*[ns:Name='{}}']../ns:Kind/ns:Name".
+                    "ns:Body/ns:Warning//*[ns:Name='{}']../ns:Kind/ns:Name".
                     format(city), ns)))
+        logging.info("weather alert: {}".format(alert_list))
+        return alert_list
 
     except Exception as e:
         logging.error(e, exc_info=True)
