@@ -6,7 +6,7 @@ from modules.RepeatedTimer import RepeatedTimer
 from xml.etree import ElementTree as et
 
 
-def alerts(prefectures, city):
+def weather_alerts(prefectures, city):
     try:
         response = requests.get(
             "https://www.data.jma.go.jp/developer/xml/feed/extra.xml")
@@ -23,6 +23,8 @@ def alerts(prefectures, city):
                     break
         if not url:
             return None
+
+        logging.info("weather alert: {}".format(url))
 
         response = requests.get(url)
         response.raise_for_status()
@@ -73,7 +75,7 @@ class JMAAlerts(WeatherModule):
             raise ValueError(__class__.__name__)
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(600, alerts,
+        self.timer_thread = RepeatedTimer(600, weather_alerts,
                                           [self.prefectures, self.city])
         self.timer_thread.start()
         logging.info("{}: thread started".format(__class__.__name__))
