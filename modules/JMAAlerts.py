@@ -23,21 +23,17 @@ def weather_alerts(prefectures, city):
         if not url:
             return None
 
-        logging.info("weather alert: {}".format(url))
-
         response = requests.get(url)
         response.raise_for_status()
 
         data = et.fromstring(response.content)
         ns = {"ns": "http://xml.kishou.go.jp/jmaxml1/body/meteorology1/"}
-        alert_list = list(
+        return list(
             map(
                 lambda x: x.text,
                 data.findall(
                     "ns:Body/ns:Warning//*[ns:Name='{}']../ns:Kind/ns:Name".
                     format(city), ns)))
-        logging.info("weather alert: {}".format(alert_list))
-        return alert_list
 
     except Exception as e:
         logging.error(e, exc_info=True)
