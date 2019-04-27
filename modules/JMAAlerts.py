@@ -83,9 +83,9 @@ class JMAAlerts(WeatherModule):
 
         self.clear_surface()
         if message:
-            logging.debug("{}: {} {} {}".format(__class__.__name__,
-                                                self.prefectures, self.city,
-                                                message))
+            logging.info("{}: {} {} {}".format(__class__.__name__,
+                                               self.prefectures, self.city,
+                                               message))
             for size in ("large", "medium", "small"):
                 w, h = self.text_size(message, "bold", size)
                 if w <= self.rect.width and h <= self.rect.height:
