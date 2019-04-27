@@ -19,7 +19,6 @@ def weather_alerts(prefectures, city):
             if element.find("ns:content", ns).text.find(prefectures) > -1:
                 if element.find("ns:title", ns).text == "気象特別警報・警報・注意報":
                     url = element.find("ns:link", ns).attrib["href"]
-                    logging.debug("{} {}".format(__class__.__name__), url)
                     break
         if not url:
             return None
