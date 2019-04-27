@@ -86,9 +86,9 @@ class JMAAlerts(WeatherModule):
                     message = ""
                 else:
                     message = ",".join(result)
-                    logging.debug("{}: {} {} {}".format(
-                        __class__.__name__, self.prefectures, self.city,
-                        message))
+        logging.debug("{}: {} {} {}".format(__class__.__name__,
+                                            self.prefectures, self.city,
+                                            message))
 
         self.clear_surface()
         self.draw_text(message, "regular", "small", "red", (0, 0), "center")
