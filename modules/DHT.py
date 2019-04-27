@@ -5,22 +5,25 @@ import sys
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 
-# Adafruit temperature/humidity sensor module
-#
-# example config:
-# {
-#   "module": "DHT",
-#   "config": {
-#     "rect": [x, y, width, height],
-#     "sensor": "DHT11",
-#     "pin": 14,
-#     "correction_value": -8
-#   }
-#  }
-#
-
 
 class DHT(WeatherModule):
+    """
+    Adafruit temperature/humidity sensor module
+
+    This module gets data form DHT11, DHT22 and AM2302 sensors and display it in
+    Color Index color.
+
+    example config:
+    {
+      "module": "DHT",
+      "config": {
+        "rect": [x, y, width, height],
+        "sensor": "DHT11",
+        "pin": 14,
+        "correction_value": -8
+      }
+     }
+    """
     sensors = {
         "DHT11": Adafruit_DHT.DHT11,
         "DHT22": Adafruit_DHT.DHT22,
@@ -69,7 +72,7 @@ class DHT(WeatherModule):
             return
 
         # workaround:
-        #　Adjusted because the temperature to be measured is too high
+        # Adjusted because the temperature to be measured is too high
         celsius = celsius + self.correction_value
 
         color = Utils.heat_color(celsius, humidity, "si")
@@ -81,7 +84,8 @@ class DHT(WeatherModule):
 
         message = "{}  {}".format(temparature, humidity)
         for size in ("large", "medium", "small"):
-            if self.text_size(message, "bold", size)[0] <= self.rect.width:
+            w, h = self.text_size(message, "bold", size)
+            if w <= self.rect.width and h <= self.rect.height:
                 break
 
         self.clear_surface()

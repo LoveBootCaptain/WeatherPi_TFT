@@ -102,7 +102,7 @@ for dist in pip.get_installed_distributions():
     call("pip install --upgrade " + dist.project_name, shell=True)
 ```
 
-* if you use DHT11 sensor, install Adafruit_DHT
+* if you use DHT11, DHT22 and AM2302 sensor, install Adafruit_DHT
 ```bash
 sudo pip3 install Adafruit_DHT
 ```
@@ -150,7 +150,7 @@ TODO: write a document for built-in and external modules
 | --------------- | ----------------------------------- | ------------- | ----------------- |
 | Alerts          | Any severe weather alerts pertinent |               | 240x15 - 480x15   |
 | Clock           | Current Time                        |               | 140x60            |
-| Location        | Current location                    |               |                   |
+| Location        | Current location                    |               | 140x15            |
 | Weather         | Current Weather                     |               | 240x100 - 480x100 |
 | WeatherForecast | Weather Forcusts                    | forecast_days | 240x80 - 480x80   |
 | SunriseSuset    | Sunsine, Sunset time                |               | 80x80             |
@@ -158,10 +158,12 @@ TODO: write a document for built-in and external modules
 | Wind            | Wind direction, speed               |               | 80x80             |
 
 ### External modules
-| Name | Description                              | Options                 | Size   |
-| ---- | ---------------------------------------- | ----------------------- | ------ |
-| DHT  | Adafruit temperature/humidity sensor     | pin<br>correction_value | 100x60 |
-| PIR  | PIR(Passive Infrared Ray） Motion Sensor | pin<br>power_save_delay | -      |
+
+| Name      | Description                                                  | Options                 | Size            |
+| --------- | ------------------------------------------------------------ | ----------------------- | --------------- |
+| JMAAlerts | JMA weather alerts<br>(気象庁の注意報、警報、特別警報を表示) |                         | 240x15 - 480x15 |
+| DHT       | Adafruit temperature/humidity sensor                         | pin<br>correction_value | 100x60          |
+| PIR       | PIR(Passive Infrared Ray）Motion Sensor                      | pin<br>power_save_delay | -               |
 
 ## Credit
 * original software: [WeatherPi_TFT](https://github.com/LoveBootCaptain/WeatherPi_TFT)

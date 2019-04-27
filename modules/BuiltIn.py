@@ -13,11 +13,14 @@ class Alerts(WeatherModule):
         else:
             message = ""
 
+        self.clear_surface()
         if message:
             logging.info("Alert: {}".format(message))
-
-        self.clear_surface()
-        self.draw_text(message, "regular", "small", "red", (0, 0), "center")
+            for size in ("large", "medium", "small"):
+                w, h = self.text_size(message, "bold", size)
+                if w <= self.rect.width and h <= self.rect.height:
+                    break
+            self.draw_text(message, "regular", size, "red", (0, 0), "center")
         self.update_screen(screen)
 
 

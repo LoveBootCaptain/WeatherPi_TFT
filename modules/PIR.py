@@ -5,20 +5,23 @@ import sys
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 
-# PIR motion sensor module
-#
-# example config:
-# {
-#   "module": "PIR",
-#   "config": {
-#     "pin": 26,
-#     "power_save_delay": 300
-#   }
-# }
-#
-
 
 class PIR(WeatherModule):
+    """
+    PIR motion sensor module
+
+    This module can monitor a PIR motion sensor and put display to sleep.
+
+    example config:
+    {
+      "module": "PIR",
+      "config": {
+        "pin": 26,
+        "power_save_delay": 300
+      }
+    }
+    """
+
     def __init__(self, fonts, location, language, units, config):
         self.pin = None
         self.power_save_delay = None
