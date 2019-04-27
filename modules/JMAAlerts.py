@@ -1,5 +1,6 @@
 import gettext
 import logging
+import requests
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 from xml.etree import ElementTree as et
