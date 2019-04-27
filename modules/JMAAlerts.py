@@ -79,14 +79,16 @@ class JMAAlerts(WeatherModule):
             message = "waiting for weather forecast data ..."
         else:
             if self.timer_thread is None:
-                return
-            result = self.timer_thread.result()
-            if result is None:
-                return
-            message = ",".join(result)
-            logging.debug("{}: {} {} {}".format(__class__.__name__,
-                                                self.prefectures, self.city,
-                                                message))
+                message = ""
+            else:
+                result = self.timer_thread.result()
+                if result is None:
+                    message = ""
+                else:
+                    message = ",".join(result)
+                    logging.debug("{}: {} {} {}".format(
+                        __class__.__name__, self.prefectures, self.city,
+                        message))
 
         self.clear_surface()
         self.draw_text(message, "regular", "small", "red", (0, 0), "center")
