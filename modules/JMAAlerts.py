@@ -4,14 +4,13 @@ from modules.WeatherModule import WeatherModule, Utils
 from xml.etree import ElementTree as et
 
 
-def extra_feed(prefectures, title="気象特別警報・警報・注意報"):
+def extra_feed(prefectures):
     """
     気象庁防災情報XMLフォーマット形式電文の公開（PULL型）で公開されているAtomフィードのうち、
     "高頻度フィード/随時"　のフィードを取得し、dataのURLを返す。
     参考：http://xml.kishou.go.jp/xmlpull.html
 
     :param prefectures: 都道府県名
-    :param title: データのタイトル　"気象警報・注意報" or "気象特別警報・警報・注意報"
     """
     try:
         response = requests.get(
@@ -22,7 +21,7 @@ def extra_feed(prefectures, title="気象特別警報・警報・注意報"):
         ns = {"ns": "http://www.w3.org/2005/Atom"}
         for element in root.findall("./ns:entry", ns):
             if element.find("ns:content", ns).text.find(prefectures) > -1:
-                if element.find("ns:title", ns).text == title:
+                if element.find("ns:title", ns).text == "気象特別警報・警報・注意報":
                     return element.find("ns:link", ns).attrib["href"]
 
     except Exception as e:
@@ -55,13 +54,13 @@ def warning(url, city):
 
 
 def alert(prefectures, city, title):
-    url = extra_feed(prefectures, title)
+    url = extra_feed(prefectures)
     if url:
         return warning(url, city)
     return None
 
 
-class JMAAlert(WeatherModule):
+class JMAAlerts(WeatherModule):
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
         self.city, self.prefectures = self.location["address"].split(",")
@@ -76,17 +75,18 @@ class JMAAlert(WeatherModule):
             self.timer_thread.quit()
 
     def draw(self, screen, weather, updated):
-        if self.timer_thread is None:
-            return
-
-        result = self.timer_thread.result()
-        if result is None:
-            return
-
-        message = ",".join(result)
-        logging.debug("{} {} {} {} {}".format(__class__.__name__,
-                                              self.prefectures, self.city,
-                                              self.title, message))
+        if weather is None:
+            message = "waiting for weather forecast data ..."
+        else:
+            if self.timer_thread is None:
+                return
+            result = self.timer_thread.result()
+            if result is None:
+                return
+            message = ",".join(result)
+            logging.debug("{}: {} {} {} {}".format(__class__.__name__,
+                                                   self.prefectures, self.city,
+                                                   self.title, message))
 
         self.clear_surface()
         self.draw_text(message, "regular", "small", "red", (0, 0), "center")
