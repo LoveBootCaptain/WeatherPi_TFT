@@ -48,7 +48,9 @@ class JMAAlerts(WeatherModule):
     {
       "module": "JMAAlerts",
       "config": {
-        "rect": [x, y, width, height]
+        "rect": [x, y, width, height],
+        "prefectures": "東京都",
+        "city": "中央区"
        }
     }
 
@@ -61,9 +63,18 @@ class JMAAlerts(WeatherModule):
 
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
-        self.city, self.prefectures = self.location["address"].split(",")
+        if self.location["address"]:
+            self.city, self.prefectures = self.location["address"].split(",")
+        else:
+            self.prefectures = config["prefectures"]
+            self.city = config["city"]
+        if not self.prefectures or not self.city:
+            raise ValueError(__class__.__name__)
+
+        # start sensor thread
         self.timer_thread = RepeatedTimer(600, alerts,
                                           [self.prefectures, self.city])
+        self.timer_thread.start()
         logging.info("{}: thread started".format(__class__.__name__))
 
     def quit(self):
