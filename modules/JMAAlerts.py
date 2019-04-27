@@ -86,6 +86,7 @@ class JMAAlerts(WeatherModule):
                     message = ""
                 else:
                     message = ",".join(result)
+
         logging.debug("{}: {} {} {}".format(__class__.__name__,
                                             self.prefectures, self.city,
                                             message))
