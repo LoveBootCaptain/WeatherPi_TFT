@@ -54,7 +54,7 @@ def warning(url, city):
         return None
 
 
-def alert(prefectures, city, title):
+def alert(prefectures, city):
     url = extra_feed(prefectures)
     if url:
         return warning(url, city)
@@ -65,9 +65,8 @@ class JMAAlerts(WeatherModule):
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
         self.city, self.prefectures = self.location["address"].split(",")
-        self.title = "気象特別警報・警報・注意報"
-        self.timer_thread = RepeatedTimer(
-            600, alert, [self.prefectures, self.city, self.title])
+        self.timer_thread = RepeatedTimer(600, alert,
+                                          [self.prefectures, self.city])
         logging.info("{}: thread started".format(__class__.__name__))
 
     def quit(self):
@@ -85,9 +84,9 @@ class JMAAlerts(WeatherModule):
             if result is None:
                 return
             message = ",".join(result)
-            logging.debug("{}: {} {} {} {}".format(__class__.__name__,
-                                                   self.prefectures, self.city,
-                                                   self.title, message))
+            logging.debug("{}: {} {} {}".format(__class__.__name__,
+                                                self.prefectures, self.city,
+                                                message))
 
         self.clear_surface()
         self.draw_text(message, "regular", "small", "red", (0, 0), "center")
