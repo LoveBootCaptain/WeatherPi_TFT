@@ -15,7 +15,7 @@ def weather_alerts(prefectures, city):
         data = et.fromstring(response.content)
         ns = {"ns": "http://www.w3.org/2005/Atom"}
         url = None
-        for element in root.findall("./ns:entry", ns):
+        for element in data.findall("./ns:entry", ns):
             if element.find("ns:content", ns).text.find(prefectures) > -1:
                 if element.find("ns:title", ns).text == "気象特別警報・警報・注意報":
                     url = element.find("ns:link", ns).attrib["href"]
@@ -34,7 +34,7 @@ def weather_alerts(prefectures, city):
         return list(
             map(
                 lambda x: x.text,
-                root.findall(
+                data.findall(
                     "ns:Body/ns:Warning//*[ns:Name='{}}']../ns:Kind/ns:Name".
                     format(city), ns)))
 
