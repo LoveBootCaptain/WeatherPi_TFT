@@ -7,7 +7,7 @@ from modules.WeatherModule import WeatherModule, Utils
 class Alerts(WeatherModule):
     def draw(self, screen, weather, updated):
         if weather is None:
-            message = "waiting for weather forecast data ..."
+            message = "Waiting data..."
         elif "alerts" in weather:
             message = weather["alerts"]["title"]
         else:
@@ -44,9 +44,14 @@ class Location(WeatherModule):
         if not self.location["address"]:
             return
 
+        message = self.location["address"].split(",")[0]
+
         self.clear_surface()
-        self.draw_text(self.location["address"], "bold", "small", "white",
-                       (0, 0), "right")
+        for size in ("large", "medium", "small"):
+            w, h = self.text_size(message, "bold", size)
+            if w <= self.rect.width and h <= self.rect.height:
+                break
+        self.draw_text(message, "bold", size, "white", (0, 0), "right")
         self.update_screen(screen)
 
 

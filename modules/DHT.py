@@ -85,7 +85,7 @@ class DHT(WeatherModule):
         message = "{}  {}".format(temparature, humidity)
         for size in ("large", "medium", "small"):
             w, h = self.text_size(message, "bold", size)
-            if w <= self.rect.width and h <= self.rect.height:
+            if w <= self.rect.width and 20 + h <= self.rect.height:
                 break
 
         self.clear_surface()
