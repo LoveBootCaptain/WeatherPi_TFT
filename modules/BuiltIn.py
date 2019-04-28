@@ -33,9 +33,9 @@ class Clock(WeatherModule):
 
         self.clear_surface()
         self.draw_text(locale_date, "bold", "small", "white", (0, 0))
-        (w, h) = self.draw_text(locale_time, "regular", "large", "white",
-                                (0, 20))
-        self.draw_text(locale_second, "regular", "medium", "gray", (w, 20))
+        (right, bottom) = self.draw_text(locale_time, "regular", "large",
+                                         "white", (0, 20))
+        self.draw_text(locale_second, "regular", "medium", "gray", (right, 20))
         self.update_screen(screen)
 
 
@@ -115,9 +115,9 @@ class Weather(WeatherModule):
         self.draw_image(weather_icon, (0, 0))
         self.draw_text(message1, "bold", "medium", heat_color, (text_x, 0))
         self.draw_text(message2, "bold", "small", "white", (text_x, 25))
-        (w, h) = self.draw_text(message3[:-1], "bold", "small", "white",
-                                (text_x, 40))
-        self.draw_text(uv_index, "bold", "small", uv_color, (w, 40))
+        (right, bottom) = self.draw_text(message3[:-1], "bold", "small",
+                                         "white", (text_x, 40))
+        self.draw_text(uv_index, "bold", "small", uv_color, (right, 40))
         height = 55 + (15 * (3 - len(message4s))) / 2
         for message in message4s:
             self.draw_text(message, "bold", "small", "white", (text_x, height))

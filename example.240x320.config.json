@@ -30,6 +30,12 @@
       }
     },
     {
+      "module": "Alerts",
+      "config": {
+        "rect": [140, 20, 180, 40]
+      }
+    },
+    {
       "module": "Weather",
       "config": {
         "rect": [0, 60, 240, 100]
@@ -58,12 +64,6 @@
       "module": "Wind",
       "config": {
         "rect": [160, 240, 80, 80]
-      }
-    },
-    {
-      "module": "Alerts",
-      "config": {
-        "rect": [0, 160, 240, 15]
       }
     }
   ]

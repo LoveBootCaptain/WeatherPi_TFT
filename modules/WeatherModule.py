@@ -191,10 +191,12 @@ class Utils:
                 response.raise_for_status()
                 image = pygame.image.load(io.BytesIO(response.content))
 
+            # replace color black to dimgray
             pixels = pygame.PixelArray(image)
             pixels.replace(pygame.Color("black"), pygame.Color("dimgray"))
             del pixels
 
+            # resize icon
             (w, h) = image.get_size()
             if w >= h:
                 (w, h) = (size, int(size / w * h))
@@ -227,13 +229,12 @@ class Utils:
             x = radius * math.sin(alpha)
             l = radius * math.cos(theta) * math.sin(alpha)
             if age < 15:
-                start_pos = (radius + l, radius + y)
-                end_pos = (radius - x, radius + y)
+                start = (radius + l, radius + y)
+                end = (radius - x, radius + y)
             else:
-                start_pos = (radius - l, radius + y)
-                end_pos = (radius + x, radius + y)
-            pygame.draw.line(image, pygame.Color("dimgray"), start_pos,
-                             end_pos)
+                start = (radius - l, radius + y)
+                end = (radius + x, radius + y)
+            pygame.draw.line(image, pygame.Color("dimgray"), start, end)
             sum_x += 2 * x
             sum_l += end_pos[0] - start_pos[0]
         logging.info("moon phase age: {} parcentage: {}%".format(
@@ -357,9 +358,9 @@ class WeatherModule:
             x = (self.rect.width - size[0]) / 2
         elif align == "right":
             x = self.rect.width - size[0]
-        (width, height) = (x + size[0], size[1])
         self.surface.blit(font.render(text, True, color, background), (x, y))
-        return width, height
+        (right, bottom) = (x + size[0], size[1])
+        return right, bottom
 
     def draw_image(self, image, position, angle=0):
         """
@@ -371,9 +372,11 @@ class WeatherModule:
             return
 
         (x, y) = position
+        (w, h) = image.get_size()
         if angle:
-            (w, h) = image.get_size()
             image = pygame.transform.rotate(image, angle)
             x = x + (w - image.get_width()) / 2
             y = h + (h - image.get_height()) / 2
         self.surface.blit(image, (x, y))
+        (right, bottom) = (x + w, y + h)
+        return right, bottom
