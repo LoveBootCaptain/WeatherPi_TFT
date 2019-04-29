@@ -236,7 +236,7 @@ class Utils:
                 end = (radius + x, radius + y)
             pygame.draw.line(image, pygame.Color("dimgray"), start, end)
             sum_x += 2 * x
-            sum_l += end_pos[0] - start_pos[0]
+            sum_l += end[0] - start[0]
         logging.info("moon phase age: {} parcentage: {}%".format(
             age, round(100 - (sum_l / sum_x) * 100, 1)))
         return image
