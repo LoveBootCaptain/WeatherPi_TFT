@@ -112,9 +112,26 @@ sudo pip3 install Adafruit_DHT
 ./WeatherPi.py [--debug]
 ```
 
+## Customize weather icons
+By default, the DarkSky icon is resized to display, but you can change it to any icon you like.
+To change the icons, place the following 10 icons in the icons folder:
+
+clear-day.png, clear-night.png, rain.png, snow.png, sleet.png, wind.png, fog.png, cloudy.png, partly-cloudy-day.png, partly-cloudy-night.png
+
+| Name            | Default                                                                  | Name                    | Default |
+| --------------- | ------------------------------------------------------------------------ | ----------------------- | ------- |
+| clear-day.png   | <img width="100" src="https://darksky.net/images/weather-icons/clear-day.png">     | wind.png                | <img width="100" src="https://darksky.net/images/weather-icons/wind.png">        |
+| clear-night.png | <img width="100" src="https://darksky.net/images/weather-icons/clear-night.png"> | fog.png                 | <img width="100" src="https://darksky.net/images/weather-icons/fog.png">        |
+| rain.png        | <img width="100" src="https://darksky.net/images/weather-icons/rain.png">        | cloudy.png              | <img width="100" src="https://darksky.net/images/weather-icons/cloudy.png">        |
+| snow.png        | <img width="100" src="https://darksky.net/images/weather-icons/snow.png">        | partly-cloudy-day.png   | <img width="100" src="https://darksky.net/images/weather-icons/partly-cloudy-day.png">        |
+| sleet.png       | <img width="100" src="https://darksky.net/images/weather-icons/sleet.png">       | partly-cloudy-night.png | <img width="100" src="https://darksky.net/images/weather-icons/partly-cloudy-night.png">         |
+
+
+
 ## I18n
 
-You can change the display language of dates and information.
+You can change the display language of dates and information.  
+(日付と情報の表示言語を変更することができます。)
 
 
 <img width="480" alt="480x320 ja" src="https://user-images.githubusercontent.com/129797/56856869-5a775f80-699f-11e9-9c37-ba41ab48d696.png">
@@ -128,7 +145,8 @@ fig 480x320 ja
 fig 240x320 ja
 
 ### Font
-* Get the TryeType font and put it in the fonts folder
+Get the TrueType font and put it in the fonts folder.  
+(TrueTypeフォントをfontフォルダにコピーします。日本語用はNoto Fontが用意されています。)
 
 ### Translation files
 * init message.po file
@@ -143,31 +161,42 @@ msgfmt <your language>/LC_MESSAGES/messages.po -o <your language>/LC_MESSAGES/me
 ```
 
 ## Modules
+All modules require the following configuration:
 ```
-TODO: write a document for built-in and external modules
+"modules": [
+  {
+    "module": "<Module Name>",
+    "config": {
+      "rect": [<x>, <y>, <width>, <height>]
+    }
+  }
 ```
+
 ### Built-in Modules
 
 | Name            | Description                         | Options       | Size              |
 | --------------- | ----------------------------------- | ------------- | ----------------- |
-| Alerts          | Any severe weather alerts pertinent |               | 240x15 - 480x15   |
-| Clock           | Current Time                        |               | 140x60            |
+| Alerts          | Any severe weather alerts pertinent | None          | 240x15 - 480x15   |
+| Clock           | Current Time                        | None          | 140x60            |
 | Location        | Current location                    |               | 140x15            |
-| Weather         | Current Weather                     |               | 240x100 - 480x100 |
+| Weather         | Current Weather                     | None          | 240x100 - 480x100 |
 | WeatherForecast | Weather Forcusts                    | forecast_days | 240x80 - 480x80   |
-| SunriseSuset    | Sunsine, Sunset time                |               | 80x80             |
-| MoonPhase       | Moon MoonPhase                      |               | 80x80             |
-| Wind            | Wind direction, speed               |               | 80x80             |
+| SunriseSuset    | Sunsine, Sunset time                | None          | 80x80             |
+| MoonPhase       | Moon MoonPhase                      | None          | 80x80             |
+| Wind            | Wind direction, speed               | None          | 80x80             |
+
 
 ### External modules
 
-| Name      | Description                                                  | Options                 | Size            |
-| --------- | ------------------------------------------------------------ | ----------------------- | --------------- |
-| JMAAlerts | JMA weather alerts<br>(気象庁の注意報、警報、特別警報を表示) |                         | 240x15 - 480x15 |
-| DHT       | Adafruit temperature/humidity sensor                         | pin<br>correction_value | 100x60          |
-| PIR       | PIR(Passive Infrared Ray）Motion Sensor                      | pin<br>power_save_delay | -               |
+| Name      | Description                                                  | Options                                                                                        | Size            |
+| --------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | --------------- |
+| JMAAlerts | JMA weather alerts<br>(気象庁の注意報、警報、特別警報を表示) | prefecture: (都道府県)<br>city: (市区町村)                                                     | 240x15 - 480x15 |
+| DHT       | Adafruit temperature/humidity sensor                         | pin: pin number<br>correction_value:                                                           | 100x60          |
+| PIR       | PIR(Passive Infrared Ray）Motion Sensor                      | pin: pin number<br>power_save_delay: delay (in seconds) before the monitor will be turned off. | -               |
+
 
 ## Credit
+
 * original software: [WeatherPi_TFT](https://github.com/LoveBootCaptain/WeatherPi_TFT)
 * [squix78](https://github.com/squix78) for his [esp8266 weather station color](https://github.com/squix78/esp8266-weather-station-color) which inspired me to make it in python for a raspberry and another weather api
 * [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
