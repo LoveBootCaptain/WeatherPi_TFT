@@ -119,13 +119,13 @@ To change the icons, place the following 10 icons in the icons folder:
 
 * clear-day.png, clear-night.png, rain.png, snow.png, sleet.png, wind.png, fog.png, cloudy.png, partly-cloudy-day.png, partly-cloudy-night.png
 
-| Name            | Default                                                                  | Name                    | Default |
-| --------------- | ------------------------------------------------------------------------ | ----------------------- | ------- |
-| clear-day.png   | <img width="100" src="https://darksky.net/images/weather-icons/clear-day.png">     | wind.png                | <img width="100" src="https://darksky.net/images/weather-icons/wind.png">        |
-| clear-night.png | <img width="100" src="https://darksky.net/images/weather-icons/clear-night.png"> | fog.png                 | <img width="100" src="https://darksky.net/images/weather-icons/fog.png">        |
-| rain.png        | <img width="100" src="https://darksky.net/images/weather-icons/rain.png">        | cloudy.png              | <img width="100" src="https://darksky.net/images/weather-icons/cloudy.png">        |
-| snow.png        | <img width="100" src="https://darksky.net/images/weather-icons/snow.png">        | partly-cloudy-day.png   | <img width="100" src="https://darksky.net/images/weather-icons/partly-cloudy-day.png">        |
-| sleet.png       | <img width="100" src="https://darksky.net/images/weather-icons/sleet.png">       | partly-cloudy-night.png | <img width="100" src="https://darksky.net/images/weather-icons/partly-cloudy-night.png">         |
+| Name            | Default                                                                          | Name                    | Default                                                                                  |
+| --------------- | -------------------------------------------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+| clear-day.png   | <img width="100" src="https://darksky.net/images/weather-icons/clear-day.png">   | wind.png                | <img width="100" src="https://darksky.net/images/weather-icons/wind.png">                |
+| clear-night.png | <img width="100" src="https://darksky.net/images/weather-icons/clear-night.png"> | fog.png                 | <img width="100" src="https://darksky.net/images/weather-icons/fog.png">                 |
+| rain.png        | <img width="100" src="https://darksky.net/images/weather-icons/rain.png">        | cloudy.png              | <img width="100" src="https://darksky.net/images/weather-icons/cloudy.png">              |
+| snow.png        | <img width="100" src="https://darksky.net/images/weather-icons/snow.png">        | partly-cloudy-day.png   | <img width="100" src="https://darksky.net/images/weather-icons/partly-cloudy-day.png">   |
+| sleet.png       | <img width="100" src="https://darksky.net/images/weather-icons/sleet.png">       | partly-cloudy-night.png | <img width="100" src="https://darksky.net/images/weather-icons/partly-cloudy-night.png"> |
 
 
 
@@ -183,7 +183,7 @@ All modules require the following configuration:
 | Weather         | Current Weather                     | None          | 240x100 - 480x100 |
 | WeatherForecast | Weather Forcusts                    | forecast_days | 240x80 - 480x80   |
 | SunriseSuset    | Sunsine, Sunset time                | None          | 80x80             |
-| MoonPhase       | Moon MoonPhase                      | None          | 80x80             |
+| MoonPhase       | Moon Phase                          | None          | 80x80             |
 | Wind            | Wind direction, speed               | None          | 80x80             |
 
 
@@ -194,7 +194,7 @@ All modules require the following configuration:
 | JMAAlerts | JMA weather alerts<br>(気象庁の注意報、警報、特別警報を表示) | prefecture: (都道府県)<br>city: (市区町村)                                                     | 240x15 - 480x15 |
 | DHT       | Adafruit temperature/humidity sensor                         | pin: pin number<br>correction_value:                                                           | 100x60          |
 | PIR       | PIR(Passive Infrared Ray）Motion Sensor                      | pin: pin number<br>power_save_delay: delay (in seconds) before the monitor will be turned off. | None            |
-|           |                                                              
+
 
 
 ## Credit
