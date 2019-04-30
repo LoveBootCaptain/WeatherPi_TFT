@@ -3,6 +3,8 @@
 Weather Station for Raspberry Pi and Small LCDs  
 (Raspberry Piと小型液晶向けのウェザーステーション)
 
+![Front View](https://user-images.githubusercontent.com/129797/56935584-e8348580-6b2c-11e9-940a-002c280885bd.png)
+
 
 <img width="480" alt="480x320 en" src="https://user-images.githubusercontent.com/129797/56856836-95c55e80-699e-11e9-8d4d-7422eef36732.png">
 
