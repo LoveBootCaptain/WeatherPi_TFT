@@ -90,7 +90,7 @@ def main():
             file = "{}/config.json".format(sys.path[0])
         with open(file, "r") as f:
             config = json.loads(f.read())
-        logging.info("config.json loaded")
+        logging.info("{} loaded".format(file))
 
         # initialize locale, gettext
         language = config["locale"].split("_")[0]
@@ -192,8 +192,7 @@ def main():
             # update display
             if display_wakeup:
                 if scale:
-                    display.blit(pygame.transform.scale(screen, scale),
-                                 (0, 0))
+                    display.blit(pygame.transform.scale(screen, scale), (0, 0))
                 pygame.display.flip()
 
             # event check
