@@ -249,13 +249,13 @@ class Utils:
         height = 0.25 * size  # arrowhead height
 
         radius = size / 2
-        angle = (360 + 90 - wind_bearing) % 360
+        angle = (90 - wind_bearing) % 360
         theta = angle / 360 * math.pi * 2
 
-        a = (radius + radius * math.cos(theta + math.pi),
-             radius - radius * math.sin(theta + math.pi))
-        b = (radius + radius * math.cos(theta),
+        a = (radius + radius * math.cos(theta),
              radius - radius * math.sin(theta))
+        b = (radius + radius * math.cos(theta + math.pi),
+             radius - radius * math.sin(theta + math.pi))
 
         base_vector = (b[0] - a[0], b[1] - a[1])
         length = math.sqrt(base_vector[0]**2 + base_vector[1]**2)
