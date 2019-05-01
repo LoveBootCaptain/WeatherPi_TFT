@@ -109,15 +109,18 @@ class Weather(WeatherModule):
         if self.text_size(message3, "bold", "small")[0] > text_width:
             message3 = "{}  {}  UV {}".format(humidity, pressure, uv_index)
         message4s = self.text_warp(long_summary, text_width, "bold", "small")
-        message4s = message4s[:3]
+        if len(message4s) > 3:
+            message4s = message4s[:3]
+            message4s[2] = (message4s[2][:-2] + "..")
 
         self.clear_surface()
         self.draw_image(weather_icon, (0, 0))
         self.draw_text(message1, "bold", "medium", heat_color, (text_x, 0))
         self.draw_text(message2, "bold", "small", "white", (text_x, 25))
-        (right, bottom) = self.draw_text(message3[:-1], "bold", "small",
+        i = message3.index("UV")
+        (right, bottom) = self.draw_text(message3[:i], "bold", "small",
                                          "white", (text_x, 40))
-        self.draw_text(uv_index, "bold", "small", uv_color, (right, 40))
+        self.draw_text(message3[i:], "bold", "small", uv_color, (right, 40))
         height = 55 + (15 * (3 - len(message4s))) / 2
         for message in message4s:
             self.draw_text(message, "bold", "small", "white", (text_x, height))
