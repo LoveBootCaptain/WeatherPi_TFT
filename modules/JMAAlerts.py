@@ -94,11 +94,11 @@ class JMAAlerts(WeatherModule):
 
         self.clear_surface()
         if message:
-            if message.index("特別警報"):
+            if message.contains("特別警報"):
                 color = "violet"
-            elif message.index("警報"):
+            elif message.contains("警報"):
                 color = "red"
-            elif message.index("警報"):
+            elif message.contains("警報"):
                 color = "yellow"
             else:
                 color = "white"
