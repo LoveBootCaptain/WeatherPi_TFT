@@ -87,7 +87,7 @@ class JMAAlerts(WeatherModule):
     def draw(self, screen, weather, updated):
         if weather is None:
             message = "Waiting data..."
-            logging.info("{}: thread started".format(__class__.__name__))
+            logging.info("{}: {}".format(__class__.__name__, message))
         else:
             result = self.timer_thread.result()
             if result:
