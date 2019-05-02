@@ -94,6 +94,14 @@ class JMAAlerts(WeatherModule):
 
         self.clear_surface()
         if message:
+            if message.index("特別警報"):
+                color = "violet"
+            elif message.index("警報"):
+                color = "red"
+            elif message.index("警報"):
+                color = "yellow"
+            else:
+                color = "white"
             logging.info("{}: {}".format(__class__.__name__, message))
             for size in ("large", "medium", "small"):
                 w, h = self.text_size(message, "bold", size)
