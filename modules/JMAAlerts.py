@@ -98,7 +98,7 @@ class JMAAlerts(WeatherModule):
                 color = "violet"
             elif "警報" in message:
                 color = "red"
-            elif "警報" in message:
+            elif "注意報" in message:
                 color = "yellow"
             else:
                 color = "white"
