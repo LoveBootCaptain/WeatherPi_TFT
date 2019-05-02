@@ -34,7 +34,7 @@ def weather_alerts(prefectures, city):
                 data.findall(
                     "ns:Body/ns:Warning//*[ns:Name='{}']../ns:Kind/ns:Name".
                     format(city), ns)))
-        logging.info("JMAAlerts: {}".format(alerts)
+        logging.info("JMAAlerts: {}".format(alerts))
         return alerts
 
     except Exception as e:
