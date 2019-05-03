@@ -46,13 +46,13 @@ class Location(WeatherModule):
         if not self.location["address"]:
             return
 
-        message = self.location["address"].split(",")[0]
-
         self.clear_surface()
         for size in ("large", "medium", "small"):
             w, h = self.text_size(message, "bold", size)
             if w <= self.rect.width and h <= self.rect.height:
                 break
+        if w > self.rect.width:
+            message = self.location["address"].split(",")[0]
         self.draw_text(message, "bold", size, "white", (0, 0), "right")
         self.update_screen(screen)
 
@@ -110,12 +110,12 @@ class Weather(WeatherModule):
                                                 _("UVindex"), uv_index)
         if self.text_size(message3, "bold", "small")[0] > text_width:
             message3 = "{}  {}  UV {}".format(humidity, pressure, uv_index)
-        line_length = int((self.rect.height - 55) / 15)
+        max_lines = int((self.rect.height - 55) / 15)
         message4s = self.text_warp(long_summary,
                                    text_width,
                                    "bold",
                                    "small",
-                                   line_length=3)
+                                   max_lines=max_lines)
 
         self.clear_surface()
         self.draw_image(weather_icon, (0, 0))
@@ -125,7 +125,7 @@ class Weather(WeatherModule):
         (right, bottom) = self.draw_text(message3[:i], "bold", "small",
                                          "white", (text_x, 40))
         self.draw_text(message3[i:], "bold", "small", uv_color, (right, 40))
-        height = 55 + (15 * (line_length - len(message4s))) / 2
+        height = 55 + (15 * (max_lines - len(message4s))) / 2
         for message in message4s:
             self.draw_text(message, "bold", "small", "white", (text_x, height))
             height += 15

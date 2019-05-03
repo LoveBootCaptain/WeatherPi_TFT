@@ -307,14 +307,14 @@ class WeatherModule:
     def text_size(self, text, style, size):
         return self.font(style, size).size(text)
 
-    def text_warp(self, text, width, style, size, *, line_length=0):
+    def text_warp(self, text, line_width, style, size, *, max_lines=0):
         font = self.font(style, size)
         lines = []
         cur_line = ""
         cur_width = 0
         for c in text:
             (w, h) = font.size(c)
-            if cur_width + w > width:
+            if cur_width + w > line_width:
                 lines.append(cur_line)
                 cur_line = ""
                 cur_width = 0
@@ -322,7 +322,8 @@ class WeatherModule:
             cur_width += w
         if cur_line:
             lines.append(cur_line)
-        if line_length and len(lines) > line_length:
+        if line_length and len(lines) > max_lines:
+            # Put a placeholder if the text is truncated
             lines = lines[:line_length]
             lines[line_length - 1] = lines[line_length - 1][:-2] + ".."
         return lines
