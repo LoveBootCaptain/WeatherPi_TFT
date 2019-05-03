@@ -322,10 +322,10 @@ class WeatherModule:
             cur_width += w
         if cur_line:
             lines.append(cur_line)
-        if line_length and len(lines) > max_lines:
+        if max_lines > 0 and len(lines) > max_lines:
             # Put a placeholder if the text is truncated
-            lines = lines[:line_length]
-            lines[line_length - 1] = lines[line_length - 1][:-2] + ".."
+            lines = lines[:max_lines]
+            lines[max_lines - 1] = lines[max_lines - 1][:-2] + ".."
         return lines
 
     def font(self, style, size):
