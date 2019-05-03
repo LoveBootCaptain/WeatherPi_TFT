@@ -28,14 +28,12 @@ def weather_alerts(prefectures, city):
 
         data = et.fromstring(response.content)
         ns = {"ns": "http://xml.kishou.go.jp/jmaxml1/body/meteorology1/"}
-        alerts = list(
+        return list(
             map(
                 lambda x: x.text,
                 data.findall(
                     "ns:Body/ns:Warning//*[ns:Name='{}']../ns:Kind/ns:Name".
                     format(city), ns)))
-        logging.info("JMAAlerts: {}".format(alerts))
-        return alerts
 
     except Exception as e:
         logging.error(e, exc_info=True)
@@ -87,7 +85,6 @@ class JMAAlerts(WeatherModule):
     def draw(self, screen, weather, updated):
         if weather is None:
             message = "Waiting data..."
-            logging.info("{}: {}".format(__class__.__name__, message))
         else:
             result = self.timer_thread.result()
             if result:
@@ -97,6 +94,7 @@ class JMAAlerts(WeatherModule):
 
         self.clear_surface()
         if message:
+            logging.info("{}: {}".format(__class__.__name__, message))
             if "特別警報" in message:
                 color = "violet"
             elif "警報" in message:
