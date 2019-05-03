@@ -46,13 +46,15 @@ class Location(WeatherModule):
         if not self.location["address"]:
             return
 
+        message = self.location["address"]
+
         self.clear_surface()
         for size in ("large", "medium", "small"):
             w, h = self.text_size(message, "bold", size)
             if w <= self.rect.width and h <= self.rect.height:
                 break
         if w > self.rect.width:
-            message = self.location["address"].split(",")[0]
+            message = message.split(",")[0]
         self.draw_text(message, "bold", size, "white", (0, 0), "right")
         self.update_screen(screen)
 
