@@ -110,7 +110,7 @@ class Weather(WeatherModule):
                                                 _("UVindex"), uv_index)
         if self.text_size(message3, "bold", "small")[0] > text_width:
             message3 = "{}  {}  UV {}".format(humidity, pressure, uv_index)
-        line_length = int((self.rect.hegith - 55) / 15)
+        line_length = int((self.rect.height - 55) / 15)
         message4s = self.text_warp(long_summary,
                                    text_width,
                                    "bold",
