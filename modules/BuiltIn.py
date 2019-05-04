@@ -101,9 +101,11 @@ class Weather(WeatherModule):
         text_x = weather_icon.get_size()[0]
         text_width = self.rect.width - text_x
 
-        message1 = "{} {}".format(temperature, short_summary)
-        if self.text_size(message1, "medium", True)[0] > text_width:
-            message1 = "{}".format(temperature)
+        message1 = self.text_warp("{} {}".format(temperature, short_summary),
+                                  text_width,
+                                  "medium",
+                                  True,
+                                  max_lines=1)[0]
         message2 = "{} {}   {} {} {} {}".format(_("Feel Like"),
                                                 apparent_temperature,
                                                 _("Low"), temperature_low,
