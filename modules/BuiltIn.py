@@ -202,8 +202,8 @@ class SunriseSuset(WeatherModule):
 
         self.clear_surface()
         self.draw_image(sun_icon, (20, 20))
-        self.draw_text(surise, (0, 5), "small", False, "white", "right")
-        self.draw_text(sunset, (0, 60), "small", False, "white", "right")
+        self.draw_text(surise, (0, 5), "small", False, "white", "center")
+        self.draw_text(sunset, (0, 60), "small", False, "white", "center")
         self.update_screen(screen)
 
 
