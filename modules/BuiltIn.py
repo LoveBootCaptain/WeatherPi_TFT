@@ -22,7 +22,7 @@ class Alerts(WeatherModule):
                 w, h = self.text_size(message, size, True)
                 if w <= self.rect.width and h <= self.rect.height:
                     break
-            self.draw_text(message, "regular", size, "red", (0, 0), "center")
+            self.draw_text(message, size, True, "red", (0, 0), "center")
         self.update_screen(screen)
 
 
@@ -55,7 +55,7 @@ class Location(WeatherModule):
                 break
         if w > self.rect.width:
             message = message.split(",")[0]
-        self.draw_text(message, "regular", size, "white", (0, 0), "right")
+        self.draw_text(message, size, False, "white", (0, 0), "right")
         self.update_screen(screen)
 
 
