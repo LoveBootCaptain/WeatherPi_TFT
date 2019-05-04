@@ -193,11 +193,11 @@ class SunriseSuset(WeatherModule):
             return
 
         daily = weather["daily"]["data"]
+        sunrise = daily[0]["sunriseTime"]
+        sunset = daily[0]["sunsetTime"]
 
-        surise = "\u2197 {}".format(
-            Utils.strftime(int(daily[0]["sunriseTime"]), "%H:%M"))
-        sunset = "\u2198 {}".format(
-            Utils.strftime(int(daily[0]["sunsetTime"]), "%H:%M"))
+        surise = "\u2197 {}".format(Utils.strftime(sunrise, "%H:%M"))
+        sunset = "\u2198 {}".format(Utils.strftime(sunset, "%H:%M"))
         sun_icon = Utils.weather_icon("clear-day", 40)
 
         self.clear_surface()
