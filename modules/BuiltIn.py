@@ -50,7 +50,7 @@ class Location(WeatherModule):
 
         self.clear_surface()
         for size in ("large", "medium", "small"):
-            w, h = self.text_size(message, "regular", size)
+            w, h = self.text_size(message, size, False)
             if w <= self.rect.width and h <= self.rect.height:
                 break
         if w > self.rect.width:
