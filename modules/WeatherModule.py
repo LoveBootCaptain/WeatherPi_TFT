@@ -167,16 +167,6 @@ class Utils:
 
     @staticmethod
     @lru_cache()
-    def icon(icon):
-        file = "{}/icons/{}".format(sys.path[0], icon)
-        if os.path.isfile(file):
-            return pygame.image.load(file)
-        else:
-            logging.error("{} not found.".format(file))
-            return None
-
-    @staticmethod
-    @lru_cache()
     def weather_icon(name, size):
         try:
             file = "{}/icons/{}.png".format(sys.path[0], name)
