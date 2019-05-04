@@ -304,11 +304,11 @@ class WeatherModule:
     def update_screen(self, screen):
         screen.blit(self.surface, (self.rect.left, self.rect.top))
 
-    def text_size(self, text, style, size):
-        return self.font(style, size).size(text)
+    def text_size(self, text, size, bold):
+        return self.font(size, bold).size(text)
 
-    def text_warp(self, text, line_width, style, size, *, max_lines=0):
-        font = self.font(style, size)
+    def text_warp(self, text, line_width, bold, size, *, max_lines=0):
+        font = self.font(size, bold)
         lines = []
         cur_line = ""
         cur_width = 0
@@ -328,25 +328,24 @@ class WeatherModule:
             lines[max_lines - 1] = lines[max_lines - 1][:-2] + ".."
         return lines
 
-    def font(self, style, size):
+    def font(self, size, bold):
         name = self.fonts["name"]
         if type(size) is str:
             size = self.fonts["size"][size]
-        style = True if style == "bold" else False
-        return Utils.font(name, size, style)
+        return Utils.font(name, size, bold)
 
     def draw_text(self,
                   text,
-                  style,
                   size,
-                  color,
-                  position,
+                  bold=False,
+                  color="white",
+                  position=(0, 0),
                   align="left",
                   background="bkack"):
         """
         :param text: text to draw
-        :param style: font style. ["regular", "bold"]
         :param size: font size. ["small", "medium", "large"]
+        :param bold: bold flag.
         :param color: color name or RGB color tuple
         :param position: render relative position (x, y)
         :param align: text align. ["left", "center", "right"]
@@ -356,7 +355,7 @@ class WeatherModule:
             return
 
         (x, y) = position
-        font = self.font(style, size)
+        font = self.font(size, bold)
         size = font.size(text)
         color = Utils.color(color) if isinstance(color, str) else color
         if align == "center":

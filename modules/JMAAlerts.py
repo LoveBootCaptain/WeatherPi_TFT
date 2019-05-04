@@ -104,8 +104,8 @@ class JMAAlerts(WeatherModule):
             else:
                 color = "white"
             for size in ("large", "medium", "small"):
-                w, h = self.text_size(message, "bold", size)
+                w, h = self.text_size(message, size, True)
                 if w <= self.rect.width and h <= self.rect.height:
                     break
-            self.draw_text(message, "bold", size, color, (0, 0), "center")
+            self.draw_text(message, size, True, color, (0, 0), "center")
         self.update_screen(screen)

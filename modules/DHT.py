@@ -84,11 +84,11 @@ class DHT(WeatherModule):
 
         message = "{}  {}".format(temparature, humidity)
         for size in ("large", "medium", "small"):
-            w, h = self.text_size(message, "bold", size)
+            w, h = self.text_size(message, size, True)
             if w <= self.rect.width and 20 + h <= self.rect.height:
                 break
 
         self.clear_surface()
-        self.draw_text(_("Indoor"), "bold", "small", "white", (0, 0))
-        self.draw_text(message, "bold", size, color, (0, 20))
+        self.draw_text(_("Indoor"), "small", False, "white", (0, 0))
+        self.draw_text(message, size, True, color, (0, 20))
         self.update_screen(screen)
