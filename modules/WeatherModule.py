@@ -336,14 +336,15 @@ class WeatherModule:
 
     def draw_text(self,
                   text,
-                  size,
+                  position=(0, 0),
+                  size="small",
                   bold=False,
                   color="white",
-                  position=(0, 0),
                   align="left",
-                  background="bkack"):
+                  background="black"):
         """
         :param text: text to draw
+        :param position: render relative position (x, y)
         :param size: font size. ["small", "medium", "large"]
         :param bold: bold flag.
         :param color: color name or RGB color tuple

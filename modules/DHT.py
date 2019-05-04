@@ -89,6 +89,6 @@ class DHT(WeatherModule):
                 break
 
         self.clear_surface()
-        self.draw_text(_("Indoor"), "small", False, "white", (0, 0))
-        self.draw_text(message, size, True, color, (0, 20))
+        self.draw_text(_("Indoor"), (0, 0), "small", False, "white")
+        self.draw_text(message, (0, 20), size, True, color)
         self.update_screen(screen)

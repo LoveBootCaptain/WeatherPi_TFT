@@ -22,7 +22,7 @@ class Alerts(WeatherModule):
                 w, h = self.text_size(message, size, True)
                 if w <= self.rect.width and h <= self.rect.height:
                     break
-            self.draw_text(message, size, True, "red", (0, 0), "center")
+            self.draw_text(message, (0, 0), size, True, "red", "center")
         self.update_screen(screen)
 
 
@@ -34,10 +34,15 @@ class Clock(WeatherModule):
         locale_second = Utils.strftime(timestamp, " %S")
 
         self.clear_surface()
-        self.draw_text(locale_date, "small", False, "white", (0, 0))
-        (right, bottom) = self.draw_text(locale_time, "large", True, "white",
-                                         (0, 20))
-        self.draw_text(locale_second, "medium", True, "gray", (right, 20))
+        self.draw_text(locale_date, (0, 0), "small", False, "white")
+        (right, bottom) = self.draw_text(
+            locale_time,
+            (0, 20),
+            "large",
+            True,
+            "white",
+        )
+        self.draw_text(locale_second, (right, 20), "medium", True, "gray")
         self.update_screen(screen)
 
 
@@ -55,7 +60,7 @@ class Location(WeatherModule):
                 break
         if w > self.rect.width:
             message = message.split(",")[0]
-        self.draw_text(message, size, False, "white", (0, 0), "right")
+        self.draw_text(message, (0, 0), size, False, "white", "right")
         self.update_screen(screen)
 
 
@@ -121,15 +126,15 @@ class Weather(WeatherModule):
 
         self.clear_surface()
         self.draw_image(weather_icon, (0, 0))
-        self.draw_text(message1, "medium", True, heat_color, (text_x, 0))
-        self.draw_text(message2, "small", False, "white", (text_x, 25))
+        self.draw_text(message1, (text_x, 0), "medium", True, heat_color)
+        self.draw_text(message2, (text_x, 25), "small", False, "white")
         i = message3.index("UV")
-        (right, bottom) = self.draw_text(message3[:i], "small", False, "white",
-                                         (text_x, 40))
-        self.draw_text(message3[i:], "small", True, uv_color, (right, 40))
+        (right, bottom) = self.draw_text(message3[:i], (text_x, 40), "small",
+                                         False, "white")
+        self.draw_text(message3[i:], (right, 40), "small", True, uv_color)
         height = 55 + (15 * (max_lines - len(message4s))) / 2
         for message in message4s:
-            self.draw_text(message, "small", True, "white", (text_x, height))
+            self.draw_text(message, (text_x, height), "small", True, "white")
             height += 15
         self.update_screen(screen)
 
@@ -152,8 +157,8 @@ class DailyWeatherForecast(WeatherModule):
         message = "{} - {}".format(temperature_low, temperature_high)
 
         self.clear_surface()
-        self.draw_text(day_of_week, "small", False, "orange", (0, 0), "center")
-        self.draw_text(message, "small", False, "white", (0, 15), "center")
+        self.draw_text(day_of_week, (0, 0), "small", False, "orange", "center")
+        self.draw_text(message, (0, 15), "small", False, "white", "center")
         self.draw_image(weather_icon, (15, 35))
         self.update_screen(screen)
 
@@ -195,8 +200,8 @@ class SunriseSuset(WeatherModule):
         self.clear_surface()
         self.draw_image(sunrise_icon, (0, 20))
         self.draw_image(sunset_icon, (0, 50))
-        self.draw_text(surise, "small", False, "white", (0, 25), "right")
-        self.draw_text(sunset, "small", False, "white", (0, 55), "right")
+        self.draw_text(surise, (0, 25), "small", False, "white", "right")
+        self.draw_text(sunset, (0, 55), "small", False, "white", "right")
         self.update_screen(screen)
 
 
@@ -214,7 +219,7 @@ class MoonPhase(WeatherModule):
 
         self.clear_surface()
         self.draw_image(moon_icon, (15, 10))
-        self.draw_text(moon_phase, "small", False, "white", (0, 60), "center")
+        self.draw_text(moon_phase, (0, 60), "small", False, "white", "center")
         self.update_screen(screen)
 
 
@@ -236,8 +241,8 @@ class Wind(WeatherModule):
         wind_bearing = Utils.wind_bearing_text(wind_bearing)
 
         self.clear_surface()
-        self.draw_text(wind_bearing, "small", False, "white", (0, 10),
+        self.draw_text(wind_bearing, (0, 10), "small", False, "white",
                        "center")
         self.draw_image(wind_icon, (25, 30))
-        self.draw_text(wind_speed, "small", False, "white", (0, 60), "center")
+        self.draw_text(wind_speed, (0, 60), "small", False, "white", "center")
         self.update_screen(screen)
