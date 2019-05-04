@@ -161,9 +161,9 @@ class Utils:
 
     @staticmethod
     @lru_cache()
-    def font(file, size):
-        logging.debug("font {} {}pxl loaded".format(file, size))
-        return pygame.font.Font(file, size)
+    def font(name, size, bold):
+        logging.debug("font {} {}pxl loaded".format(name, size))
+        return pygame.font.SysFont(name, size, bold)
 
     @staticmethod
     @lru_cache()
@@ -329,10 +329,11 @@ class WeatherModule:
         return lines
 
     def font(self, style, size):
-        file = self.fonts[style]
+        name = self.fonts["name"]
         if type(size) is str:
-            size = {"large": 30, "medium": 22, "small": 14}[size]
-        return Utils.font(file, size)
+            size = self.fonts["size"][size]
+        style = True if style == "bold" else False
+        return Utils.font(name, size, style)
 
     def draw_text(self,
                   text,

@@ -152,10 +152,7 @@ def main():
             "address": config["address"]
         }
         units = config["units"]
-        fonts = {}
-        for style in ["regular", "bold"]:
-            fonts[style] = "{}/fonts/{}".format(sys.path[0],
-                                                config["fonts"][style])
+        fonts = config["fonts"]
         modules = []
         for module in config["modules"]:
             name = module["module"]
@@ -192,6 +189,7 @@ def main():
             # update display
             if display_wakeup:
                 if scale:
+                    # fit to display
                     display.blit(pygame.transform.scale(screen, scale), (0, 0))
                 pygame.display.flip()
 

@@ -12,8 +12,12 @@
   "SDL_FBDEV": "/dev/fb1",
   "display": [240, 320],
   "fonts": {
-    "regular": "Roboto-Medium.ttf",
-    "bold": "Roboto-Bold.ttf"
+    "name": "Sans",
+    "size": {
+      "large": 30,
+      "medium": 22,
+      "small": 14
+    }
   },
 
   "modules": [

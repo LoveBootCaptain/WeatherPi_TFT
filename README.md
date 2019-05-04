@@ -47,19 +47,22 @@ or
 cp example.480x320.config.json config.json
 ```
 
+{"large": 30, "medium": 22, "small": 14}
+
 #### config.json
-| Name                    |          | Default           | Description                                                                                                        |
-| ----------------------- | -------- | ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| darksky_api_key         | required |                   | **[DarkSky API Key](https://darksky.net/dev)**                                                                     |
-| google_api_key          | optional |                   | [Google Geocoding API darksky_api_key](https://developers.google.com/maps/documentation/geocoding/start)           |
-| address                 | optional |                   | The address of a location. <br> latitude and longitude can be omitted if google_api_key and address are specified. |
-| latitude <br> longitude | required |                   | The latitude and longitude of a location (in decimal degrees). Positive is east, negative is west.                 |
-| locale                  | required | en_US.UTF-8       | Locale. Specify the display language of time and weather information.                                              |
-| units                   | required | si                | Unit of weather　information.                                                                                      |
-| SDL_FBDEV               | required | /dev/fb1          | Frame buffer device to use in the linux fbcon driver, instead of /dev/fb0.                                         |
-| display                 | required |                   | Display size. [Width, Height]                                                                                      |
-| fonts.regular           | required | Roboto-Medium.ttf | Regular font file name. (Font files should be placed in the fonts folder.)                                         |
-| fonts.bold              | required | Roboto-Bold.ttf   | Bold font file name. (Font files should be placed in the fonts folder.)                                            |
+| Name                    |          | Default                                  | Description                                                                                                        |
+| ----------------------- | -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| darksky_api_key         | required |                                          | **[DarkSky API Key](https://darksky.net/dev)**                                                                     |
+| google_api_key          | optional |                                          | [Google Geocoding API darksky_api_key](https://developers.google.com/maps/documentation/geocoding/start)           |
+| address                 | optional |                                          | The address of a location. <br> latitude and longitude can be omitted if google_api_key and address are specified. |
+| latitude <br> longitude | required |                                          | The latitude and longitude of a location (in decimal degrees). Positive is east, negative is west.                 |
+| locale                  | required | en_US.UTF-8                              | Locale. Specify the display language of time and weather information.                                              |
+| units                   | required | si                                       | Unit of weather　information.                                                                                      |
+| SDL_FBDEV               | required | /dev/fb1                                 | Frame buffer device to use in the linux fbcon driver, instead of /dev/fb0.                                         |
+| display                 | required |                                          | Display size. [Width, Height]                                                                                      |
+| fonts.name              | required | Sans                                     | Font name.                                                                                                         |
+| fonts.size              | required | {"large": 30, "medium": 22, "small": 14} | Font size list. (Style name and point)                                                                             |
+
 
 * for language-support, units, latitude and longitude please refer to -> **[DarkSky API Docs](https://darksky.net/dev/docs/forecast)**
 
@@ -148,8 +151,9 @@ fig 480x320 ja
 fig 240x320 ja
 
 ### Font
-Get the TrueType font and put it in the fonts folder.  
-(TrueTypeフォントをfontフォルダにコピーします。日本語用はNoto Fontが用意されています。)
+Install the font for your locale. I recommend [Google Fonts](https://fonts.google.com/) and [Google NotoFonts](https://www.google.com/get/noto/).  
+(ロケールにあったフォントをインストールします。日本語であれば、"Noto Sans CJK JP"をインストールして、等幅フォント"Noto Sans Mono CJK JP"を設定することを勧めます。)
+
 
 ### Translation files
 * init message.po file
@@ -201,9 +205,9 @@ All modules require the following configuration:
 
 ## Credit
 
-* original software: [WeatherPi_TFT](https://github.com/LoveBootCaptain/WeatherPi_TFT)
-* [squix78](https://github.com/squix78) for his [esp8266 weather station color](https://github.com/squix78/esp8266-weather-station-color) which inspired me to make it in python for a raspberry and another weather api
+* [WeatherPi_TFT](https://github.com/LoveBootCaptain/WeatherPi_TFT) His wonderful software is the beginning of my project
 * [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
 * [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
-* fonts: [google](https://fonts.google.com/)
-* fonts: [Noto-Sans-CJK-JP](https://github.com/minoryorg/Noto-Sans-CJK-JP)
+* [気象庁防災情報XMLフォーマット](http://xml.kishou.go.jp/)
+* [Google Fonts](https://fonts.google.com/)
+* [Google NotoFonts](https://www.google.com/get/noto/).  
