@@ -219,8 +219,8 @@ class Utils:
             x = radius * math.sin(alpha)
             l = radius * math.cos(theta) * math.sin(alpha)
             if age < 15:
-                start = (radius + l, radius + y)
-                end = (radius - x, radius + y)
+                start = (radius - x, radius + y)
+                end = (radius + l, radius + y)
             else:
                 start = (radius - l, radius + y)
                 end = (radius + x, radius + y)
@@ -294,10 +294,10 @@ class WeatherModule:
     def update_screen(self, screen):
         screen.blit(self.surface, (self.rect.left, self.rect.top))
 
-    def text_size(self, text, size, bold):
+    def text_size(self, text, size, *, bold=False):
         return self.font(size, bold).size(text)
 
-    def text_warp(self, text, line_width, bold, size, *, max_lines=0):
+    def text_warp(self, text, line_width, size, *, bold=False, max_lines=0):
         font = self.font(size, bold)
         lines = []
         cur_line = ""
@@ -326,19 +326,19 @@ class WeatherModule:
 
     def draw_text(self,
                   text,
-                  position=(0, 0),
-                  size="small",
+                  position,
+                  size,
+                  color,
+                  *,
                   bold=False,
-                  color="white",
                   align="left",
                   background="black"):
         """
         :param text: text to draw
         :param position: render relative position (x, y)
         :param size: font size. ["small", "medium", "large"]
-        :param bold: bold flag.
         :param color: color name or RGB color tuple
-        :param position: render relative position (x, y)
+        :param bold: bold flag.
         :param align: text align. ["left", "center", "right"]
         :param background: background color
         """

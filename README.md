@@ -181,16 +181,16 @@ All modules require the following configuration:
 
 ### Built-in Modules
 
-| Name            | Description                         | Options       | Size              |
-| --------------- | ----------------------------------- | ------------- | ----------------- |
-| Alerts          | Any severe weather alerts pertinent | None          | 240x15 - 480x15   |
-| Clock           | Current Time                        | None          | 140x60            |
-| Location        | Current location                    |               | 140x15            |
-| Weather         | Current Weather                     | None          | 240x100 - 480x100 |
-| WeatherForecast | Weather Forcusts                    | forecast_days | 240x80 - 480x80   |
-| SunriseSuset    | Sunsine, Sunset time                | None          | 80x80             |
-| MoonPhase       | Moon Phase                          | None          | 80x80             |
-| Wind            | Wind direction, speed               | None          | 80x80             |
+| Name            | Description                         | Options                                 | Size              |
+| --------------- | ----------------------------------- | --------------------------------------- | ----------------- |
+| Alerts          | Any severe weather alerts pertinent | None                                    | 240x15 - 480x15   |
+| Clock           | Current Time                        | None                                    | 140x60            |
+| Location        | Current location                    |                                         | 140x15            |
+| Weather         | Current Weather                     | icon_size (default 100)                 | 240x100 - 480x100 |
+| WeatherForecast | Weather Forecast                    | forecast_days<br>icon_size (default 50) | 240x80 - 480x80   |
+| SunriseSuset    | Sunrise, Sunset time                | icon_size (default 40)                  | 80x80             |
+| MoonPhase       | Moon Phase                          | icon_size (default 50)                  | 80x80             |
+| Wind            | Wind direction, speed               | icon_size (default 30)                  | 80x80             |
 
 
 ### External modules
