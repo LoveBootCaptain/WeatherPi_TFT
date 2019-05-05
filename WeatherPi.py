@@ -132,7 +132,7 @@ def main():
             scale = None
         else:
             display = pygame.display.set_mode((0, 0))
-            screen = pygame.surface(config["display"])
+            screen = pygame.Surface(config["display"])
             display_w, display_h = display.get_size()
             screen_w, screen_h = screen.get_size()
             if display_w / screen_w * screen_h <= display_h:
