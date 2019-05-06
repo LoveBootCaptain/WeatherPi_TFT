@@ -164,7 +164,7 @@ class DailyWeatherForecast(WeatherModule):
                                                  self.units)
         temperature_high = Utils.temparature_text(int(temperature_high),
                                                   self.units)
-        message = "{} - {}".format(temperature_low, temperature_high)
+        message = "{}-{}".format(temperature_low, temperature_high)
 
         self.clear_surface()
         self.draw_text(day_of_week, (0, 0), "small", "orange", align="center")

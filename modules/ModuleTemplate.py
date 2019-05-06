@@ -3,7 +3,7 @@ import logging
 from modules.WeatherModule import WeatherModule, Utils
 
 
-class YourModuleClass(WeatherModule):
+class ModuleTemplate(WeatherModule):
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
         # check config if needed

@@ -88,7 +88,7 @@ class JMAAlerts(WeatherModule):
         else:
             result = self.timer_thread.result()
             if result:
-                message = ",".join(result)
+                message = ",".join(list(map(lambda x: _(x), result)))
             else:
                 message = ""
 
