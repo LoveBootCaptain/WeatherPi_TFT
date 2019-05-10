@@ -71,7 +71,7 @@ class JMAAlerts(WeatherModule):
         if not self.prefectures or not self.city:
             raise ValueError(__class__.__name__)
 
-        # start sensor thread
+        # start weather alerts thread
         self.timer_thread = RepeatedTimer(600, weather_alerts,
                                           [self.prefectures, self.city])
         self.timer_thread.start()

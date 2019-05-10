@@ -83,13 +83,15 @@ class Utils:
             (10 ** -6) * (f ** 2) * (h ** 2)
 
     @staticmethod
+    def celsius(f):
+        return (f - 32.0) * 0.555556
+
+    @staticmethod
+    def fahrenheit(c):
+        return (c * 1.8) + 32.0
+
+    @staticmethod
     def heat_color(temperature, humidity, units):
-        def celsius(f):
-            return (f - 32.0) * 0.555556
-
-        def fahrenheit(c):
-            return (c * 1.8) + 32.0
-
         def gradation(color_a, color_b, val_a, val_b, val_x):
             def geometric(a, b, p):
                 return int((b - a) * p / 100 + a)
@@ -98,8 +100,8 @@ class Utils:
             color_x = [geometric(color_a[i], color_b[i], p) for i in range(3)]
             return color_x
 
-        f = fahrenheit(temperature) if units == "si" else temperature
-        c = celsius(Utils.heat_index(f, humidity))
+        f = Utils.fahrenheit(temperature) if units == "si" else temperature
+        c = Utils.celsius(Utils.heat_index(f, humidity))
 
         color = Utils.color("white")
         for cm in Utils.color_maps:
@@ -207,7 +209,7 @@ class Utils:
         image = pygame.Surface((size, size))
         radius = int(size / 2)
 
-        # drow full moon
+        # draw full moon
         pygame.draw.circle(image, pygame.Color("white"), (radius, radius),
                            radius)
 
