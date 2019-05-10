@@ -42,32 +42,37 @@
     {
       "module": "Weather",
       "config": {
-        "rect": [0, 60, 240, 100]
+        "rect": [0, 60, 240, 100],
+        "icon_size": 100
       }
     },
     {
       "module": "WeatherForecast",
       "config": {
         "rect": [0, 160, 240, 80],
-        "forecast_days": 3
+        "forecast_days": 3,
+        "icon_size": 50
       }
     },
     {
       "module": "SunriseSuset",
       "config": {
-        "rect": [0, 240, 80, 80]
+        "rect": [0, 240, 80, 80],
+        "icon_size": 40
       }
     },
     {
       "module": "MoonPhase",
       "config": {
-        "rect": [80, 240, 80, 80]
+        "rect": [80, 240, 80, 80],
+        "icon_size": 50
       }
     },
     {
       "module": "Wind",
       "config": {
-        "rect": [160, 240, 80, 80]
+        "rect": [160, 240, 80, 80],
+        "icon_size": 30
       }
     }
   ]
