@@ -77,7 +77,7 @@ class DHT(WeatherModule):
 
         color = Utils.heat_color(celsius, humidity, "si")
         temparature = Utils.temparature_text(
-            Utils.fahrenheit(celsius) if self.units == "si" else celsius,
+            celsius if self.units == "si" else Utils.fahrenheit(celsius)
             self.units)
         humidity = Utils.percentage_text(humidity)
 
