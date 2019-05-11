@@ -9,22 +9,21 @@ from modules.RepeatedTimer import RepeatedTimer
 def read_temperature(units, correction_value):
     try:
         # send Temperature command and save reply
-        s = serial.Serial("/dev/ttyACM0", 9600, timeout=1)
-        s.write(b"T\r\n")
-        value = str(s.readline()).strip()
-        status = str(s.readline()).strip()
-        s.close()
+        with serial.Serial("/dev/ttyACM0", 9600, timeout=1) as s:
+            s.write(b"T\r\n")
+            value = s.readline().strip()
+            status = s.readline().strip()
 
         # Celsius conversion and correction
         celsius = ((5.0 / 1024.0 * float(value)) - 0.4) / 0.01953
         celsius = round(celsius + correction_value, 1)
 
         temperature = celsius if units == "si" else Utils.fahrenheit(celsius)
-        logging.debug("Temperature: {}".format(temparature))
+        logging.debug("Temperature: {}".format(temperature))
         return temperature
 
     except Exception as e:
-        logging.error("read_temperature failed: {}".format(e))
+        logging.error(e, exc_info=True)
         return None
 
 
@@ -32,7 +31,10 @@ class IrMagitianT(WeatherModule):
     """
     irMagician-T module
 
-    This module gets temparature from irMagician-T and display it.
+    This module gets temparature from the temperature sensor (Microchip MCP -97001)
+    installed in the infrared remote control system "irMagician-T" and displayed.
+
+    赤外線リモコンシステムirMagician-Tに搭載された温度センサ(Microchip MCP-97001)から温度を取得し表示します。
 
     example config:
     {
