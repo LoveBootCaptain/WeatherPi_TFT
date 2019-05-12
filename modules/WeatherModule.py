@@ -302,6 +302,8 @@ class WeatherModule:
         screen.blit(self.surface, (self.rect.left, self.rect.top))
 
     def text_size(self, text, size, *, bold=False):
+        if not text:
+            return (0, 0)
         return self.font(size, bold).size(text)
 
     def text_warp(self, text, line_width, size, *, bold=False, max_lines=0):
