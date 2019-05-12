@@ -60,12 +60,9 @@ class IrMagitianT(WeatherModule):
         self.timer_thread = RepeatedTimer(20, read_temperature,
                                           [self.units, self.correction_value])
         self.timer_thread.start()
-        logging.info("{}: sensor thread started".format(__class__.__name__))
 
     def quit(self):
         if self.timer_thread:
-            logging.info("{}: sensor thread stopped".format(
-                __class__.__name__))
             self.timer_thread.quit()
 
     def draw(self, screen, weather, updated):

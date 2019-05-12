@@ -120,7 +120,6 @@ def main():
             language, config["units"]
         ])
         timer_thread.start()
-        logging.info("weather forecast thread started")
 
         # initialize pygame
         os.putenv("SDL_FBDEV", config["SDL_FBDEV"])
@@ -208,6 +207,11 @@ def main():
                         display_wakeup = True
                 elif event.type == RESTART:
                     logging.info("restarting..")
+                    if timer_thread:
+                        timer_thread.quit()
+                    for module in modules:
+                        module.quit()
+                    pygame.quit()
                     os.execl(sys.executable, sys.executable, *sys.argv)
 
             time.sleep(1)
@@ -217,12 +221,10 @@ def main():
 
     finally:
         if timer_thread:
-            logging.info("weather forecast thread stopped")
             timer_thread.quit()
         for module in modules:
             module.quit()
         pygame.quit()
-        quit()
 
 
 if __name__ == "__main__":

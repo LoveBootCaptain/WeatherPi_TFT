@@ -40,9 +40,7 @@ class SelfUpdate(WeatherModule):
 
         self.timer_thread = RepeatedTimer(self.check_interval, self_update)
         self.timer_thread.start()
-        logging.info("{}: thread started".format(__class__.__name__))
 
     def quit(self):
         if self.timer_thread:
-            logging.info("{}: thread stopped".format(__class__.__name__))
             self.timer_thread.quit()

@@ -1,3 +1,4 @@
+import logging
 import sys
 import threading
 
@@ -8,6 +9,8 @@ class RepeatedTimer(threading.Timer):
         self.thread = None
         self.function = function
         self._return = None
+        logging.info("{} thread created. interval: {}".format(
+            self.function.__name__, self.interval))
 
     def run(self):
         self.thread = threading.Timer(self.interval, self.run)
@@ -19,6 +22,7 @@ class RepeatedTimer(threading.Timer):
 
     def quit(self):
         if self.thread is not None:
+            logging.info("{} thread stopped".format(self.function.__name__))
             self.thread.cancel()
             self.thread.join()
             del self.thread
