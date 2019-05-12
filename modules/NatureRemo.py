@@ -16,12 +16,12 @@ def read_temperature_and_humidity(token, name):
                                 })
         response.raise_for_status()
 
-        temparature = humidity = None
+        temperature = humidity = None
         for device in response.json():
             if device["name"] == name:
                 events = device["newest_events"]
                 if "te" in events:
-                    temparature = events["te"]["val"]
+                    temperature = events["te"]["val"]
                 if "hu" in events:
                     humidity = events["hu"]["val"]
 
