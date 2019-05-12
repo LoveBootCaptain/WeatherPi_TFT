@@ -21,7 +21,7 @@ def read_temperature_and_humidity(token, name):
             if device["name"] == name:
                 events = device["newest_events"]
                 if "te" in events:
-                    temperature = events["te"]["val"]
+                    temperature = round(float(events["te"]["val"]), 1)
                 if "hu" in events:
                     humidity = events["hu"]["val"]
 
