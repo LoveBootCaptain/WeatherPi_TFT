@@ -141,6 +141,7 @@ def main():
                 scale = (int(display_h / screen_h * screen_w), display_h)
         DISPLAY_SLEEP = pygame.USEREVENT + 1
         DISPLAY_WAKEUP = pygame.USEREVENT + 2
+        RESTART = pygame.USEREVENT + 3
         logging.info(
             "pygame initialized. display:{} screen:{} scale:{}".format(
                 display.get_size(), screen.get_size(), scale))
@@ -205,6 +206,9 @@ def main():
                     if not display_wakeup:
                         last_hash = None
                         display_wakeup = True
+                elif event.type == RESTART:
+                    logging.info("restarting..")
+                    os.execl(sys.executable, sys.executable, *sys.argv)
 
             time.sleep(1)
 

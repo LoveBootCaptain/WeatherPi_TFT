@@ -198,7 +198,8 @@ All modules require the following configuration:
 | JMAAlerts   | JMA weather alerts<br>(気象庁の注意報、警報、特別警報を表示)                    | prefecture: (都道府県)<br>city: (市区町村)                                                     | 240x15 - 480x15 |
 | DHT         | Adafruit temperature/humidity sensor                                            | pin: pin number<br>correction_value:                                                           | 100x60          |
 | PIR         | PIR(Passive Infrared Ray）Motion Sensor                                         | pin: pin number<br>power_save_delay: delay (in seconds) before the monitor will be turned off. | None            |
-| IrMagitianT | Temperature sensor mounted on the infrared remote control system "irMagician-T" | correction_value: (調整値)                                                                     | 60x35 - 70x60                |
+| IrMagitianT | Temperature sensor mounted on the infrared remote control system "irMagician-T" | correction_value: (調整値)                                                                     | 60x35 - 70x60   |
+| SelfUpdate  | Update and restart if there is a newer version on GitHub                        | check_interval (default 86400 # once a day)                                                                                           | -               |
 
 
 

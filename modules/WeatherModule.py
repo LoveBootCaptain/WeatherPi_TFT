@@ -273,6 +273,11 @@ class Utils:
         DISPLAY_WAKEUP = pygame.USEREVENT + 2
         pygame.event.post(pygame.event.Event(DISPLAY_WAKEUP))
 
+    @staticmethod
+    def restart():
+        RESTART = pygame.USEREVENT + 3
+        pygame.event.post(pygame.event.Event(RESTART))
+
 
 class WeatherModule:
     def __init__(self, fonts, location, language, units, config):
