@@ -71,17 +71,18 @@ class NatureRemo(WeatherModule):
         if self.timer_thread is None:
             return
 
-        temperature, humidity = self.timer_thread.result()
-        if temperature is None:
+        result = self.timer_thread.result()
+        if result is None:
             logging.info("{}: No data from sensor".format(__class__.__name__))
             return
+        temperature, humidity = result
 
         if self.units != "si":
-            temparature = Utils.fahrenheit(temparature)
+            temperature = Utils.fahrenheit(temperature)
 
-        message1 = Utils.temparature_text(temparature, self.units)
+        message1 = Utils.temparature_text(temperature, self.units)
         message2 = Utils.pressure_text(humidity) if humidity else None
-        color = Utils.heat_color(temparature, humidity,
+        color = Utils.heat_color(temperature, humidity,
                                  self.units) if humidity else "white"
         for size in ("large", "medium", "small"):
             w1, h1 = self.text_size(message1, size, bold=True)
