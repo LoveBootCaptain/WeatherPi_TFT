@@ -59,7 +59,7 @@ class DHT(WeatherModule):
 
         # start sensor thread
         self.timer_thread = RepeatedTimer(
-            20, Adafruit_DHT.read_retry,
+            20, read_temperature_and_humidity,
             [self.sensor, self.pin, self.correction_value])
         self.timer_thread.start()
 
