@@ -65,7 +65,7 @@ class Utils:
         return ("{}km/h" if units == "si" else "{}mi/h").format(value)
 
     @staticmethod
-    def temparature_text(value, units):
+    def temperature_text(value, units):
         return ("{}°c" if units == "si" else "{}°f").format(value)
 
     @staticmethod

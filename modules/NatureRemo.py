@@ -1,4 +1,5 @@
 import gettext
+import hashlib
 import json
 import logging
 import requests
@@ -16,18 +17,19 @@ def read_temperature_and_humidity(token, name):
                                 })
         response.raise_for_status()
 
-        temperature = humidity = None
+        celsius = humidity = None
         for device in response.json():
             if device["name"] == name:
                 events = device["newest_events"]
                 if "te" in events:
-                    temperature = round(float(events["te"]["val"]), 1)
+                    celsius = round(float(events["te"]["val"]), 1)
                 if "hu" in events:
                     humidity = events["hu"]["val"]
-
-        logging.debug("Temperature: {} Humidity: {}".format(
-            temperature, humidity))
-        return temperature, humidity
+                break
+        hash = hashlib.md5("{}{}".format(celsius,
+                                         humidity).encode()).hexdigest()
+        logging.info("Celsius: {} Humidity: {}".format(celsius, humidity))
+        return celsius, humidity, hash
 
     except Exception as e:
         logging.error(e, exc_info=True)
@@ -38,7 +40,7 @@ class NatureRemo(WeatherModule):
     """
     Nature Remo module
 
-    This module gets temparature and humidity from Nature Remo/Remo mini and displayed.
+    This module gets temperature and humidity from Nature Remo/Remo mini and displayed.
     Nature Remo/Remo miniに搭載された温湿度センサ()から温湿度を取得し表示します。
     （湿度が計測できるのはRemoのみ）
 
@@ -57,6 +59,8 @@ class NatureRemo(WeatherModule):
         super().__init__(fonts, location, language, units, config)
         self.token = config["token"]
         self.name = config["name"]
+        self.timer_thread = None
+        self.hash = None
 
         # start sensor thread
         self.timer_thread = RepeatedTimer(20, read_temperature_and_humidity,
@@ -75,16 +79,29 @@ class NatureRemo(WeatherModule):
         if result is None:
             logging.info("{}: No data from sensor".format(__class__.__name__))
             return
-        temperature, humidity = result
+        celsius, humidity, hash = result
+        if self.hash == hash:
+            return
+        self.hash = hash
 
-        if self.units != "si":
-            temperature = Utils.fahrenheit(temperature)
+        color = Utils.heat_color(celsius, humidity,
+                                 "si") if humidity else "white"
+        temperature = Utils.temperature_text(
+            celsius if self.units == "si" else Utils.fahrenheit(celsius),
+            self.units)
+        humidity = Utils.pressure_text(humidity) if humidity else None
 
-        message1 = Utils.temparature_text(temperature, self.units)
-        message2 = Utils.pressure_text(humidity) if humidity else None
-        color = Utils.heat_color(temperature, humidity,
-                                 self.units) if humidity else "white"
         for size in ("large", "medium", "small"):
+            # Horizontal
+            message1 = "{} {}".format(temperature, humidity)
+            message2 = None
+            w, h = self.text_size(message1, size, bold=True)
+            if w <= self.rect.width and 20 + h <= self.rect.height:
+                break
+
+            # Vertical
+            message1 = temperature
+            message2 = humidity if humidity else None
             w1, h1 = self.text_size(message1, size, bold=True)
             w2, h2 = self.text_size(message2, size, bold=True)
             if max(w1,

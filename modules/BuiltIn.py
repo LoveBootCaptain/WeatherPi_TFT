@@ -92,12 +92,12 @@ class Weather(WeatherModule):
         uv_color = Utils.uv_color(uv_index)
         weather_icon = Utils.weather_icon(currently["icon"], self.icon_size)
 
-        temperature = Utils.temparature_text(int(temperature), self.units)
-        apparent_temperature = Utils.temparature_text(
+        temperature = Utils.temperature_text(int(temperature), self.units)
+        apparent_temperature = Utils.temperature_text(
             int(apparent_temperature), self.units)
-        temperature_low = Utils.temparature_text(int(temperature_low),
+        temperature_low = Utils.temperature_text(int(temperature_low),
                                                  self.units)
-        temperature_high = Utils.temparature_text(int(temperature_high),
+        temperature_high = Utils.temperature_text(int(temperature_high),
                                                   self.units)
         humidity = Utils.percentage_text(int(humidity * 100))
         uv_index = str(uv_index)
@@ -160,9 +160,9 @@ class DailyWeatherForecast(WeatherModule):
 
         weather_icon = Utils.weather_icon(daily["icon"], icon_size)
         day_of_week = Utils.strftime(daily["time"], "%a")
-        temperature_low = Utils.temparature_text(int(temperature_low),
+        temperature_low = Utils.temperature_text(int(temperature_low),
                                                  self.units)
-        temperature_high = Utils.temparature_text(int(temperature_high),
+        temperature_high = Utils.temperature_text(int(temperature_high),
                                                   self.units)
         message = "{}-{}".format(temperature_low, temperature_high)
 

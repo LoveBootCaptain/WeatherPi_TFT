@@ -1,4 +1,5 @@
 import gettext
+import hashlib
 import logging
 import serial
 import sys
@@ -6,7 +7,7 @@ from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 
 
-def read_temperature(units, correction_value):
+def read_temperature(correction_value):
     try:
         # send Temperature command and save reply
         with serial.Serial("/dev/ttyACM0", 9600, timeout=1) as s:
@@ -17,10 +18,9 @@ def read_temperature(units, correction_value):
         # Celsius conversion and correction
         celsius = ((5.0 / 1024.0 * float(value)) - 0.4) / 0.01953
         celsius = round(celsius + correction_value, 1)
-
-        temperature = celsius if units == "si" else Utils.fahrenheit(celsius)
-        logging.debug("Temperature: {}".format(temperature))
-        return temperature
+        hash = hashlib.md5(str(celsius).encode()).hexdigest()
+        logging.info("Celsius: {}".format(celsius))
+        return celsius, hash
 
     except Exception as e:
         logging.error(e, exc_info=True)
@@ -50,6 +50,7 @@ class IrMagitianT(WeatherModule):
         super().__init__(fonts, location, language, units, config)
         self.correction_value = None
         self.timer_thread = None
+        self.hash = None
 
         if isinstance(config["correction_value"], int):
             self.correction_value = config["correction_value"]
@@ -58,7 +59,7 @@ class IrMagitianT(WeatherModule):
 
         # start sensor thread
         self.timer_thread = RepeatedTimer(20, read_temperature,
-                                          [self.units, self.correction_value])
+                                          [self.correction_value])
         self.timer_thread.start()
 
     def quit(self):
@@ -69,12 +70,21 @@ class IrMagitianT(WeatherModule):
         if self.timer_thread is None:
             return
 
-        temperature = self.timer_thread.result()
-        if temperature is None:
+        result = self.timer_thread.result()
+        if result is None:
             logging.info("{}: No data from sensor".format(__class__.__name__))
             return
 
-        message = Utils.temparature_text(temperature, self.units)
+        (celsius, hash) = result
+        if self.hash == hash:
+            return
+        self.hash = hash
+
+        temparature = Utils.temperature_text(
+            celsius if self.units == "si" else Utils.fahrenheit(celsius),
+            self.units)
+
+        message = temparature
         for size in ("large", "medium", "small"):
             w, h = self.text_size(message, size, bold=True)
             if w <= self.rect.width and 20 + h <= self.rect.height:
