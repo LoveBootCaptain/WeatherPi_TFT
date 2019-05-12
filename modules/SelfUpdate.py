@@ -1,6 +1,7 @@
 import gettext
 import logging
 from modules.WeatherModule import WeatherModule, Utils
+from modules.RepeatedTimer import RepeatedTimer
 
 
 def self_update():
@@ -29,9 +30,11 @@ def self_update():
 
 class SelfUpdate(WeatherModule):
     def __init__(self, fonts, location, language, units, config):
-        self.check_interval = 86400  # onece a day
-        self.check_interval = config[
-            "check_interval"] if "check_interval" in config else 86400  # onece a day
+        self.check_interval = None
+        if isinstance(config["check_interval"], int):
+            self.check_interval = config["check_interval"]
+        if self.check_interval is None:
+            raise ValueError(__class__.__name__)
 
         self.timer_thread = RepeatedTimer(self.check_interval, self_update)
         self.timer_thread.start()
