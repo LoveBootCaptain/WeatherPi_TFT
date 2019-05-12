@@ -1,5 +1,7 @@
 import gettext
 import logging
+import subprocess
+import sys
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 
