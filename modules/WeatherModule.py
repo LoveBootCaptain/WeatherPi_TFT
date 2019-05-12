@@ -292,7 +292,7 @@ class WeatherModule:
     def quit(self):
         pass
 
-    def draw(self, weather):
+    def draw(self, screen, weather, updated):
         pass
 
     def clear_surface(self):
