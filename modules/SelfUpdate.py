@@ -22,7 +22,7 @@ def self_update():
         if rid == lid:
             logging.debug("Up to date")
         else:
-            exec("git pull")
+            exec("sudo -u pi git pull")
             logging.info("Updated to new version")
             Utils.restart()
 

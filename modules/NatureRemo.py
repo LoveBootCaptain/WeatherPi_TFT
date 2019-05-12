@@ -59,7 +59,7 @@ class NatureRemo(WeatherModule):
         self.name = config["name"]
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(20, read_temperature,
+        self.timer_thread = RepeatedTimer(20, read_temperature_and_humidity,
                                           [self.token, self.name])
         self.timer_thread.start()
 
