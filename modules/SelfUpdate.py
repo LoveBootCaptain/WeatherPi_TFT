@@ -18,7 +18,7 @@ def self_update():
     try:
         rid = exec("git ls-remote origin HEAD | cut -f1")
         lid = exec("git log --format='%H' -n 1")
-        logging.debug("remote: {} local: {}".format(rid, lid))
+        logging.info("remote: {} local: {}".format(rid, lid))
         if rid == lid:
             logging.debug("Up to date")
         else:
