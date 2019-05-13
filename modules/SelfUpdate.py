@@ -31,6 +31,20 @@ def self_update():
 
 
 class SelfUpdate(WeatherModule):
+    """
+    Self update module
+
+    This module detects git updates and updates itself.
+
+    example config:
+    {
+      "module": "SelfUpdate",
+      "config": {
+        "check_interval": 86400
+      }
+    }
+    """
+
     def __init__(self, fonts, location, language, units, config):
         self.check_interval = None
         if isinstance(config["check_interval"], int):
