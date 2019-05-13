@@ -63,11 +63,11 @@ class JMAAlerts(WeatherModule):
 
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
-        if self.location["address"]:
-            self.city, self.prefectures = self.location["address"].split(",")
-        else:
+        if "prefectures" in config and "city" in config:
             self.prefectures = config["prefectures"]
             self.city = config["city"]
+        elif self.location["address"]:
+            self.city, self.prefectures = self.location["address"].split(",")
         if not self.prefectures or not self.city:
             raise ValueError(__class__.__name__)
 

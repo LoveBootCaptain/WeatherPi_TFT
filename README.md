@@ -19,10 +19,12 @@ fig: 240x320 en
   (表示パーツはモジュール化してあるので、カスタマイズが可能です)
 * Heat Index color / UV Index color support  
   (Heat Index/UV Indexで表示色を変更します)
-* Custom module support（ex. DHT11 temperature/humidity sensor module)  
-  (カスタムモジュールを作成して組み込むことができます)
+* Custom module support
+  (カスタムモジュールを作成して組み込むことができます)  
+  [External modules](#External modules)
 * i18n (internationalization) support  
-  (ロケールの変更や表示文字列の翻訳が可能です)
+  (ロケールの変更や表示文字列の翻訳が可能です)  
+  [I18n](#I18n)
 
 ## Installation
 

@@ -52,8 +52,8 @@ class IrMagitianT(WeatherModule):
         self.timer_thread = None
         self.hash = None
 
-        if isinstance(config["correction_value"], int):
-            self.correction_value = config["correction_value"]
+        if isinstance(config["correction_value"], float):
+            self.correction_value = float(config["correction_value"])
         if self.correction_value is None:
             raise ValueError(__class__.__name__)
 

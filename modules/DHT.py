@@ -52,8 +52,8 @@ class DHT(WeatherModule):
             self.sensor = DHT.sensors[config["sensor"]]
         if isinstance(config["pin"], int):
             self.pin = config["pin"]
-        if isinstance(config["correction_value"], int):
-            self.correction_value = config["correction_value"]
+        if isinstance(config["correction_value"], float):
+            self.correction_value = float(config["correction_value"])
         if self.sensor is None or self.pin is None or self.correction_value is None:
             raise ValueError(__class__.__name__)
 

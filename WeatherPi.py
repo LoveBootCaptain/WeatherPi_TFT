@@ -37,7 +37,7 @@ def weather_forecast(api_key, latitude, longitude, language, units):
         return None
 
 
-def geolocode(key, language, address, latitude, longitude):
+def geocode(key, language, address, latitude, longitude):
     try:
         response = requests.get(
             "https://maps.googleapis.com/maps/api/geocode/json",
@@ -103,9 +103,9 @@ def main():
 
         # initialize address, latitude and longitude
         if config["google_api_key"]:
-            results = geolocode(config["google_api_key"], language,
-                                config["address"], config["latitude"],
-                                config["longitude"])
+            results = geocode(config["google_api_key"], language,
+                              config["address"], config["latitude"],
+                              config["longitude"])
             if results is not None:
                 latitude, longitude, address = results
                 config["latitude"] = latitude
