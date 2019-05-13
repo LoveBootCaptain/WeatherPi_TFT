@@ -21,7 +21,7 @@ fig: 240x320 en
   (Heat Index/UV Indexで表示色を変更します)
 * Custom module support
   (カスタムモジュールを作成して組み込むことができます)  
-  [External modules](#External modules)
+  [External modules](#external-modules)
 * i18n (internationalization) support  
   (ロケールの変更や表示文字列の翻訳が可能です)  
   [I18n](#I18n)
