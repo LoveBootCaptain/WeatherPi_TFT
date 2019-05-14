@@ -56,7 +56,7 @@ class NatureRemo(WeatherModule):
         self.token = config["token"]
         self.name = config["name"]
         self.timer_thread = None
-        self.hash = None
+        self.last_hash = None
 
         # start sensor thread
         self.timer_thread = RepeatedTimer(20, read_temperature_and_humidity,
@@ -76,9 +76,9 @@ class NatureRemo(WeatherModule):
 
         # Has the value changed
         hash = self.timer_thread.get_hash()
-        if self.hash == hash:
+        if self.last_hash == hash:
             return
-        self.hash = hash
+        self.last_hash = hash
 
         celsius, humidity = result
 

@@ -47,7 +47,7 @@ class DHT(WeatherModule):
         self.pin = None
         self.correction_value = None
         self.timer_thread = None
-        self.hash = None
+        self.last_hash = None
 
         if config["sensor"] in DHT.sensors:
             self.sensor = DHT.sensors[config["sensor"]]
@@ -76,9 +76,9 @@ class DHT(WeatherModule):
 
         # Has the value changed
         hash = self.timer_thread.get_hash()
-        if self.hash == hash:
+        if self.last_hash == hash:
             return
-        self.hash = hash
+        self.last_hash = hash
 
         (humidity, celsius) = result
 

@@ -48,7 +48,7 @@ class IrMagitianT(WeatherModule):
         super().__init__(fonts, location, language, units, config)
         self.correction_value = None
         self.timer_thread = None
-        self.hash = None
+        self.last_hash = None
 
         self.correction_value = float(config["correction_value"])
         if self.correction_value is None:
@@ -72,9 +72,9 @@ class IrMagitianT(WeatherModule):
 
         # Has the value changed
         hash = self.timer_thread.get_hash()
-        if self.hash == hash:
+        if self.last_hash == hash:
             return
-        self.hash = hash
+        self.last_hash = hash
 
         celsius = result
 

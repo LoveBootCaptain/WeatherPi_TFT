@@ -174,11 +174,10 @@ def main():
         while running:
             # weather data check
             weather = timer_thread.get_result()
+            updated = False
             if weather:
                 hash = timer_thread.get_hash()
-                if last_hash == hash:
-                    updated = False
-                else:
+                if last_hash != hash:
                     logging.info("weather data updated")
                     last_hash = hash
                     updated = True
