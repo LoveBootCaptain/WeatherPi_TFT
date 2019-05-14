@@ -1,6 +1,6 @@
+import gettext
 import logging
 import time
-from gettext import gettext as _
 from modules.WeatherModule import WeatherModule, Utils
 
 

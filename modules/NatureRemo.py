@@ -1,6 +1,6 @@
+import gettext
 import logging
 import requests
-from gettext import gettext as _
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 

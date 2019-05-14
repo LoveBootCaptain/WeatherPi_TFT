@@ -1,6 +1,6 @@
 import Adafruit_DHT
+import gettext
 import logging
-from gettext import gettext as _
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 
