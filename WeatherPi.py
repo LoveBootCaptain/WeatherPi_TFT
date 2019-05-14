@@ -122,10 +122,12 @@ def main():
         timer_thread.start()
 
         # initialize pygame
-        os.putenv("SDL_FBDEV", config["SDL_FBDEV"])
+        if "DISPLAY_NO" in config:
+            os.putenv("DISPLAY", config["DISPLAY_NO"])
+        if "SDL_FBDEV" in config:
+            os.putenv("SDL_FBDEV", config["SDL_FBDEV"])
         pygame.init()
         pygame.mouse.set_visible(False)
-        display_info = pygame.display.Info()
         if pygame.display.mode_ok(config["display"]):
             display = screen = pygame.display.set_mode(config["display"])
             scale = None

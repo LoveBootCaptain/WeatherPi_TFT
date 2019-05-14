@@ -1,6 +1,6 @@
-import gettext
 import logging
 import time
+from gettext import gettext as _
 from modules.WeatherModule import WeatherModule, Utils
 
 
@@ -90,7 +90,7 @@ class Weather(WeatherModule):
 
         heat_color = Utils.heat_color(temperature, humidity, self.units)
         uv_color = Utils.uv_color(uv_index)
-        weather_icon = Utils.weather_icon(currently["icon"], self.icon_size)
+        weather_icon = Utils.weather_icon(icon, self.icon_size)
 
         temperature = Utils.temperature_text(int(temperature), self.units)
         apparent_temperature = Utils.temperature_text(

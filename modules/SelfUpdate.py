@@ -1,4 +1,3 @@
-import gettext
 import logging
 import subprocess
 import sys

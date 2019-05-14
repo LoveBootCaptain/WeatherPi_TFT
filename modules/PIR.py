@@ -1,9 +1,6 @@
-import gettext
 import RPi.GPIO as GPIO
 import logging
-import sys
 from modules.WeatherModule import WeatherModule, Utils
-from modules.RepeatedTimer import RepeatedTimer
 
 
 class PIR(WeatherModule):

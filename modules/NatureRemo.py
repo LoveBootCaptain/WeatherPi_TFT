@@ -1,9 +1,7 @@
-import gettext
 import hashlib
-import json
 import logging
 import requests
-import sys
+from gettext import gettext as _
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 
@@ -40,7 +38,8 @@ class NatureRemo(WeatherModule):
     """
     Nature Remo module
 
-    This module gets temperature and humidity from Nature Remo/Remo mini and displayed.
+    This module gets temperature and humidity from Nature Remo/Remo mini and
+    displayed.
     Nature Remo/Remo miniに搭載された温湿度センサ()から温湿度を取得し表示します。
     （湿度が計測できるのはRemoのみ）
 

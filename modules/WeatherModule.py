@@ -6,6 +6,7 @@ import os
 import pygame
 import requests
 import sys
+from gettext import gettext as _
 from functools import lru_cache
 
 
@@ -343,13 +344,24 @@ class WeatherModule:
                   align="left",
                   background="black"):
         """
-        :param text: text to draw
-        :param position: render relative position (x, y)
-        :param size: font size. ["small", "medium", "large"]
-        :param color: color name or RGB color tuple
-        :param bold: bold flag.
-        :param align: text align. ["left", "center", "right"]
-        :param background: background color
+        Draw text.
+
+        Parameters
+        ----------
+        text:
+            text to draw
+        position:
+            render relative position (x, y)
+        size:
+            font size. ["small", "medium", "large"]
+        color:
+            color name or RGB color tuple
+        bold:
+            bold flag.
+        align:
+            text align. ["left", "center", "right"]
+        background:
+            background color
         """
         if not text:
             return
@@ -368,9 +380,16 @@ class WeatherModule:
 
     def draw_image(self, image, position, angle=0):
         """
-        :param image: image to draw
-        :param position: render relative position (x, y)
-        :param angle: counterclockwise  degrees angle
+        Draw an image.
+
+        Parameters
+        ----------
+        image:
+            image to draw
+        position:
+            render relative position (x, y)
+        angle:
+            counterclockwise  degrees angle
         """
         if not image:
             return

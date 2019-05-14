@@ -1,8 +1,7 @@
 import Adafruit_DHT
-import gettext
 import hashlib
 import logging
-import sys
+from gettext import gettext as _
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 
@@ -10,8 +9,7 @@ from modules.RepeatedTimer import RepeatedTimer
 def read_temperature_and_humidity(sensor, pin, correction_value):
     humidity, celsius = Adafruit_DHT.read_retry(sensor, pin)
     celsius = round(celsius + correction_value, 1)
-    hash = hashlib.md5("{}{}".format(temperature,
-                                     humidity).encode()).hexdigest()
+    hash = hashlib.md5("{}{}".format(celsius, humidity).encode()).hexdigest()
     logging.info("Celsius: {} Humidity: {}".format(celsius, humidity))
     return humidity, celsius, hash
 
@@ -20,8 +18,8 @@ class DHT(WeatherModule):
     """
     Adafruit temperature/humidity sensor module
 
-    This module gets data form DHT11, DHT22 and AM2302 sensors and display it in
-    Color Index color.
+    This module gets data form DHT11, DHT22 and AM2302 sensors and display it
+    in Heat Index color.
 
     example config:
     {
@@ -52,8 +50,7 @@ class DHT(WeatherModule):
             self.sensor = DHT.sensors[config["sensor"]]
         if isinstance(config["pin"], int):
             self.pin = config["pin"]
-        if isinstance(config["correction_value"], float):
-            self.correction_value = float(config["correction_value"])
+        self.correction_value = float(config["correction_value"])
         if self.sensor is None or self.pin is None or self.correction_value is None:
             raise ValueError(__class__.__name__)
 
