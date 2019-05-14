@@ -1,5 +1,4 @@
 import Adafruit_DHT
-import hashlib
 import logging
 from gettext import gettext as _
 from modules.WeatherModule import WeatherModule, Utils
@@ -7,11 +6,15 @@ from modules.RepeatedTimer import RepeatedTimer
 
 
 def read_temperature_and_humidity(sensor, pin, correction_value):
-    humidity, celsius = Adafruit_DHT.read_retry(sensor, pin)
-    celsius = round(celsius + correction_value, 1)
-    hash = hashlib.md5("{}{}".format(celsius, humidity).encode()).hexdigest()
-    logging.info("Celsius: {} Humidity: {}".format(celsius, humidity))
-    return humidity, celsius, hash
+    try:
+        humidity, celsius = Adafruit_DHT.read_retry(sensor, pin)
+        celsius = round(celsius + correction_value, 1)
+        logging.info("Celsius: {} Humidity: {}".format(celsius, humidity))
+        return humidity, celsius
+
+    except Exception as e:
+        logging.error(e, exc_info=True)
+        return None
 
 
 class DHT(WeatherModule):
@@ -65,20 +68,19 @@ class DHT(WeatherModule):
             self.timer_thread.quit()
 
     def draw(self, screen, weather, updated):
-        if self.timer_thread is None:
-            return
-
-        result = self.timer_thread.result()
+        # No result yet
+        result = self.timer_thread.get_result()
         if result is None:
-            return
-
-        (humidity, celsius, hash) = result
-        if humidity is None or celsius is None:
             logging.info("{}: No data from sensor".format(__class__.__name__))
             return
+
+        # Has the value changed
+        hash = self.timer_thread.get_hash()
         if self.hash == hash:
             return
         self.hash = hash
+
+        (humidity, celsius) = result
 
         color = Utils.heat_color(celsius, humidity, "si")
         temperature = Utils.temperature_text(

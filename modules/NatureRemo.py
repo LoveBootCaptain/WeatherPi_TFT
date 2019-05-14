@@ -1,4 +1,3 @@
-import hashlib
 import logging
 import requests
 from gettext import gettext as _
@@ -24,10 +23,8 @@ def read_temperature_and_humidity(token, name):
                 if "hu" in events:
                     humidity = events["hu"]["val"]
                 break
-        hash = hashlib.md5("{}{}".format(celsius,
-                                         humidity).encode()).hexdigest()
         logging.info("Celsius: {} Humidity: {}".format(celsius, humidity))
-        return celsius, humidity, hash
+        return celsius, humidity
 
     except Exception as e:
         logging.error(e, exc_info=True)
@@ -71,17 +68,19 @@ class NatureRemo(WeatherModule):
             self.timer_thread.quit()
 
     def draw(self, screen, weather, updated):
-        if self.timer_thread is None:
-            return
-
-        result = self.timer_thread.result()
+        # No result yet
+        result = self.timer_thread.get_result()
         if result is None:
             logging.info("{}: No data from sensor".format(__class__.__name__))
             return
-        celsius, humidity, hash = result
+
+        # Has the value changed
+        hash = self.timer_thread.get_hash()
         if self.hash == hash:
             return
         self.hash = hash
+
+        celsius, humidity = result
 
         color = Utils.heat_color(celsius, humidity,
                                  "si") if humidity else "white"

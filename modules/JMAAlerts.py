@@ -84,7 +84,7 @@ class JMAAlerts(WeatherModule):
         if weather is None:
             message = "Waiting data..."
         else:
-            result = self.timer_thread.result()
+            result = self.timer_thread.get_result()
             if result:
                 message = ",".join(list(map(lambda x: _(x), result)))
             else:

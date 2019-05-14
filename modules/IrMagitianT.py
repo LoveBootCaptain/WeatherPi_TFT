@@ -1,4 +1,3 @@
-import hashlib
 import logging
 import serial
 from gettext import gettext as _
@@ -17,9 +16,8 @@ def read_temperature(correction_value):
         # Celsius conversion and correction
         celsius = ((5.0 / 1024.0 * float(value)) - 0.4) / 0.01953
         celsius = round(celsius + correction_value, 1)
-        hash = hashlib.md5(str(celsius).encode()).hexdigest()
         logging.info("Celsius: {}".format(celsius))
-        return celsius, hash
+        return celsius
 
     except Exception as e:
         logging.error(e, exc_info=True)
@@ -66,18 +64,19 @@ class IrMagitianT(WeatherModule):
             self.timer_thread.quit()
 
     def draw(self, screen, weather, updated):
-        if self.timer_thread is None:
-            return
-
-        result = self.timer_thread.result()
+        # No result yet
+        result = self.timer_thread.get_result()
         if result is None:
             logging.info("{}: No data from sensor".format(__class__.__name__))
             return
 
-        (celsius, hash) = result
+        # Has the value changed
+        hash = self.timer_thread.get_hash()
         if self.hash == hash:
             return
         self.hash = hash
+
+        celsius = result
 
         temparature = Utils.temperature_text(
             celsius if self.units == "si" else Utils.fahrenheit(celsius),

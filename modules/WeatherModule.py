@@ -1,4 +1,5 @@
 import datetime
+import gettext
 import io
 import logging
 import math
@@ -6,7 +7,6 @@ import os
 import pygame
 import requests
 import sys
-from gettext import gettext as _
 from functools import lru_cache
 
 
@@ -368,14 +368,14 @@ class WeatherModule:
 
         (x, y) = position
         font = self.font(size, bold)
-        size = font.size(text)
+        (w, h) = font.size(text)
         color = Utils.color(color) if isinstance(color, str) else color
         if align == "center":
-            x = (self.rect.width - size[0]) / 2
+            x = (self.rect.width - w) / 2
         elif align == "right":
-            x = self.rect.width - size[0]
+            x = self.rect.width - w
         self.surface.blit(font.render(text, True, color, background), (x, y))
-        (right, bottom) = (x + size[0], size[1])
+        (right, bottom) = (x + w, h)
         return right, bottom
 
     def draw_image(self, image, position, angle=0):

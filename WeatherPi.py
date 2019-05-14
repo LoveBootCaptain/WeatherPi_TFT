@@ -3,7 +3,6 @@
 
 import argparse
 import gettext
-import hashlib
 import importlib
 import json
 import locale
@@ -28,9 +27,7 @@ def weather_forecast(api_key, latitude, longitude, language, units):
                 "exclude": "minutely,hourly,flags"
             })
         resopnse.raise_for_status()
-        data = resopnse.json()
-        hash = hashlib.md5(json.dumps(data).encode()).hexdigest()
-        return data, hash
+        return resopnse.json()
 
     except Exception as e:
         logging.error("darksky weather forecast api failed: {}".format(e))
@@ -173,16 +170,18 @@ def main():
         display_wakeup = True
         last_hash = None
         running = True
+        restart = False
         while running:
             # weather data check
-            result = timer_thread.result()
-            (weather, hash) = result if result is not None else (None, None)
-            if last_hash == hash:
-                updated = False
-            else:
-                logging.info("weather data updated")
-                last_hash = hash
-                updated = True
+            weather = timer_thread.get_result()
+            if weather:
+                hash = timer_thread.get_hash()
+                if last_hash == hash:
+                    updated = False
+                else:
+                    logging.info("weather data updated")
+                    last_hash = hash
+                    updated = True
 
             # update screen
             for module in modules:
@@ -199,6 +198,9 @@ def main():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                elif event.type == RESTART:
+                    running = False
+                    restart = True
                 elif event.type == DISPLAY_SLEEP:
                     display.fill(pygame.Color("black"))
                     pygame.display.flip()
@@ -207,14 +209,6 @@ def main():
                     if not display_wakeup:
                         last_hash = None
                         display_wakeup = True
-                elif event.type == RESTART:
-                    logging.info("restarting..")
-                    if timer_thread:
-                        timer_thread.quit()
-                    for module in modules:
-                        module.quit()
-                    pygame.quit()
-                    os.execl(sys.executable, sys.executable, *sys.argv)
 
             time.sleep(1)
 
@@ -227,6 +221,9 @@ def main():
         for module in modules:
             module.quit()
         pygame.quit()
+        if restart:
+            logging.info("restarting..")
+            os.execl(sys.executable, sys.executable, *sys.argv)
 
 
 if __name__ == "__main__":
