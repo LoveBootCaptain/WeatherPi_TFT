@@ -176,7 +176,7 @@ def main():
             weather = timer_thread.get_result()
             updated = False
             if weather:
-                hash = timer_thread.get_hash()
+                hash = timer_thread.get_hash_value()
                 if last_hash != hash:
                     logging.info("weather data updated")
                     last_hash = hash

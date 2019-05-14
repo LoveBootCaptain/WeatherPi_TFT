@@ -75,7 +75,7 @@ class NatureRemo(WeatherModule):
             return
 
         # Has the value changed
-        hash = self.timer_thread.get_hash()
+        hash = self.timer_thread.get_hash_value()
         if self.last_hash == hash:
             return
         self.last_hash = hash
