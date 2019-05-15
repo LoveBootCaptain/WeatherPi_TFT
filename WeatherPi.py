@@ -129,7 +129,7 @@ def main():
             display = screen = pygame.display.set_mode(config["display"])
             scale = None
         else:
-            display = pygame.display.set_mode((0, 0))
+            display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
             screen = pygame.Surface(config["display"])
             display_w, display_h = display.get_size()
             screen_w, screen_h = screen.get_size()
