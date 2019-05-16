@@ -30,7 +30,7 @@ def weather_forecast(api_key, latitude, longitude, language, units):
         return resopnse.json()
 
     except Exception as e:
-        logging.error("darksky weather forecast api failed: {}".format(e))
+        logging.error(e, exc_info=True)
         return None
 
 
@@ -57,7 +57,7 @@ def geocode(key, language, address, latitude, longitude):
         return location["lat"], location["lng"], address
 
     except Exception as e:
-        logging.error("google geocode api failed: {}".format(e))
+        logging.error(e, exc_info=True)
         return None
 
 
@@ -87,7 +87,7 @@ def main():
             file = "{}/config.json".format(sys.path[0])
         with open(file, "r") as f:
             config = json.loads(f.read())
-        logging.info("{} loaded".format(file))
+        logging.info("%s loaded", file)
 
         # initialize locale, gettext
         language = config["locale"].split("_")[0]
@@ -108,8 +108,8 @@ def main():
                 config["latitude"] = latitude
                 config["longitude"] = longitude
                 config["address"] = address
-                logging.info("location: {},{} {}".format(
-                    latitude, longitude, address))
+                logging.info("location: %s,%s %s", latitude, longitude,
+                             address)
 
         # start weather forecast thread
         timer_thread = RepeatedTimer(300, weather_forecast, [
@@ -140,9 +140,8 @@ def main():
         DISPLAY_SLEEP = pygame.USEREVENT + 1
         DISPLAY_WAKEUP = pygame.USEREVENT + 2
         RESTART = pygame.USEREVENT + 3
-        logging.info(
-            "pygame initialized. display:{} screen:{} scale:{}".format(
-                display.get_size(), screen.get_size(), scale))
+        logging.info("pygame initialized. display:%s screen:%s scale:%s",
+                     display.get_size(), screen.get_size(), scale)
 
         # load modules
         location = {
@@ -157,10 +156,10 @@ def main():
             name = module["module"]
             conf = module["config"]
             if name in globals():
-                logging.info("load built-in module: {}".format(name))
+                logging.info("load built-in module: %s", name)
                 mod = (globals()[name])
             else:
-                logging.info("load external module: {}".format(name))
+                logging.info("load external module: %s", name)
                 mod = getattr(
                     importlib.import_module("modules.{}".format(name)), name)
             modules.append((mod)(fonts, location, language, units, conf))
@@ -168,7 +167,7 @@ def main():
 
         # main loop
         display_wakeup = True
-        last_hash = None
+        last_hash_value = None
         running = True
         restart = False
         while running:
@@ -176,10 +175,10 @@ def main():
             weather = timer_thread.get_result()
             updated = False
             if weather:
-                hash = timer_thread.get_hash_value()
-                if last_hash != hash:
+                hash_value = timer_thread.get_hash_value()
+                if last_hash_value != hash_value:
                     logging.info("weather data updated")
-                    last_hash = hash
+                    last_hash_value = hash_value
                     updated = True
 
             # update screen
@@ -206,7 +205,7 @@ def main():
                     display_wakeup = False
                 elif event.type == DISPLAY_WAKEUP:
                     if not display_wakeup:
-                        last_hash = None
+                        last_hash_value = None
                         display_wakeup = True
 
             time.sleep(1)

@@ -23,7 +23,7 @@ def read_temperature_and_humidity(token, name):
                 if "hu" in events:
                     humidity = events["hu"]["val"]
                 break
-        logging.info("Celsius: {} Humidity: {}".format(celsius, humidity))
+        logging.info("Celsius: %s Humidity: %s", celsius, humidity)
         return celsius, humidity
 
     except Exception as e:
@@ -56,7 +56,7 @@ class NatureRemo(WeatherModule):
         self.token = config["token"]
         self.name = config["name"]
         self.timer_thread = None
-        self.last_hash = None
+        self.last_hash_value = None
 
         # start sensor thread
         self.timer_thread = RepeatedTimer(20, read_temperature_and_humidity,
@@ -71,14 +71,14 @@ class NatureRemo(WeatherModule):
         # No result yet
         result = self.timer_thread.get_result()
         if result is None:
-            logging.info("{}: No data from sensor".format(__class__.__name__))
+            logging.info("%s: No data from sensor", __class__.__name__)
             return
 
         # Has the value changed
-        hash = self.timer_thread.get_hash_value()
-        if self.last_hash == hash:
+        hash_value = self.timer_thread.get_hash_value()
+        if self.last_hash_value == hash_value:
             return
-        self.last_hash = hash
+        self.last_hash_value = hash_value
 
         celsius, humidity = result
 

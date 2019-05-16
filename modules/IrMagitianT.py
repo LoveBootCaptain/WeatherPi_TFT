@@ -16,7 +16,7 @@ def read_temperature(correction_value):
         # Celsius conversion and correction
         celsius = ((5.0 / 1024.0 * float(value)) - 0.4) / 0.01953
         celsius = round(celsius + correction_value, 1)
-        logging.info("Celsius: {}".format(celsius))
+        logging.info("Celsius: %s", celsius)
         return celsius
 
     except Exception as e:
@@ -32,7 +32,8 @@ class IrMagitianT(WeatherModule):
     MCP -97001) installed in the infrared remote control system "irMagician-T"
     and displayed.
 
-    赤外線リモコンシステムirMagician-Tに搭載された温度センサ(Microchip MCP-97001)から温度を取得し表示します。
+    赤外線リモコンシステムirMagician-Tに搭載された温度センサ(Microchip MCP-97001)から
+    温度を取得し表示します。
 
     example config:
     {
@@ -48,7 +49,7 @@ class IrMagitianT(WeatherModule):
         super().__init__(fonts, location, language, units, config)
         self.correction_value = None
         self.timer_thread = None
-        self.last_hash = None
+        self.last_hash_value = None
 
         self.correction_value = float(config["correction_value"])
         if self.correction_value is None:
@@ -67,14 +68,14 @@ class IrMagitianT(WeatherModule):
         # No result yet
         result = self.timer_thread.get_result()
         if result is None:
-            logging.info("{}: No data from sensor".format(__class__.__name__))
+            logging.info("%s: No data from sensor", __class__.__name__)
             return
 
         # Has the value changed
-        hash = self.timer_thread.get_hash_value()
-        if self.last_hash == hash:
+        hash_value = self.timer_thread.get_hash_value()
+        if self.last_hash_value == hash_value:
             return
-        self.last_hash = hash
+        self.last_hash_value = hash_value
 
         celsius = result
 
