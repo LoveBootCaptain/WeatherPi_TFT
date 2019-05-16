@@ -17,7 +17,7 @@ class Alerts(WeatherModule):
 
         self.clear_surface()
         if message:
-            logging.info("{}: {}".format(__class__.__name__, message))
+            logging.info("%s: %s", __class__.__name__, message)
             for size in ("large", "medium", "small"):
                 w, h = self.text_size(message, size, bold=True)
                 if w <= self.rect.width and h <= self.rect.height:
