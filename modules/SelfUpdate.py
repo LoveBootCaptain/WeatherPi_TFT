@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, super-init-not-called
+# pylint: disable=invalid-name, super-init-not-called, broad-except
 """Self update module
 """
 

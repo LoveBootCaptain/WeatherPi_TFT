@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# pylint: disable=invalid-name, unused-import
+# pylint: disable=invalid-name, unused-import, broad-except
 # pylint: disable=too-many-locals, too-many-nested-blocks, too-many-branches
 # pylint: disable=too-many-statements
 """Weather Station for Raspberry Pi and Small LCDs

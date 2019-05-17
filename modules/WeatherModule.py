@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,too-many-locals
+# pylint: disable=invalid-name, too-many-locals, broad-except
 """Utility class and WeatherModule class
 """
 
@@ -263,22 +263,22 @@ class Utils:
 
         # draw shadow
         theta = age / 14.765 * math.pi
-        sum_x = sum_l = 0
+        sum_x = sum_length = 0
         for y in range(-radius, radius, 1):
             alpha = math.acos(y / radius)
             x = radius * math.sin(alpha)
-            l = radius * math.cos(theta) * math.sin(alpha)
+            length = radius * math.cos(theta) * math.sin(alpha)
             if age < 15:
                 start = (radius - x, radius + y)
-                end = (radius + l, radius + y)
+                end = (radius + length, radius + y)
             else:
-                start = (radius - l, radius + y)
+                start = (radius - length, radius + y)
                 end = (radius + x, radius + y)
             pygame.draw.line(image, pygame.Color("dimgray"), start, end)
             sum_x += 2 * x
-            sum_l += end[0] - start[0]
+            sum_length += end[0] - start[0]
         logging.info("moon phase age: %s parcentage: %s", age,
-                     round(100 - (sum_l / sum_x) * 100, 1))
+                     round(100 - (sum_length / sum_x) * 100, 1))
         return image
 
     @staticmethod

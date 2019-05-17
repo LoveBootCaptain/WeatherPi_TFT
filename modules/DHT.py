@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,too-many-locals
+# pylint: disable=invalid-name, too-many-locals, broad-except
 """Adafruit temperature/humidity sensor module
 """
 
