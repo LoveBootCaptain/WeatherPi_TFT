@@ -1,16 +1,21 @@
+# pylint: disable=invalid-name,too-many-locals
+"""Utility class and WeatherModule class
+"""
+
 import datetime
-import gettext
 import io
 import logging
 import math
 import os
-import pygame
-import requests
 import sys
 from functools import lru_cache
+import requests
+import pygame
 
 
 class Utils:
+    """Utility class
+    """
     color_maps = [
         # hot: red
         {
@@ -50,32 +55,53 @@ class Utils:
     ]
 
     @staticmethod
-    def strftime(timestamp, format):
-        return datetime.datetime.fromtimestamp(int(timestamp)).strftime(format)
+    def strftime(timestamp, fmt):
+        """
+        Format unix timestamp to text.
+        """
+        return datetime.datetime.fromtimestamp(int(timestamp)).strftime(fmt)
 
     @staticmethod
     def percentage_text(value):
+        """
+        Format percentega value to text.
+        """
         return "{}%".format(value)
 
     @staticmethod
     def pressure_text(value):
+        """
+        Format pressure value to text.
+        """
         return "{}pa".format(value)
 
     @staticmethod
     def speed_text(value, units):
+        """
+        Format speed value to text
+        """
         return ("{}km/h" if units == "si" else "{}mi/h").format(value)
 
     @staticmethod
     def temperature_text(value, units):
+        """
+        Format temperature value to text
+        """
         return ("{}°c" if units == "si" else "{}°f").format(value)
 
     @staticmethod
     def color(name):
+        """
+        Convert Color name to RGB value
+        """
         return pygame.Color(name)[:3]
 
     @staticmethod
     def heat_index(f, h):
-        if (f < 80):
+        """
+        Calculate heat index from temperature and humidity
+        """
+        if f < 80:
             return f
         return -42.379 + 2.04901523 * f + 10.14333127 * h - 0.22475541 * \
             f * h - 6.83783 * (10 ** -3) * (f ** 2) - 5.481717 * \
@@ -84,15 +110,25 @@ class Utils:
             (10 ** -6) * (f ** 2) * (h ** 2)
 
     @staticmethod
-    def celsius(f):
-        return (f - 32.0) * 0.555556
+    def celsius(value):
+        """
+        Convert fahrenheit to celsius
+        """
+        return (value - 32.0) * 0.555556
 
     @staticmethod
-    def fahrenheit(c):
-        return (c * 1.8) + 32.0
+    def fahrenheit(value):
+        """
+        Convert  celsius to fahrenheit
+        """
+        return (value * 1.8) + 32.0
 
     @staticmethod
     def heat_color(temperature, humidity, units):
+        """
+        Return heat index color
+        """
+
         def gradation(color_a, color_b, val_a, val_b, val_x):
             def geometric(a, b, p):
                 return int((b - a) * p / 100 + a)
@@ -106,7 +142,7 @@ class Utils:
 
         color = Utils.color("white")
         for cm in Utils.color_maps:
-            if cm["celsius_a"] <= c and c < cm["celsius_b"]:
+            if cm["celsius_a"] <= c < cm["celsius_b"]:
                 color = gradation(cm["color_a"], cm["color_b"],
                                   cm["celsius_a"], cm["celsius_b"], c)
                 break
@@ -114,6 +150,9 @@ class Utils:
 
     @staticmethod
     def uv_color(uv_index):
+        """
+        Return UV index color
+        """
         if uv_index < 3:
             color = "green"
         elif uv_index < 6:
@@ -128,35 +167,37 @@ class Utils:
 
     @staticmethod
     def wind_bearing_text(angle):
-        if angle > 11.25 and angle <= 33.75:
+        """Return wind bearig text
+        """
+        if 11.25 < angle <= 33.75:
             text = "NNE"
-        elif angle > 33.75 and angle <= 56.25:
+        elif 33.75 < angle <= 56.25:
             text = "NE"
-        elif angle > 56.25 and angle <= 78.75:
+        elif 56.25 < angle <= 78.75:
             text = "ENE"
-        elif angle > 78.75 and angle <= 101.25:
+        elif 78.75 < angle <= 101.25:
             text = "E"
-        elif angle > 101.25 and angle <= 123.75:
+        elif 101.25 < angle <= 123.75:
             text = "ESE"
-        elif angle > 123.75 and angle <= 146.25:
+        elif 123.75 < angle <= 146.25:
             text = "SE"
-        elif angle > 146.25 and angle <= 168.75:
+        elif 146.25 < angle <= 168.75:
             text = "SSE"
-        elif angle > 168.75 and angle <= 191.25:
+        elif 168.75 < angle <= 191.25:
             text = "S"
-        elif angle > 191.25 and angle <= 213.75:
+        elif 191.25 < angle <= 213.75:
             text = "SSW"
-        elif angle > 213.75 and angle <= 236.25:
+        elif 213.75 < angle <= 236.25:
             text = "SW"
-        elif angle > 236.25 and angle <= 258.75:
+        elif 236.25 < angle <= 258.75:
             text = "WSW"
-        elif angle > 258.75 and angle <= 281.25:
+        elif 258.75 < angle <= 281.25:
             text = "W"
-        elif angle > 281.25 and angle <= 303.75:
+        elif 281.25 < angle <= 303.75:
             text = "WNW"
-        elif angle > 303.75 and angle <= 326.25:
+        elif 303.75 < angle <= 326.25:
             text = "NW"
-        elif angle > 326.25 and angle <= 348.75:
+        elif 326.25 < angle <= 348.75:
             text = "NNW"
         else:
             text = "N"
@@ -165,12 +206,16 @@ class Utils:
     @staticmethod
     @lru_cache()
     def font(name, size, bold):
-        logging.debug("font {} {}pxl loaded".format(name, size))
+        """Create a new Font object
+        """
+        logging.debug("font %s %spxl loaded", name, size)
         return pygame.font.SysFont(name, size, bold)
 
     @staticmethod
     @lru_cache()
     def weather_icon(name, size):
+        """Create a weather image
+        """
         try:
             file = "{}/icons/{}.png".format(sys.path[0], name)
             if os.path.isfile(file):
@@ -197,7 +242,7 @@ class Utils:
                 (w, h) = (int(size / w * h), size)
             image = pygame.transform.scale(image, (w, h))
 
-            logging.debug("weather icon {} {} loaded".format(name, size))
+            logging.debug("weather icon %s %s loaded", name, size)
             return image
 
         except Exception as e:
@@ -207,6 +252,8 @@ class Utils:
     @staticmethod
     @lru_cache()
     def moon_icon(age, size):
+        """Create a moon phase image
+        """
         image = pygame.Surface((size, size))
         radius = int(size / 2)
 
@@ -230,13 +277,15 @@ class Utils:
             pygame.draw.line(image, pygame.Color("dimgray"), start, end)
             sum_x += 2 * x
             sum_l += end[0] - start[0]
-        logging.info("moon phase age: {} parcentage: {}%".format(
-            age, round(100 - (sum_l / sum_x) * 100, 1)))
+        logging.info("moon phase age: %s parcentage: %s", age,
+                     round(100 - (sum_l / sum_x) * 100, 1))
         return image
 
     @staticmethod
     @lru_cache()
     def wind_arrow_icon(wind_bearing, size):
+        """Create a wind direction allow image
+        """
         color = pygame.Color("white")
         width = 0.15 * size  # arrowhead width
         height = 0.25 * size  # arrowhead height
@@ -245,43 +294,55 @@ class Utils:
         angle = (90 - wind_bearing) % 360
         theta = angle / 360 * math.pi * 2
 
-        a = (radius + radius * math.cos(theta),
-             radius - radius * math.sin(theta))
-        b = (radius + radius * math.cos(theta + math.pi),
-             radius - radius * math.sin(theta + math.pi))
+        tail = (radius + radius * math.cos(theta),
+                radius - radius * math.sin(theta))
+        head = (radius + radius * math.cos(theta + math.pi),
+                radius - radius * math.sin(theta + math.pi))
 
-        base_vector = (b[0] - a[0], b[1] - a[1])
+        base_vector = (head[0] - tail[0], head[1] - tail[1])
         length = math.sqrt(base_vector[0]**2 + base_vector[1]**2)
         unit_vector = (base_vector[0] / length, base_vector[1] / length)
 
-        l = (b[0] - unit_vector[1] * width - unit_vector[0] * height,
-             b[1] + unit_vector[0] * width - unit_vector[1] * height)
-        r = (b[0] + unit_vector[1] * width - unit_vector[0] * height,
-             b[1] - unit_vector[0] * width - unit_vector[1] * height)
+        left = (head[0] - unit_vector[1] * width - unit_vector[0] * height,
+                head[1] + unit_vector[0] * width - unit_vector[1] * height)
+        right = (head[0] + unit_vector[1] * width - unit_vector[0] * height,
+                 head[1] - unit_vector[0] * width - unit_vector[1] * height)
 
         image = pygame.Surface((size, size))
-        pygame.draw.line(image, color, a, b, 2)
-        pygame.draw.polygon(image, color, [b, l, r, b], 0)
+        pygame.draw.line(image, color, tail, head, 2)
+        pygame.draw.polygon(image, color, [head, left, right, head], 0)
         return image
 
     @staticmethod
     def display_sleep():
+        """Send display sleep event
+        """
         DISPLAY_SLEEP = pygame.USEREVENT + 1
         pygame.event.post(pygame.event.Event(DISPLAY_SLEEP))
 
     @staticmethod
     def display_wakeup():
+        """Send display wakeup event
+        """
         DISPLAY_WAKEUP = pygame.USEREVENT + 2
         pygame.event.post(pygame.event.Event(DISPLAY_WAKEUP))
 
     @staticmethod
     def restart():
+        """
+        send system restart event
+        """
         RESTART = pygame.USEREVENT + 3
         pygame.event.post(pygame.event.Event(RESTART))
 
 
 class WeatherModule:
+    """Weather Module
+    """
+
     def __init__(self, fonts, location, language, units, config):
+        """Initialize
+        """
         self.fonts = fonts
         self.location = location
         self.language = language
@@ -291,29 +352,41 @@ class WeatherModule:
         self.surface = pygame.Surface((self.rect.width, self.rect.height))
 
     def quit(self):
-        pass
+        """Destractor
+        """
 
     def draw(self, screen, weather, updated):
-        pass
+        """Draw surface
+        """
 
     def clear_surface(self):
+        """Clear Surface
+        """
         self.surface.fill(pygame.Color("black"))
 
     def update_screen(self, screen):
+        """Draw surface on screen
+        """
         screen.blit(self.surface, (self.rect.left, self.rect.top))
 
     def text_size(self, text, size, *, bold=False):
+        """
+        determine the amount of space needed to render text
+        """
         if not text:
             return (0, 0)
         return self.font(size, bold).size(text)
 
     def text_warp(self, text, line_width, size, *, bold=False, max_lines=0):
+        """
+        Text wrapping
+        """
         font = self.font(size, bold)
         lines = []
         cur_line = ""
         cur_width = 0
         for c in text:
-            (w, h) = font.size(c)
+            (w, _h) = font.size(c)
             if cur_width + w > line_width:
                 lines.append(cur_line)
                 cur_line = ""
@@ -322,15 +395,18 @@ class WeatherModule:
             cur_width += w
         if cur_line:
             lines.append(cur_line)
-        if max_lines > 0 and len(lines) > max_lines:
+        if 0 < max_lines < len(lines):
             # Put a placeholder if the text is truncated
             lines = lines[:max_lines]
             lines[max_lines - 1] = lines[max_lines - 1][:-2] + ".."
         return lines
 
     def font(self, size, bold):
+        """
+        create a new Font object
+        """
         name = self.fonts["name"]
-        if type(size) is str:
+        if isinstance(size, str):
             size = self.fonts["size"][size]
         return Utils.font(name, size, bold)
 
@@ -364,7 +440,7 @@ class WeatherModule:
             background color
         """
         if not text:
-            return
+            return position
 
         (x, y) = position
         font = self.font(size, bold)
@@ -392,7 +468,7 @@ class WeatherModule:
             counterclockwise  degrees angle
         """
         if not image:
-            return
+            return position
 
         (x, y) = position
         (w, h) = image.get_size()

@@ -1,10 +1,16 @@
-import gettext
+# pylint: disable=invalid-name,too-many-locals
+"""Built-in modules
+"""
+
 import logging
 import time
 from modules.WeatherModule import WeatherModule, Utils
 
 
 class Alerts(WeatherModule):
+    """Any severe weather alerts pertinent
+    """
+
     def draw(self, screen, weather, updated):
         if weather is None:
             message = "Waiting data..."
@@ -31,6 +37,9 @@ class Alerts(WeatherModule):
 
 
 class Clock(WeatherModule):
+    """Current Date and Time
+    """
+
     def draw(self, screen, weather, updated):
         timestamp = time.time()
         locale_date = Utils.strftime(timestamp, "%a, %x")
@@ -39,15 +48,18 @@ class Clock(WeatherModule):
 
         self.clear_surface()
         self.draw_text(locale_date, (0, 0), "small", "white")
-        (right, bottom) = self.draw_text(locale_time, (0, 20),
-                                         "large",
-                                         "white",
-                                         bold=True)
+        (right, _bottom) = self.draw_text(locale_time, (0, 20),
+                                          "large",
+                                          "white",
+                                          bold=True)
         self.draw_text(locale_second, (right, 20), "medium", "gray", bold=True)
         self.update_screen(screen)
 
 
 class Location(WeatherModule):
+    """Current Location
+    """
+
     def draw(self, screen, weather, updated):
         if not self.location["address"]:
             return
@@ -66,6 +78,9 @@ class Location(WeatherModule):
 
 
 class Weather(WeatherModule):
+    """Current Weather
+    """
+
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
         self.icon_size = config["icon_size"] if "icon_size" in config else 100
@@ -136,8 +151,8 @@ class Weather(WeatherModule):
         self.draw_text(message1, (text_x, 0), "medium", heat_color, bold=True)
         self.draw_text(message2, (text_x, 25), "small", "white")
         i = message3.index("UV")
-        (right, bottom) = self.draw_text(message3[:i], (text_x, 40), "small",
-                                         "white")
+        (right, _bottom) = self.draw_text(message3[:i], (text_x, 40), "small",
+                                          "white")
         self.draw_text(message3[i:], (right, 40), "small", uv_color, bold=True)
         height = 55 + (15 * (max_lines - len(message4s))) / 2
         for message in message4s:
@@ -150,15 +165,23 @@ class Weather(WeatherModule):
 
 
 class DailyWeatherForecast(WeatherModule):
-    def draw(self, screen, weather, day, icon_size):
-        if weather is None:
+    """Daily weather forecast
+    """
+
+    def __init__(self, fonts, location, language, units, config):
+        super().__init__(fonts, location, language, units, config)
+        self.icon_size = config["icon_size"]
+        self.day = config["day"]
+
+    def draw(self, screen, weather, updated):
+        if weather is None or not updated:
             return
 
-        daily = weather["daily"]["data"][day]
+        daily = weather["daily"]["data"][self.day]
         temperature_high = daily["temperatureHigh"]
         temperature_low = daily["temperatureLow"]
 
-        weather_icon = Utils.weather_icon(daily["icon"], icon_size)
+        weather_icon = Utils.weather_icon(daily["icon"], self.icon_size)
         day_of_week = Utils.strftime(daily["time"], "%a")
         temperature_low = Utils.temperature_text(int(temperature_low),
                                                  self.units)
@@ -170,20 +193,25 @@ class DailyWeatherForecast(WeatherModule):
         self.draw_text(day_of_week, (0, 0), "small", "orange", align="center")
         self.draw_text(message, (0, 15), "small", "white", align="center")
         self.draw_image(weather_icon,
-                        ((self.rect.width - icon_size) / 2, 30 +
-                         (self.rect.height - 30 - icon_size) / 2))
+                        ((self.rect.width - self.icon_size) / 2, 30 +
+                         (self.rect.height - 30 - self.icon_size) / 2))
         self.update_screen(screen)
 
 
 class WeatherForecast(WeatherModule):
+    """Weather Forecast
+    """
+
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
 
-        self.icon_size = config["icon_size"] if "icon_size" in config else 50
         self.forecast_days = config["forecast_days"]
         self.forecast_modules = []
         width = self.rect.width / self.forecast_days
         for i in range(self.forecast_days):
+            if "icon_size" not in config:
+                config["icon_size"] = 50
+            config["day"] = i + 1
             config["rect"] = [
                 self.rect.x + i * width, self.rect.y, width, self.rect.height
             ]
@@ -195,11 +223,13 @@ class WeatherForecast(WeatherModule):
             return
 
         for i in range(self.forecast_days):
-            self.forecast_modules[i].draw(screen, weather, i + 1,
-                                          self.icon_size)
+            self.forecast_modules[i].draw(screen, weather, updated)
 
 
 class SunriseSuset(WeatherModule):
+    """Sunrise, Sunset time
+    """
+
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
         self.icon_size = config["icon_size"] if "icon_size" in config else 40
@@ -228,6 +258,9 @@ class SunriseSuset(WeatherModule):
 
 
 class MoonPhase(WeatherModule):
+    """Moon Phase
+    """
+
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
         self.icon_size = config["icon_size"] if "icon_size" in config else 50
@@ -253,6 +286,9 @@ class MoonPhase(WeatherModule):
 
 
 class Wind(WeatherModule):
+    """Wind direction, speed
+    """
+
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
         self.icon_size = config["icon_size"] if "icon_size" in config else 30

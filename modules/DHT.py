@@ -1,15 +1,20 @@
-import Adafruit_DHT
-import gettext
+# pylint: disable=invalid-name,too-many-locals
+"""Adafruit temperature/humidity sensor module
+"""
+
 import logging
+import Adafruit_DHT
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 
 
 def read_temperature_and_humidity(sensor, pin, correction_value):
+    """Read tempareture and humidity from sensor
+    """
     try:
         humidity, celsius = Adafruit_DHT.read_retry(sensor, pin)
         celsius = round(celsius + correction_value, 1)
-        logging.info("Celsius: {} Humidity: {}".format(celsius, humidity))
+        logging.info("Celsius: %s Humidity: %s", celsius, humidity)
         return humidity, celsius
 
     except Exception as e:
@@ -47,14 +52,14 @@ class DHT(WeatherModule):
         self.pin = None
         self.correction_value = None
         self.timer_thread = None
-        self.last_hash = None
+        self.last_hash_value = None
 
         if config["sensor"] in DHT.sensors:
             self.sensor = DHT.sensors[config["sensor"]]
         if isinstance(config["pin"], int):
             self.pin = config["pin"]
         self.correction_value = float(config["correction_value"])
-        if self.sensor is None or self.pin is None or self.correction_value is None:
+        if not (self.sensor and self.pin and self.correction_value):
             raise ValueError(__class__.__name__)
 
         # start sensor thread
@@ -71,14 +76,14 @@ class DHT(WeatherModule):
         # No result yet
         result = self.timer_thread.get_result()
         if result is None:
-            logging.info("{}: No data from sensor".format(__class__.__name__))
+            logging.info("%s: No data from sensor", __class__.__name__)
             return
 
         # Has the value changed
-        hash = self.timer_thread.get_hash_value()
-        if self.last_hash == hash:
+        hash_value = self.timer_thread.get_hash_value()
+        if self.last_hash_value == hash_value:
             return
-        self.last_hash = hash
+        self.last_hash_value = hash_value
 
         (humidity, celsius) = result
 

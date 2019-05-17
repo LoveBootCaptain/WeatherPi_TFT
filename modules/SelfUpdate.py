@@ -1,3 +1,7 @@
+# pylint: disable=invalid-name, super-init-not-called
+"""Self update module
+"""
+
 import logging
 import subprocess
 import sys
@@ -6,22 +10,25 @@ from modules.RepeatedTimer import RepeatedTimer
 
 
 def self_update():
-    def exec(cmd):
+    """Check git master repository and update
+    """
+
+    def execute_command(cmd):
         p = subprocess.Popen(cmd,
                              cwd=sys.path[0],
                              shell=True,
                              stdout=subprocess.PIPE)
-        o, e = p.communicate()
+        o, _e = p.communicate()
         return str(o.strip(), "utf-8")
 
     try:
-        rid = exec("git ls-remote origin HEAD | cut -f1")
-        lid = exec("git log --format='%H' -n 1")
+        rid = execute_command("git ls-remote origin HEAD | cut -f1")
+        lid = execute_command("git log --format='%H' -n 1")
         logging.info("remote: %s local: %s", rid, lid)
         if rid == lid:
             logging.debug("Up to date")
         else:
-            exec("sudo -u pi git pull")
+            execute_command("sudo -u pi git pull")
             logging.info("Updated to new version")
             Utils.restart()
 

@@ -1,5 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name, unused-import
+# pylint: disable=too-many-locals, too-many-nested-blocks, too-many-branches
+# pylint: disable=too-many-statements
+"""Weather Station for Raspberry Pi and Small LCDs
+"""
 
 import argparse
 import gettext
@@ -8,15 +13,19 @@ import json
 import locale
 import logging
 import os
-import pygame
-import requests
 import sys
 import time
-from modules.BuiltIn import Alerts, Clock, Location, Weather, WeatherForecast, SunriseSuset, MoonPhase, Wind
+import requests
+import pygame
+
+from modules.BuiltIn import (Alerts, Clock, Location, Weather, WeatherForecast,
+                             SunriseSuset, MoonPhase, Wind)
 from modules.RepeatedTimer import RepeatedTimer
 
 
 def weather_forecast(api_key, latitude, longitude, language, units):
+    """get weather forcast data using darksky api
+    """
     try:
         resopnse = requests.get(
             "https://api.forecast.io/forecast/{}/{},{}".format(
@@ -35,6 +44,8 @@ def weather_forecast(api_key, latitude, longitude, language, units):
 
 
 def geocode(key, language, address, latitude, longitude):
+    """get latitude, longitude from address using google geocode api
+    """
     try:
         response = requests.get(
             "https://maps.googleapis.com/maps/api/geocode/json",
@@ -62,6 +73,9 @@ def geocode(key, language, address, latitude, longitude):
 
 
 def main():
+    """main program
+    """
+
     # initialize logger
     parser = argparse.ArgumentParser(description=__file__)
     parser.add_argument("--debug",
@@ -200,9 +214,10 @@ def main():
                     running = False
                     restart = True
                 elif event.type == DISPLAY_SLEEP:
-                    display.fill(pygame.Color("black"))
-                    pygame.display.flip()
-                    display_wakeup = False
+                    if display_wakeup:
+                        display.fill(pygame.Color("black"))
+                        pygame.display.flip()
+                        display_wakeup = False
                 elif event.type == DISPLAY_WAKEUP:
                     if not display_wakeup:
                         last_hash_value = None

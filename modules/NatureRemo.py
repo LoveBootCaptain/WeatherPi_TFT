@@ -1,4 +1,7 @@
-import gettext
+# pylint: disable=invalid-name,too-many-locals
+"""NatureRemo module
+"""
+
 import logging
 import requests
 from modules.WeatherModule import WeatherModule, Utils
@@ -6,6 +9,8 @@ from modules.RepeatedTimer import RepeatedTimer
 
 
 def read_temperature_and_humidity(token, name):
+    """Read tempareture and humidity from device
+    """
     try:
         response = requests.get("https://api.nature.global/1/devices",
                                 headers={

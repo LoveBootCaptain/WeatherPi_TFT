@@ -1,11 +1,15 @@
-import RPi.GPIO as GPIO
+# pylint: disable=invalid-name, super-init-not-called
+"""PIR(Passive Infrared Ray) motion sensor module
+"""
+
 import logging
+import RPi.GPIO as GPIO
 from modules.WeatherModule import WeatherModule, Utils
 
 
 class PIR(WeatherModule):
     """
-    PIR motion sensor module
+    PIR(Passive Infrared Ray) motion sensor module
 
     This module can monitor a PIR motion sensor and put display to sleep.
 
@@ -41,5 +45,5 @@ class PIR(WeatherModule):
         else:
             self.power_save_timer += 1
             if self.power_save_timer > self.power_save_delay:
-                logging.info("{}: screen sleep.".format(__class__.__name__))
+                logging.info("%s: screen sleep.", __class__.__name__)
                 Utils.display_sleep()

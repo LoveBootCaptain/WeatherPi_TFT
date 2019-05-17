@@ -1,12 +1,17 @@
-import gettext
-import logging
-from modules.WeatherModule import WeatherModule, Utils
+# pylint: disable=invalid-name
+""" External module template class
+"""
+
+from modules.WeatherModule import WeatherModule
 
 
 class ModuleTemplate(WeatherModule):
-    def __init__(self, fonts, location, language, units, config):
-        super().__init__(fonts, location, language, units, config)
-        # check config if needed
+    """Module template
+    """
+
+    # def __init__(self, fonts, location, language, units, config):
+    #    super().__init__(fonts, location, language, units, config)
+    #    # check config if needed
 
     def draw(self, screen, weather, updated):
         if weather is None or not updated:

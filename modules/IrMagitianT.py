@@ -1,4 +1,7 @@
-import gettext
+# pylint: disable=invalid-name
+"""irMagician-T module
+"""
+
 import logging
 import serial
 from modules.WeatherModule import WeatherModule, Utils
@@ -6,6 +9,8 @@ from modules.RepeatedTimer import RepeatedTimer
 
 
 def read_temperature(correction_value):
+    """Read tempareture from device
+    """
     try:
         # send Temperature command and save reply
         with serial.Serial("/dev/ttyACM0", 9600, timeout=1) as s:

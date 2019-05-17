@@ -1,12 +1,18 @@
-import gettext
+# pylint: disable=invalid-name
+"""Japan Meteorological Agency alerts module
+"""
+
 import logging
+from xml.etree import ElementTree as et
 import requests
 from modules.WeatherModule import WeatherModule
 from modules.RepeatedTimer import RepeatedTimer
-from xml.etree import ElementTree as et
 
 
 def weather_alerts(prefectures, city):
+    """Get weather alerts
+    """
+
     try:
         response = requests.get(
             "https://www.data.jma.go.jp/developer/xml/feed/extra.xml")
@@ -86,13 +92,13 @@ class JMAAlerts(WeatherModule):
         else:
             result = self.timer_thread.get_result()
             if result:
-                message = ",".join(list(map(lambda x: _(x), result)))
+                message = ",".join(list(map(_, result)))
             else:
                 message = ""
 
         self.clear_surface()
         if message:
-            logging.info("{}: {}".format(__class__.__name__, message))
+            logging.info("%s: %s", __class__.__name__, message)
             if "特別警報" in message:
                 color = "violet"
             elif "警報" in message:
