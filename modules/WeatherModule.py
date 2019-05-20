@@ -137,14 +137,16 @@ class Utils:
             color_x = [geometric(color_a[i], color_b[i], p) for i in range(3)]
             return color_x
 
-        f = Utils.fahrenheit(temperature) if units == "si" else temperature
-        c = Utils.celsius(Utils.heat_index(f, humidity))
+        fahrenheit = Utils.fahrenheit(
+            temperature) if units == "si" else temperature
+        celsius = Utils.celsius(Utils.heat_index(fahrenheit, humidity))
 
         color = Utils.color("white")
-        for cm in Utils.color_maps:
-            if cm["celsius_a"] <= c < cm["celsius_b"]:
-                color = gradation(cm["color_a"], cm["color_b"],
-                                  cm["celsius_a"], cm["celsius_b"], c)
+        for color_map in Utils.color_maps:
+            if color_map["celsius_a"] <= celsius < color_map["celsius_b"]:
+                color = gradation(color_map["color_a"], color_map["color_b"],
+                                  color_map["celsius_a"],
+                                  color_map["celsius_b"], celsius)
                 break
         return color
 
@@ -235,12 +237,12 @@ class Utils:
             del pixels
 
             # resize icon
-            (w, h) = image.get_size()
-            if w >= h:
-                (w, h) = (size, int(size / w * h))
+            (width, height) = image.get_size()
+            if width >= height:
+                (width, height) = (size, int(size / width * height))
             else:
-                (w, h) = (int(size / w * h), size)
-            image = pygame.transform.scale(image, (w, h))
+                (width, height) = (int(size / width * height), size)
+            image = pygame.transform.scale(image, (width, height))
 
             logging.debug("weather icon %s %s loaded", name, size)
             return image
@@ -385,14 +387,14 @@ class WeatherModule:
         lines = []
         cur_line = ""
         cur_width = 0
-        for c in text:
-            (w, _h) = font.size(c)
-            if cur_width + w > line_width:
+        for char in text:
+            (width, _height) = font.size(char)
+            if cur_width + width > line_width:
                 lines.append(cur_line)
                 cur_line = ""
                 cur_width = 0
-            cur_line += c
-            cur_width += w
+            cur_line += char
+            cur_width += width
         if cur_line:
             lines.append(cur_line)
         if 0 < max_lines < len(lines):
@@ -444,14 +446,14 @@ class WeatherModule:
 
         (x, y) = position
         font = self.font(size, bold)
-        (w, h) = font.size(text)
+        (width, height) = font.size(text)
         color = Utils.color(color) if isinstance(color, str) else color
         if align == "center":
-            x = (self.rect.width - w) / 2
+            x = (self.rect.width - width) / 2
         elif align == "right":
-            x = self.rect.width - w
+            x = self.rect.width - width
         self.surface.blit(font.render(text, True, color, background), (x, y))
-        (right, bottom) = (x + w, h)
+        (right, bottom) = (x + width, height)
         return right, bottom
 
     def draw_image(self, image, position, angle=0):
@@ -471,11 +473,11 @@ class WeatherModule:
             return position
 
         (x, y) = position
-        (w, h) = image.get_size()
+        (width, height) = image.get_size()
         if angle:
             image = pygame.transform.rotate(image, angle)
-            x = x + (w - image.get_width()) / 2
-            y = h + (h - image.get_height()) / 2
+            x = x + (width - image.get_width()) / 2
+            y = height + (height - image.get_height()) / 2
         self.surface.blit(image, (x, y))
-        (right, bottom) = (x + w, y + h)
+        (right, bottom) = (x + width, y + height)
         return right, bottom

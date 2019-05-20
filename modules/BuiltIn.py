@@ -25,8 +25,8 @@ class Alerts(WeatherModule):
         if message:
             logging.info("%s: %s", __class__.__name__, message)
             for size in ("large", "medium", "small"):
-                w, h = self.text_size(message, size, bold=True)
-                if w <= self.rect.width and h <= self.rect.height:
+                width, height = self.text_size(message, size, bold=True)
+                if width <= self.rect.width and height <= self.rect.height:
                     break
             self.draw_text(message, (0, 0),
                            size,
@@ -68,10 +68,10 @@ class Location(WeatherModule):
 
         self.clear_surface()
         for size in ("large", "medium", "small"):
-            w, h = self.text_size(message, size)
-            if w <= self.rect.width and h <= self.rect.height:
+            width, height = self.text_size(message, size)
+            if width <= self.rect.width and height <= self.rect.height:
                 break
-        if w > self.rect.width:
+        if width > self.rect.width:
             message = message.split(",")[0]
         self.draw_text(message, (0, 0), size, "white", align="right")
         self.update_screen(screen)

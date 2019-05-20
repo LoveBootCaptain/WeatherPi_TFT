@@ -16,7 +16,7 @@ def read_temperature(correction_value):
         with serial.Serial("/dev/ttyACM0", 9600, timeout=1) as s:
             s.write(b"T\r\n")
             value = s.readline().strip()
-            s.readline().strip()  # discard the status
+            s.readline()  # discard the status
 
         # Celsius conversion and correction
         celsius = ((5.0 / 1024.0 * float(value)) - 0.4) / 0.01953
