@@ -112,6 +112,11 @@ for dist in pip.get_installed_distributions():
 sudo pip3 install Adafruit_DHT
 ```
 
+* if you use DigistampTemper, install pyusb
+```bash
+sudo pip3 install pyusb
+```
+
 ### test
 ```bash
 ./WeatherPi.py [--debug]
@@ -195,14 +200,15 @@ All modules require the following configuration:
 
 ### External modules
 
-| Name        | Description                                                                     | Options                                                                                        | Size            |
-| ----------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------- |
-| DHT         | Adafruit temperature/humidity sensor                                            | pin: pin number<br>correction_value:                                                           | 100x60          |
-| IrMagitianT | Temperature sensor on the infrared remote control system "irMagician-T" | correction_value: (調整値)                                                                     | 60x35 - 70x60   |
-| JMAAlerts   | JMA weather alerts<br>(気象庁の注意報、警報、特別警報を表示)                    | prefecture: (都道府県)<br>city: (市区町村)                                                     | 240x15 - 480x15 |
-| NatureRemo   | Temperature and humidity sensor on Nature Remo/Remo mini                   | token: (access tokens to access Nature API)<br>name: (device name)                                                     | 100x60 |
-| PIR         | PIR(Passive Infrared Ray）Motion Sensor                                         | pin: pin number<br>power_save_delay: delay (in seconds) before the monitor will be turned off. | None            |
-| SelfUpdate  | Update and restart if there is a newer version on GitHub                        | check_interval (default 86400 # once a day)                                                                                           | -               |
+| Name            | Description                                                             | Options                                                                                        | Size            |
+| --------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------- |
+| DHT             | Adafruit temperature/humidity sensor                                    | pin: pin number<br>correction_value: (調整値)                                                  | 60x60 - 70x120  |
+| [DigistampTemper](https://github.com/miyaichi/DigisparkTemper) | DigisparkTemper (usb temperature/humidity sensor)                       | correction_value: (調整値)                                                                     | 60x60 - 70x120  |
+| [IrMagitianT](http://www.omiya-giken.com/?page_id=837)     | Temperature sensor on the infrared remote control system "irMagician-T" | correction_value: (調整値)                                                                     | 60x35 - 70x60   |
+| JMAAlerts       | JMA weather alerts<br>(気象庁の注意報、警報、特別警報を表示)            | prefecture: (都道府県)<br>city: (市区町村)                                                     | 240x15 - 480x15 |
+| [NatureRemo](https://nature.global/jp/landing-page-dm-g/)      | Temperature and humidity sensor on Nature Remo/Remo mini                | token: (access tokens to access Nature API)<br>name: (device name)                             | 100x60          |
+| PIR             | PIR(Passive Infrared Ray）Motion Sensor                                 | pin: pin number<br>power_save_delay: delay (in seconds) before the monitor will be turned off. | None            |
+| SelfUpdate      | Update and restart if there is a newer version on GitHub                | check_interval (default 86400 # once a day)                                                    | -               |
 
 
 ## Credit
