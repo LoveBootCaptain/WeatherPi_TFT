@@ -22,14 +22,14 @@ def read_temperature_and_humidity(correction_value):
                 c = chr(device.read())
                 if c == '\r':
                     return line
-                    line += c
+                line += c
             except:
                 time.sleep(0.5)
 
     try:
         device = ArduinoUsbDevice(idVendor=0x16c0, idProduct=0x05df)
-        read_line(device)  # discard first line
-        data = json.loads(read_line(device).strip())
+        line = read_line(device).strip()
+        data = json.loads(line)
 
         humidity = data["Humidity"]
         celsius = round(data["Temperature"] + correction_value, 1)
@@ -38,6 +38,8 @@ def read_temperature_and_humidity(correction_value):
         return humidity, celsius
 
     except Exception as e:
+        if line:
+            logging.error("DigisparkTemper: %s", line)
         logging.error(e, exc_info=True)
         return None
 
@@ -70,7 +72,7 @@ class DigisparkTemper(WeatherModule):
             raise ValueError(__class__.__name__)
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(20, read_temperature_and_humidity,
+        self.timer_thread = RepeatedTimer(9, read_temperature_and_humidity,
                                           [self.correction_value])
         self.timer_thread.start()
 
