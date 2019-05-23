@@ -1,9 +1,10 @@
-# pylint: disable=invalid-name, broad-except
+# pylint: disable=invalid-name, broad-except, bare-except
 """DigisparkTemper (usb temperature/humidity sensor) module
 """
 
 import json
 import logging
+import time
 
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
@@ -17,10 +18,13 @@ def read_temperature_and_humidity(correction_value):
     def read_line(device):
         line = ""
         while True:
-            c = chr(device.read())
-            if c == '\r':
-                return line
-            line += c
+            try:
+                c = chr(device.read())
+                if c == '\r':
+                    return line
+                    line += c
+            except:
+                time.sleep(0.5)
 
     try:
         device = ArduinoUsbDevice(idVendor=0x16c0, idProduct=0x05df)
