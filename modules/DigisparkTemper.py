@@ -72,7 +72,7 @@ class DigisparkTemper(WeatherModule):
             raise ValueError(__class__.__name__)
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(9, read_temperature_and_humidity,
+        self.timer_thread = RepeatedTimer(10, read_temperature_and_humidity,
                                           [self.correction_value])
         self.timer_thread.start()
 
