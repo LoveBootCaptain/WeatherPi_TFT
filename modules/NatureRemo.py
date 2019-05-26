@@ -66,6 +66,8 @@ class NatureRemo(WeatherModule):
         self.timer_thread = None
         self.last_hash_value = None
 
+        self.correction_value = float(config["correction_value"])
+
         # start sensor thread
         self.timer_thread = RepeatedTimer(
             20, read_temperature_and_humidity,
