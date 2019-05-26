@@ -94,6 +94,9 @@ def main():
     # initialize modules
     modules = []
 
+    # initialize restart flag
+    restart = False
+
     try:
         # load config file
         file = "/boot/WeatherPi.json"
@@ -183,7 +186,6 @@ def main():
         display_wakeup = True
         last_hash_value = None
         running = True
-        restart = False
         while running:
             # weather data check
             weather = timer_thread.get_result()
