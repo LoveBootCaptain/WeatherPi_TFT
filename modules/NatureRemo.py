@@ -8,7 +8,7 @@ from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
 
 
-def read_temperature_and_humidity(token, name):
+def read_temperature_and_humidity(token, name, correction_value):
     """Read tempareture and humidity from device
     """
     try:
@@ -25,6 +25,7 @@ def read_temperature_and_humidity(token, name):
                 events = device["newest_events"]
                 if "te" in events:
                     celsius = round(float(events["te"]["val"]), 1)
+                    celsius = round(celsius + correction_value, 1)
                 if "hu" in events:
                     humidity = events["hu"]["val"]
                 break
@@ -51,7 +52,8 @@ class NatureRemo(WeatherModule):
       "config": {
         "rect": [x, y, width, height],
         "token": "<access tokens to access Nature API>"
-        "name": "<device name>"
+        "name": "<device name>",
+        "correction_value": 0.2
       }
      }
     """
@@ -60,12 +62,14 @@ class NatureRemo(WeatherModule):
         super().__init__(fonts, location, language, units, config)
         self.token = config["token"]
         self.name = config["name"]
+        self.correction_value = None
         self.timer_thread = None
         self.last_hash_value = None
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(20, read_temperature_and_humidity,
-                                          [self.token, self.name])
+        self.timer_thread = RepeatedTimer(
+            20, read_temperature_and_humidity,
+            [self.token, self.name, self.correction_value])
         self.timer_thread.start()
 
     def quit(self):
