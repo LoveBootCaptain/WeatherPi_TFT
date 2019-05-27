@@ -5,29 +5,43 @@
 import json
 import logging
 import time
+import usb
 
 from modules.WeatherModule import WeatherModule, Utils
 from modules.RepeatedTimer import RepeatedTimer
-from modules.usbdevice import ArduinoUsbDevice
 
 
-def read_temperature_and_humidity(correction_value):
+def read_temperature_and_humidity(device, correction_value):
     """Read tempareture and humidity from sensor
     """
 
+    def read(device):
+        """Read byte from usb device
+        """
+        response = device.ctrl_transfer(
+            bmRequestType=usb.util.build_request_type(
+                usb.util.CTRL_IN, usb.util.CTRL_TYPE_CLASS,
+                usb.util.CTRL_RECIPIENT_DEVICE),
+            bRequest=0x01,  # USBRQ_HID_GET_REPORT
+            wValue=(0x03 << 8) | 0,
+            wIndex=0,  # ignored
+            data_or_wLength=1)  # length
+        if not response:
+            return None
+        return response[0]
+
     def read_line(device):
+        """Read line
+        """
+        device.reset()
         line = ""
         while True:
-            try:
-                c = chr(device.read())
-                if c == '\r':
-                    return line
-                line += c
-            except:
-                time.sleep(0.5)
+            c = chr(read(device))
+            if c == '\r':
+                return line.strip()
+            line += c
 
     try:
-        device = ArduinoUsbDevice(idVendor=0x16c0, idProduct=0x05df)
         line = read_line(device).strip()
         data = json.loads(line)
 
@@ -47,6 +61,7 @@ def read_temperature_and_humidity(correction_value):
 class DigisparkTemper(WeatherModule):
     """
     DigisparkTemper (USB temperature/humidity sensor) module
+    https://github.com/miyaichi/DigisparkTemper
 
     This module gets data form DigisparkTemper and display it in
     Heat Index color.
@@ -63,17 +78,20 @@ class DigisparkTemper(WeatherModule):
 
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
+        self.device = None
         self.correction_value = None
         self.timer_thread = None
         self.last_hash_value = None
 
         self.correction_value = float(config["correction_value"])
-        if self.correction_value is None:
-            raise ValueError(__class__.__name__)
+        self.device = usb.core.find(idVendor=0x16c0, idProduct=0x05df)
+        if not self.device:
+            logging.error("%s: device not found", __class__.__name__)
+            raise Exception()
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(10, read_temperature_and_humidity,
-                                          [self.correction_value])
+        self.timer_thread = RepeatedTimer(5, read_temperature_and_humidity,
+                                          [self.device, self.correction_value])
         self.timer_thread.start()
 
     def quit(self):
