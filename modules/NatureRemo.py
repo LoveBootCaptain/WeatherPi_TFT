@@ -48,7 +48,7 @@ class NatureRemo(WeatherModule):
 
     example config:
     {
-      "module": "IRM",
+      "module": "NatureRemo",
       "config": {
         "rect": [x, y, width, height],
         "token": "<access tokens to access Nature API>"
