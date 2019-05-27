@@ -38,7 +38,7 @@ def read_temperature_and_humidity(device, correction_value):
         while True:
             c = chr(read(device))
             if c == '\r':
-                return line.strip()
+                return line
             line += c
 
     try:
