@@ -14,7 +14,7 @@ from modules.RepeatedTimer import RepeatedTimer
 
 
 def find_temper():
-    """Find Temper device
+    """Find TEMPer device
     """
 
     def read_file(path):
@@ -99,7 +99,7 @@ def read_hidraw(device):
 
 
 def read_temperature_and_humidity(device, correction_value):
-    """Read tempareture and humidity from Temper
+    """Read tempareture and humidity from TEMPer
     """
     try:
         if device.startswith("/dev/hidraw"):
@@ -117,19 +117,19 @@ def read_temperature_and_humidity(device, correction_value):
         return None
 
 
-class Temper(WeatherModule):
+class TEMPer(WeatherModule):
     """
-    Temper module
+    TEMPer module
 
     This module gets data form Temper sensors and display it
     in Heat Index color.
 
     example config:
     {
-      "module": "DHT",
+      "module": "TEMPer",
       "config": {
         "rect": [x, y, width, height],
-        "correction_value": -8
+        "correction_value": -2
       }
      }
     """
