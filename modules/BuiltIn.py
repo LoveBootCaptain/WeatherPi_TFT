@@ -191,7 +191,7 @@ class DailyWeatherForecast(WeatherModule):
 
         self.clear_surface()
         self.draw_text(day_of_week, (0, 0), "small", "orange", align="center")
-        self.draw_text(message, (0, 15), "small", "white", align="center")
+        self.draw_text(message, (0, 15), "small", "gray", align="center")
         self.draw_image(weather_icon,
                         ((self.rect.width - self.icon_size) / 2, 30 +
                          (self.rect.height - 30 - self.icon_size) / 2))
