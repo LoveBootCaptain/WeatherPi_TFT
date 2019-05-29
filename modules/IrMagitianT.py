@@ -95,6 +95,6 @@ class IrMagitianT(WeatherModule):
                 break
 
         self.clear_surface()
-        self.draw_text(_("Indoor"), (0, 0), "small", "white")
+        self.draw_text(_("Indoor"), (0, 0), "small", "gray")
         self.draw_text(message, (0, 20), size, "white", bold=True)
         self.update_screen(screen)

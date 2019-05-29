@@ -118,7 +118,7 @@ class NatureRemo(WeatherModule):
                 break
 
         self.clear_surface()
-        self.draw_text(_("Indoor"), (0, 0), "small", "white")
+        self.draw_text(_("Indoor"), (0, 0), "small", "gray")
         (w, h) = self.draw_text(message1, (0, 20), size, color, bold=True)
         if message2:
             self.draw_text(message2, (0, 20 + h), size, color, bold=True)
