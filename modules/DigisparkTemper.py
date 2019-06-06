@@ -18,22 +18,28 @@ def read_temperature_and_humidity(device, correction_value):
     def read(device):
         """Read byte from usb device
         """
-        response = device.ctrl_transfer(
-            bmRequestType=usb.util.build_request_type(
-                usb.util.CTRL_IN, usb.util.CTRL_TYPE_CLASS,
-                usb.util.CTRL_RECIPIENT_DEVICE),
-            bRequest=0x01,  # USBRQ_HID_GET_REPORT
-            wValue=(0x03 << 8) | 0,
-            wIndex=0,  # ignored
-            data_or_wLength=1)  # length
-        if not response:
-            return None
-        return response[0]
+        while True:
+            try:
+                response = device.ctrl_transfer(
+                    bmRequestType=usb.util.build_request_type(
+                        usb.util.CTRL_IN, usb.util.CTRL_TYPE_CLASS,
+                        usb.util.CTRL_RECIPIENT_DEVICE),
+                    bRequest=0x01,  # USBRQ_HID_GET_REPORT
+                    wValue=(0x03 << 8) | 0,
+                    wIndex=0,  # ignored
+                    data_or_wLength=1)  # length
+                if response:
+                    return response[0]
+            except usb.core.USBError:
+                pass
 
     def read_line(device):
         """Read line
         """
-        device.reset()
+        try:
+            device.reset()
+        except usb.core.USBError:
+            pass
         line = ""
         while True:
             c = chr(read(device))
@@ -90,7 +96,7 @@ class DigisparkTemper(WeatherModule):
             raise Exception()
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(5, read_temperature_and_humidity,
+        self.timer_thread = RepeatedTimer(10, read_temperature_and_humidity,
                                           [self.device, self.correction_value])
         self.timer_thread.start()
 
