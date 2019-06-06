@@ -36,10 +36,6 @@ def read_temperature_and_humidity(device, correction_value):
     def read_line(device):
         """Read line
         """
-        try:
-            device.reset()
-        except usb.core.USBError:
-            pass
         line = ""
         while True:
             c = chr(read(device))
