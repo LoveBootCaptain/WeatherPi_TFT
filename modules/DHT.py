@@ -77,6 +77,7 @@ class DHT(WeatherModule):
         result = self.timer_thread.get_result()
         if result is None:
             logging.info("%s: No data from sensor", __class__.__name__)
+            self.last_hash_value = None
             return
 
         # Has the value changed
