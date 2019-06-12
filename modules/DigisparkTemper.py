@@ -92,7 +92,7 @@ class DigisparkTemper(WeatherModule):
             raise Exception()
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(10, read_temperature_and_humidity,
+        self.timer_thread = RepeatedTimer(20, read_temperature_and_humidity,
                                           [self.device, self.correction_value])
         self.timer_thread.start()
 
