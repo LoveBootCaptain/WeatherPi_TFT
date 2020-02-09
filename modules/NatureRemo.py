@@ -4,8 +4,8 @@
 
 import logging
 import requests
-from modules.WeatherModule import WeatherModule, Utils
-from modules.RepeatedTimer import RepeatedTimer
+from modules.TemparatureModule import TemparatureModule
+from modules.WeatherModule import Utils
 
 
 def read_temperature_and_humidity(token, name, correction_value):
@@ -37,7 +37,7 @@ def read_temperature_and_humidity(token, name, correction_value):
         return None
 
 
-class NatureRemo(WeatherModule):
+class NatureRemo(TemparatureModule):
     """
     Nature Remo module
 
@@ -53,7 +53,8 @@ class NatureRemo(WeatherModule):
         "rect": [x, y, width, height],
         "token": "<access tokens to access Nature API>"
         "name": "<device name>",
-        "correction_value": 0.2
+        "correction_value": 0.2,
+        "graph_rect": [x, y, width, height]
       }
      }
     """
@@ -62,37 +63,23 @@ class NatureRemo(WeatherModule):
         super().__init__(fonts, location, language, units, config)
         self.token = config["token"]
         self.name = config["name"]
-        self.correction_value = None
-        self.timer_thread = None
-        self.last_hash_value = None
-
         self.correction_value = float(config["correction_value"])
+        if self.correction_value is None:
+            raise ValueError(__class__.__name__)
+        self.humidities = None
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(
+        self.start_sensor_thread(
             20, read_temperature_and_humidity,
             [self.token, self.name, self.correction_value])
-        self.timer_thread.start()
-
-    def quit(self):
-        if self.timer_thread:
-            self.timer_thread.quit()
 
     def draw(self, screen, weather, updated):
-        # No result yet
-        result = self.timer_thread.get_result()
-        if result is None:
-            logging.info("%s: No data from sensor", __class__.__name__)
-            self.last_hash_value = None
+        (celsius, humidity, data_changed) = self.get_sensor_value()
+        if not data_changed:
             return
 
-        # Has the value changed
-        hash_value = self.timer_thread.get_hash_value()
-        if self.last_hash_value == hash_value:
-            return
-        self.last_hash_value = hash_value
-
-        celsius, humidity = result
+        if self.graph_rect is not None:
+            self.plotting(screen)
 
         color = Utils.heat_color(celsius, humidity,
                                  "si") if humidity else "white"

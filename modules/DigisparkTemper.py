@@ -1,14 +1,13 @@
-# pylint: disable=invalid-name, broad-except, bare-except
+# pylint: disable=invalid-name, broad-except, bare-except, too-many-locals
 """DigisparkTemper (usb temperature/humidity sensor) module
 """
 
 import json
 import logging
-import time
 import usb
 
-from modules.WeatherModule import WeatherModule, Utils
-from modules.RepeatedTimer import RepeatedTimer
+from modules.TemparatureModule import TemparatureModule
+from modules.WeatherModule import Utils
 
 
 def read_temperature_and_humidity(device, correction_value):
@@ -51,7 +50,7 @@ def read_temperature_and_humidity(device, correction_value):
         celsius = round(data["Temperature"] + correction_value, 1)
 
         logging.info("Celsius: %s Humidity: %s", celsius, humidity)
-        return humidity, celsius
+        return celsius, humidity
 
     except Exception as e:
         if line:
@@ -60,7 +59,7 @@ def read_temperature_and_humidity(device, correction_value):
         return None
 
 
-class DigisparkTemper(WeatherModule):
+class DigisparkTemper(TemparatureModule):
     """
     DigisparkTemper (USB temperature/humidity sensor) module
     https://github.com/miyaichi/DigisparkTemper
@@ -73,7 +72,8 @@ class DigisparkTemper(WeatherModule):
       "module": "DigisparkTemper",
       "config": {
         "rect": [x, y, width, height],
-        "correction_value": -1
+        "correction_value": -1,
+        "graph_rect": [x, y, width, height]
       }
      }
     """
@@ -82,8 +82,6 @@ class DigisparkTemper(WeatherModule):
         super().__init__(fonts, location, language, units, config)
         self.device = None
         self.correction_value = None
-        self.timer_thread = None
-        self.last_hash_value = None
 
         self.correction_value = float(config["correction_value"])
         self.device = usb.core.find(idVendor=0x16c0, idProduct=0x05df)
@@ -92,29 +90,16 @@ class DigisparkTemper(WeatherModule):
             raise Exception()
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(20, read_temperature_and_humidity,
-                                          [self.device, self.correction_value])
-        self.timer_thread.start()
-
-    def quit(self):
-        if self.timer_thread:
-            self.timer_thread.quit()
+        self.start_sensor_thread(20, read_temperature_and_humidity,
+                                 [self.device, self.correction_value])
 
     def draw(self, screen, weather, updated):
-        # No result yet
-        result = self.timer_thread.get_result()
-        if result is None:
-            logging.info("%s: No data from sensor", __class__.__name__)
-            self.last_hash_value = None
+        (celsius, humidity, data_changed) = self.get_sensor_value()
+        if not data_changed:
             return
 
-        # Has the value changed
-        hash_value = self.timer_thread.get_hash_value()
-        if self.last_hash_value == hash_value:
-            return
-        self.last_hash_value = hash_value
-
-        (humidity, celsius) = result
+        if self.graph_rect is not None:
+            self.plotting(screen)
 
         color = Utils.heat_color(celsius, humidity, "si")
         temperature = Utils.temperature_text(

@@ -4,8 +4,8 @@
 
 import logging
 import Adafruit_DHT
-from modules.WeatherModule import WeatherModule, Utils
-from modules.RepeatedTimer import RepeatedTimer
+from modules.TemparatureModule import TemparatureModule
+from modules.WeatherModule import Utils
 
 
 def read_temperature_and_humidity(sensor, pin, correction_value):
@@ -15,14 +15,14 @@ def read_temperature_and_humidity(sensor, pin, correction_value):
         humidity, celsius = Adafruit_DHT.read_retry(sensor, pin)
         celsius = round(celsius + correction_value, 1)
         logging.info("Celsius: %s Humidity: %s", celsius, humidity)
-        return humidity, celsius
+        return celsius, humidity
 
     except Exception as e:
         logging.error(e, exc_info=True)
         return None
 
 
-class DHT(WeatherModule):
+class DHT(TemparatureModule):
     """
     Adafruit temperature/humidity sensor module
 
@@ -36,7 +36,8 @@ class DHT(WeatherModule):
         "rect": [x, y, width, height],
         "sensor": "DHT11",
         "pin": 14,
-        "correction_value": -8
+        "correction_value": -8,
+        "graph_rect": [x, y, width, height]
       }
      }
     """
@@ -51,8 +52,6 @@ class DHT(WeatherModule):
         self.sensor = None
         self.pin = None
         self.correction_value = None
-        self.timer_thread = None
-        self.last_hash_value = None
 
         if config["sensor"] in DHT.sensors:
             self.sensor = DHT.sensors[config["sensor"]]
@@ -63,30 +62,17 @@ class DHT(WeatherModule):
             raise ValueError(__class__.__name__)
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(
+        self.start_sensor_thread(
             20, read_temperature_and_humidity,
             [self.sensor, self.pin, self.correction_value])
-        self.timer_thread.start()
-
-    def quit(self):
-        if self.timer_thread:
-            self.timer_thread.quit()
 
     def draw(self, screen, weather, updated):
-        # No result yet
-        result = self.timer_thread.get_result()
-        if result is None:
-            logging.info("%s: No data from sensor", __class__.__name__)
-            self.last_hash_value = None
+        (celsius, humidity, data_changed) = self.get_sensor_value()
+        if not data_changed:
             return
 
-        # Has the value changed
-        hash_value = self.timer_thread.get_hash_value()
-        if self.last_hash_value == hash_value:
-            return
-        self.last_hash_value = hash_value
-
-        (humidity, celsius) = result
+        if self.graph_rect is not None:
+            self.plotting(screen)
 
         color = Utils.heat_color(celsius, humidity, "si")
         temperature = Utils.temperature_text(

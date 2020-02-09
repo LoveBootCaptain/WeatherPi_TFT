@@ -4,8 +4,8 @@
 
 import logging
 import serial
-from modules.WeatherModule import WeatherModule, Utils
-from modules.RepeatedTimer import RepeatedTimer
+from modules.TemparatureModule import TemparatureModule
+from modules.WeatherModule import Utils
 
 
 def read_temperature(correction_value):
@@ -22,14 +22,14 @@ def read_temperature(correction_value):
         celsius = ((5.0 / 1024.0 * float(value)) - 0.4) / 0.01953
         celsius = round(celsius + correction_value, 1)
         logging.info("Celsius: %s", celsius)
-        return celsius
+        return celsius, None
 
     except Exception as e:
         logging.error(e, exc_info=True)
         return None
 
 
-class IrMagitianT(WeatherModule):
+class IrMagitianT(TemparatureModule):
     """
     irMagician-T module
 
@@ -45,45 +45,29 @@ class IrMagitianT(WeatherModule):
       "module": "IRM",
       "config": {
         "rect": [x, y, width, height],
-        "correction_value": -10
+        "correction_value": -10,
+        "graph_rect": [x, y, width, height]
       }
      }
     """
 
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
-        self.correction_value = None
-        self.timer_thread = None
-        self.last_hash_value = None
-
         self.correction_value = float(config["correction_value"])
         if self.correction_value is None:
             raise ValueError(__class__.__name__)
+        self.humidities = None
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(20, read_temperature,
-                                          [self.correction_value])
-        self.timer_thread.start()
-
-    def quit(self):
-        if self.timer_thread:
-            self.timer_thread.quit()
+        self.start_sensor_thread(20, read_temperature, [self.correction_value])
 
     def draw(self, screen, weather, updated):
-        # No result yet
-        result = self.timer_thread.get_result()
-        if result is None:
-            logging.info("%s: No data from sensor", __class__.__name__)
-            self.last_hash_value = None
+        (celsius, _humidity, data_changed) = self.get_sensor_value()
+        if not data_changed:
             return
 
-        # Has the value changed
-        hash_value = self.timer_thread.get_hash_value()
-        if self.last_hash_value == hash_value:
-            return
-        self.last_hash_value = hash_value
-
-        celsius = result
+        if self.graph_rect is not None:
+            self.plotting(screen)
 
         temparature = Utils.temperature_text(
             celsius if self.units == "si" else Utils.fahrenheit(celsius),

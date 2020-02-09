@@ -9,8 +9,8 @@ import struct
 import logging
 import serial
 
-from modules.WeatherModule import WeatherModule, Utils
-from modules.RepeatedTimer import RepeatedTimer
+from modules.TemparatureModule import TemparatureModule
+from modules.WeatherModule import Utils
 
 
 def find_temper():
@@ -110,14 +110,14 @@ def read_temperature_and_humidity(device, correction_value):
         celsius = round(celsius + correction_value, 1)
         humidity = round(humidity, 1)
         logging.info("Celsius: %s Humidity: %s", celsius, humidity)
-        return humidity, celsius
+        return celsius, humidity
 
     except Exception as e:
         logging.error(e, exc_info=True)
         return None
 
 
-class TEMPer(WeatherModule):
+class TEMPer(TemparatureModule):
     """
     TEMPer module
 
@@ -129,7 +129,8 @@ class TEMPer(WeatherModule):
       "module": "TEMPer",
       "config": {
         "rect": [x, y, width, height],
-        "correction_value": -2
+        "correction_value": -2,
+        "graph_rect": [x, y, width, height]
       }
      }
     """
@@ -138,8 +139,6 @@ class TEMPer(WeatherModule):
         super().__init__(fonts, location, language, units, config)
         self.device = None
         self.correction_value = None
-        self.timer_thread = None
-        self.last_hash_value = None
 
         self.correction_value = float(config["correction_value"])
         self.device = find_temper()
@@ -148,29 +147,16 @@ class TEMPer(WeatherModule):
             raise Exception()
 
         # start sensor thread
-        self.timer_thread = RepeatedTimer(20, read_temperature_and_humidity,
-                                          [self.device, self.correction_value])
-        self.timer_thread.start()
-
-    def quit(self):
-        if self.timer_thread:
-            self.timer_thread.quit()
+        self.start_sensor_thread(20, read_temperature_and_humidity,
+                                 [self.device, self.correction_value])
 
     def draw(self, screen, weather, updated):
-        # No result yet
-        result = self.timer_thread.get_result()
-        if result is None:
-            logging.info("%s: No data from sensor", __class__.__name__)
-            self.last_hash_value = None
+        (celsius, humidity, data_changed) = self.get_sensor_value()
+        if not data_changed:
             return
 
-        # Has the value changed
-        hash_value = self.timer_thread.get_hash_value()
-        if self.last_hash_value == hash_value:
-            return
-        self.last_hash_value = hash_value
-
-        (humidity, celsius) = result
+        if self.graph_rect is not None:
+            self.plotting(screen)
 
         color = Utils.heat_color(celsius, humidity, "si")
         temperature = Utils.temperature_text(
