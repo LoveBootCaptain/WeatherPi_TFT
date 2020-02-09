@@ -20,22 +20,26 @@ def plotting(screen, rect, units, times, temparatures, humidities):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
+    import numpy as np
     from matplotlib.dates import DateFormatter, HourLocator
 
     # plot graph
     plt.style.use("dark_background")
     fig, ax1 = plt.subplots(figsize=(rect.width / 100, rect.height / 100))
+    kernel = np.ones(4) / 4
     if temparatures is not None:
         c = plt.get_cmap("Dark2")(0)
         ax1.yaxis.label.set_color(c)
         ax1.set_ylabel(Utils.temperature_text("Temparature ", units))
-        ax1.plot(times, temparatures, color=c)
+        ax1.plot(times,
+                 np.convolve(temparatures, kernel, mode="same"),
+                 color=c)
     if humidities is not None:
         c = plt.get_cmap("Dark2")(1)
         ax2 = ax1.twinx()
         ax2.yaxis.label.set_color(color=c)
         ax2.set_ylabel(Utils.percentage_text("Humidity "))
-        ax2.plot(times, humidities, color=c)
+        ax2.plot(times, np.convolve(humidities, kernel, mode="same"), color=c)
     ax1.xaxis.set_major_locator(HourLocator())
     ax1.xaxis.set_major_formatter(DateFormatter("%H:%M"))
 
