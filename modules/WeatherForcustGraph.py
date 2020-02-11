@@ -52,6 +52,7 @@ class WeatherForcustGraph(WeatherModule):
 
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
+        self.block = "hourly"
         self.condition1 = None
         self.condition2 = None
         if "conditions" in config:
@@ -70,13 +71,12 @@ class WeatherForcustGraph(WeatherModule):
         if weather is None or not updated:
             return
 
-        hourly_forcust = weather["hourly"]["data"]
-        times = list(
-            map(lambda x: adjust_unit(x, "time", self.units), hourly_forcust))
+        data = weather[self.block]["data"]
+        times = list(map(lambda x: adjust_unit(x, "time", self.units), data))
         if self.condition1:
             y1 = list(
                 map(lambda x: adjust_unit(x, self.condition1, self.units),
-                    hourly_forcust))
+                    data))
             ylabel1 = "".join(
                 map(lambda x: x if x.islower() else " " + x,
                     self.condition1)).capitalize()
@@ -85,7 +85,7 @@ class WeatherForcustGraph(WeatherModule):
         if self.condition2:
             y2 = list(
                 map(lambda x: adjust_unit(x, self.condition2, self.units),
-                    hourly_forcust))
+                    data))
             ylabel2 = "".join(
                 map(lambda x: x if x.islower() else " " + x,
                     self.condition2)).capitalize()

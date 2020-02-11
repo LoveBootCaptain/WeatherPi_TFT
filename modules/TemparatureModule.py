@@ -28,8 +28,8 @@ class TemparatureModule(WeatherModule):
             for x in range(0, self.DATA_POINTS)
         ]
         self.times.reverse()
-        self.temparatures = [float(0)] * self.DATA_POINTS
-        self.humidities = [float(0)] * self.DATA_POINTS
+        self.temparatures = [np.nan] * self.DATA_POINTS
+        self.humidities = [np.nan] * self.DATA_POINTS
 
         # glaph options
         self.graph_rect = None
@@ -59,12 +59,12 @@ class TemparatureModule(WeatherModule):
         if dt.second == 0:
             self.times = self.times[1:] + [dt]
             if self.temparatures is not None:
-                celsius = 0 if celsius is None else float(
+                celsius = np.nan if celsius is None else float(
                     celsius if self.units ==
                     "si" else Utils.fahrenheit(celsius))
                 self.temparatures = self.temparatures[1:] + [celsius]
             if self.humidities is not None:
-                humidity = 0 if humidity is None else float(humidity)
+                humidity = np.nan if humidity is None else float(humidity)
                 self.humidities = self.humidities[1:] + [humidity]
 
         # Has the value changed
@@ -84,11 +84,12 @@ class TemparatureModule(WeatherModule):
 
         # smoothing by moving average
         kernel = np.ones(4) / 4
+        mode = "valid"
         times = self.times[1:-2]
         temparatures = np.convolve(self.temparatures, kernel,
-                                   mode="valid") if self.temparatures else None
+                                   mode=mode) if self.temparatures else None
         humidities = np.convolve(self.humidities, kernel,
-                                 mode="valid") if self.humidities else None
+                                 mode=mode) if self.humidities else None
 
         # import modules only when plotting graphs
         from modules.GraphUtils import GraphUtils
