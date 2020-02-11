@@ -37,6 +37,24 @@ msgstr "Pressure"
 msgid "UVindex"
 msgstr "UVindex"
 
+msgid "Temperature"
+msgstr "Temperature"
+
+msgid "Apparent temperature"
+msgstr "Apparent temperature"
+
+msgid "Dew point"
+msgstr "Dew point"
+
+msgid "Wind speed"
+msgstr "Wind speed"
+
+msgid "Uv index"
+msgstr "UV index"
+
+msgid "Ozone"
+msgstr "Ozone"
+
 msgid "NNE"
 msgstr "NNE"
 

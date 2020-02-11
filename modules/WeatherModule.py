@@ -119,9 +119,16 @@ class Utils:
     @staticmethod
     def fahrenheit(value):
         """
-        Convert  celsius to fahrenheit
+        Convert celsius to fahrenheit
         """
         return (value * 1.8) + 32.0
+
+    @staticmethod
+    def kilometer(value):
+        """
+        Convert mile to kilometer
+        """
+        return value * 1.609344
 
     @staticmethod
     def heat_color(temperature, humidity, units):

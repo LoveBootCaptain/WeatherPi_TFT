@@ -33,7 +33,7 @@ def weather_forecast(api_key, latitude, longitude, language, units):
             params={
                 "lang": language,
                 "units": units,
-                "exclude": "minutely,hourly,flags"
+                "exclude": "minutely,flags"
             })
         resopnse.raise_for_status()
         return resopnse.json()

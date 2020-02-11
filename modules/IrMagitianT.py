@@ -66,9 +66,6 @@ class IrMagitianT(TemparatureModule):
         if not data_changed:
             return
 
-        if self.graph_rect is not None:
-            self.plotting(screen)
-
         temparature = Utils.temperature_text(
             celsius if self.units == "si" else Utils.fahrenheit(celsius),
             self.units)
@@ -83,3 +80,6 @@ class IrMagitianT(TemparatureModule):
         self.draw_text(_("Indoor"), (0, 0), "small", "gray")
         self.draw_text(message, (0, 20), size, "white", bold=True)
         self.update_screen(screen)
+
+        # plot the graph if necessary
+        self.plot_graph(screen)

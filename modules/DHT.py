@@ -71,9 +71,6 @@ class DHT(TemparatureModule):
         if not data_changed:
             return
 
-        if self.graph_rect is not None:
-            self.plotting(screen)
-
         color = Utils.heat_color(celsius, humidity, "si")
         temperature = Utils.temperature_text(
             celsius if self.units == "si" else Utils.fahrenheit(celsius),
@@ -103,3 +100,6 @@ class DHT(TemparatureModule):
         if message2:
             self.draw_text(message2, (0, 20 + h), size, color, bold=True)
         self.update_screen(screen)
+
+        # plot the graph if necessary
+        self.plot_graph(screen)

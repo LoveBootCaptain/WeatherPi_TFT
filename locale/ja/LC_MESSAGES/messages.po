@@ -37,6 +37,24 @@ msgstr "気圧"
 msgid "UVindex"
 msgstr "UVインデックス"
 
+msgid "Temperature"
+msgstr "温度"
+
+msgid "Apparent temperature"
+msgstr "体感温度"
+
+msgid "Dew point"
+msgstr "露点"
+
+msgid "Wind speed"
+msgstr "風速"
+
+msgid "Uv index"
+msgstr "UVインデックス"
+
+msgid "Ozone"
+msgstr "オゾン"
+
 msgid "NNE"
 msgstr "北北東"
 
