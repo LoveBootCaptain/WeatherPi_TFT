@@ -92,5 +92,7 @@ class WeatherForcustGraph(WeatherModule):
         else:
             y2 = ylabel2 = None
 
+        self.clear_surface()
+        GraphUtils.set_font(self.fonts.name)
         GraphUtils.plot_2axis_graph(screen, self.surface, self.rect, times, y1,
                                     ylabel1, y2, ylabel2)

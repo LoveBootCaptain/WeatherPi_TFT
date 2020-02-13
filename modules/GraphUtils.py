@@ -7,6 +7,7 @@ import threading
 import pygame
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
 from matplotlib.dates import DateFormatter, DayLocator, HourLocator
 
 # graph parameters
@@ -22,13 +23,13 @@ def _plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2, ylabel2):
     if y1 is not None:
         if ylabel1:
             ax1.yaxis.label.set_color(colormap(0))
-            ax1.set_ylabel((ylabel1))
+            ax1.set_ylabel(ylabel1)
         ax1.plot(times, y1, color=colormap(0))
     if y2 is not None:
         ax2 = ax1.twinx()
         if ylabel2:
             ax2.yaxis.label.set_color(colormap(1))
-            ax2.set_ylabel((ylabel2))
+            ax2.set_ylabel(ylabel2)
         ax2.plot(times, y2, color=colormap(1))
 
     # setting tics
@@ -49,7 +50,6 @@ def _plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2, ylabel2):
     image = pygame.image.load(f)
 
     # draw image
-    surface.fill(pygame.Color("black"))
     surface.blit(image, (0, 0))
     screen.blit(surface, (rect.left, rect.top))
 
@@ -57,6 +57,15 @@ def _plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2, ylabel2):
 class GraphUtils:
     """Graph Utility class
     """
+
+    @staticmethod
+    def set_font(font):
+        """set graph text font
+        """
+        if font not in plt.rcParams["font.family"]:
+            font_manager.fontManager.ttflist.extend(
+                font_manager.createFontList(font_manager.findSystemFonts()))
+            plt.rcParams["font.family"] = font
 
     @staticmethod
     def plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2,

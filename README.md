@@ -164,6 +164,7 @@ fig 240x320 ja
 Install the font for your locale. I recommend [Google Fonts](https://fonts.google.com/) and [Google NotoFonts](https://www.google.com/get/noto/).  
 (ロケールにあったフォントをインストールします。日本語であれば、"Noto Sans CJK JP"をインストールして、等幅フォント"Noto Sans CJK JP"を設定することを勧めます。)
 
+[How to install fonts](https://www.google.com/get/noto/help/install/)
 
 ### Translation files
 * init message.po file

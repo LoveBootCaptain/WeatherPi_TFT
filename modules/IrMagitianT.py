@@ -4,12 +4,12 @@
 
 import logging
 import serial
-from modules.TemparatureModule import TemparatureModule
+from modules.TemperatureModule import TemperatureModule
 from modules.WeatherModule import Utils
 
 
 def read_temperature(correction_value):
-    """Read tempareture from device
+    """Read Temperature from device
     """
     try:
         # send Temperature command and save reply
@@ -29,7 +29,7 @@ def read_temperature(correction_value):
         return None
 
 
-class IrMagitianT(TemparatureModule):
+class IrMagitianT(TemperatureModule):
     """
     irMagician-T module
 
@@ -81,5 +81,5 @@ class IrMagitianT(TemparatureModule):
         self.draw_text(message, (0, 20), size, "white", bold=True)
         self.update_screen(screen)
 
-        # plot the graph if necessary
-        self.plot_graph(screen)
+        # draw the graph if necessary
+        self.draw_graph(screen, weather, updated)

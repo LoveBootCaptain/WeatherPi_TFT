@@ -6,12 +6,12 @@ import json
 import logging
 import usb
 
-from modules.TemparatureModule import TemparatureModule
+from modules.TemperatureModule import TemperatureModule
 from modules.WeatherModule import Utils
 
 
 def read_temperature_and_humidity(device, correction_value):
-    """Read tempareture and humidity from sensor
+    """Read Temperature and humidity from sensor
     """
 
     def read(device):
@@ -59,7 +59,7 @@ def read_temperature_and_humidity(device, correction_value):
         return None
 
 
-class DigisparkTemper(TemparatureModule):
+class DigisparkTemper(TemperatureModule):
     """
     DigisparkTemper (USB temperature/humidity sensor) module
     https://github.com/miyaichi/DigisparkTemper
@@ -128,5 +128,5 @@ class DigisparkTemper(TemparatureModule):
             self.draw_text(message2, (0, 20 + h), size, color, bold=True)
         self.update_screen(screen)
 
-        # plot the graph if necessary
-        self.plot_graph(screen)
+        # draw the graph if necessary
+        self.draw_graph(screen, weather, updated)

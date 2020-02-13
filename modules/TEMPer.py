@@ -9,7 +9,7 @@ import struct
 import logging
 import serial
 
-from modules.TemparatureModule import TemparatureModule
+from modules.TemperatureModule import TemperatureModule
 from modules.WeatherModule import Utils
 
 
@@ -60,7 +60,7 @@ def find_temper():
 
 
 def read_serial(device):
-    """Read tempareture and humidity from serial
+    """Read Temperature and humidity from serial
     """
     with serial.Serial(device, 9600, timeout=1) as s:
         s.write(b"ReadTemp")
@@ -76,7 +76,7 @@ def read_serial(device):
 
 
 def read_hidraw(device):
-    """Read tempareture and humidity from hidraw
+    """Read Temperature and humidity from hidraw
     """
 
     def parse_bytes(data, offset, divisor):
@@ -99,7 +99,7 @@ def read_hidraw(device):
 
 
 def read_temperature_and_humidity(device, correction_value):
-    """Read tempareture and humidity from TEMPer
+    """Read Temperature and humidity from TEMPer
     """
     try:
         if device.startswith("/dev/hidraw"):
@@ -117,7 +117,7 @@ def read_temperature_and_humidity(device, correction_value):
         return None
 
 
-class TEMPer(TemparatureModule):
+class TEMPer(TemperatureModule):
     """
     TEMPer module
 
@@ -185,5 +185,5 @@ class TEMPer(TemparatureModule):
             self.draw_text(message2, (0, 20 + h), size, color, bold=True)
         self.update_screen(screen)
 
-        # plot the graph if necessary
-        self.plot_graph(screen)
+        # draw the graph if necessary
+        self.draw_graph(screen, weather, updated)

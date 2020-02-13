@@ -4,12 +4,12 @@
 
 import logging
 import Adafruit_DHT
-from modules.TemparatureModule import TemparatureModule
+from modules.TemperatureModule import TemperatureModule
 from modules.WeatherModule import Utils
 
 
 def read_temperature_and_humidity(sensor, pin, correction_value):
-    """Read tempareture and humidity from sensor
+    """Read Temperature and humidity from sensor
     """
     try:
         humidity, celsius = Adafruit_DHT.read_retry(sensor, pin)
@@ -22,7 +22,7 @@ def read_temperature_and_humidity(sensor, pin, correction_value):
         return None
 
 
-class DHT(TemparatureModule):
+class DHT(TemperatureModule):
     """
     Adafruit temperature/humidity sensor module
 
@@ -101,5 +101,5 @@ class DHT(TemparatureModule):
             self.draw_text(message2, (0, 20 + h), size, color, bold=True)
         self.update_screen(screen)
 
-        # plot the graph if necessary
-        self.plot_graph(screen)
+        # draw the graph if necessary
+        self.draw_graph(screen, weather, updated)

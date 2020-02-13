@@ -4,12 +4,12 @@
 
 import logging
 import requests
-from modules.TemparatureModule import TemparatureModule
+from modules.TemperatureModule import TemperatureModule
 from modules.WeatherModule import Utils
 
 
 def read_temperature_and_humidity(token, name, correction_value):
-    """Read tempareture and humidity from device
+    """Read Temperature and humidity from device
     """
     try:
         response = requests.get("https://api.nature.global/1/devices",
@@ -37,7 +37,7 @@ def read_temperature_and_humidity(token, name, correction_value):
         return None
 
 
-class NatureRemo(TemparatureModule):
+class NatureRemo(TemperatureModule):
     """
     Nature Remo module
 
@@ -109,5 +109,5 @@ class NatureRemo(TemparatureModule):
             self.draw_text(message2, (0, 20 + h), size, color, bold=True)
         self.update_screen(screen)
 
-        # plot the graph if necessary
-        self.plot_graph(screen)
+        # draw the graph if necessary
+        self.draw_graph(screen, weather, updated)
