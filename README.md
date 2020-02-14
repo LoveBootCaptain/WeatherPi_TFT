@@ -191,7 +191,6 @@ All modules require the following configuration:
 ```
 
 ### Built-in Modules
-
 | Name            | Description                         | Options                                 | Size              |
 | --------------- | ----------------------------------- | --------------------------------------- | ----------------- |
 | Alerts          | Any severe weather alerts pertinent | None                                    | 240x15 - 480x15   |
@@ -205,25 +204,63 @@ All modules require the following configuration:
 
 
 ### External modules
-
 | Name                                                            | Description                                                             | Options                                                                                                                                                                               | Size              |
 | --------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
 | DHT                                                             | Adafruit temperature/humidity sensor                                    | pin: pin number<br>correction_value: (調整値)                                                                                                                                         | 60x60 - 70x120    |
 | [DigistampTemper](https://github.com/miyaichi/DigisparkTemper)  | DigisparkTemper (usb temperature/humidity sensor)                       | correction_value: (調整値)                                                                                                                                                            | 60x60 - 70x120    |
 | [IrMagitianT](http://www.omiya-giken.com/?page_id=837)          | Temperature sensor on the infrared remote control system "irMagician-T" | correction_value: (調整値)                                                                                                                                                            | 60x35 - 70x60     |
-| [JMAAlerts](http://xml.kishou.go.jp/xmlpull.html)               | JMA weather alerts<br>(気象庁の注意報、警報、特別警報を表示)            | prefecture: (都道府県)<br>city: (市区町村)                                                                                                                                            | 240x15 - 480x15   |
+| [JMAAlerts](http://xml.kishou.go.jp/xmlpull.html)               | JMA weather alerts<br>(気象庁の注意報、警報、特別警報を表示)                  | prefecture: (都道府県)<br>city: (市区町村)                                                                                                                                            | 240x15 - 480x15   |
 | [NatureRemo](https://nature.global/jp/landing-page-dm-g/)       | Temperature and humidity sensor on Nature Remo/Remo mini                | token: (access tokens to access Nature API)<br>name: (device name)                                                                                                                    | 100x60            |
 | PIR                                                             | PIR(Passive Infrared Ray）Motion Sensor                                 | pin: pin number<br>power_save_delay: delay (in seconds) before the monitor will be turned off.                                                                                        | None              |
 | SelfUpdate                                                      | Update and restart if there is a newer version on GitHub                | check_interval (default 86400 # once a day)                                                                                                                                           | -                 |
 | [TEMPer](http://www.pcsensor.com/usb-hygrometer/temperhum.html) | TEMPerHUM/TEMPer thermometer & hygrometer                               | correction_value: (調整値)                                                                                                                                                            | 60x60 - 70x120    |
 | WeatherForcustGraph                                             | Plots weather condition data for the next 48 hours.                     | conditions: Weather conditions to display.<br>Available weather conditions is following:<br>temperature, apparentTemperature, dewPoint, humidity, pressure, windSpeed, uvIndex, ozone | The size you want |
 
+## Plots a graph
+Temperature and humidity sensors and weather forecast data can be displayed in a graph.
+（温湿度センサーや気象予想データをグラフで表示することができます。）
+
+* Temperature and humidity sensor modules (DHT, DigisparkTemper, IrMagitianT, NatureRemo, TEMPer)
+  Each module holds the last 6 hours of sensor data and can display it graphically. To plot the graph, define the graph drawing area with "graph_rect" parameter in the module config.
+  （各モジュールは過去６時間分のセンサーデータを保持して、それをグラフで表示することができます。グラフを表示するには、モジュールのconfigに"graph_rect"パラメータでグラフの描画領域を定義します。）
+
+  example config:
+  ```
+  {
+    "module": "<Module name>",
+    "config": {
+      "rect": [x, y, width, height],
+      ...
+      "graph_rect": [x, y, width, height]
+    }
+  }
+  ```
+
+* WeatherGorcustGraph module
+  It can graphically displays the weather data for the next 48 hours provided by DarkSky. To plot the graph, define up to two weather condition names with the conditions parameter in the module's config.
+  （DarkSkyが提供する今後48時間の天気データをグラフィカルに表示できます。グラフを表示するには、モジュールのconfigにconditionsパラメータで気象条件名を最大２つまで定義します。）
+
+  example config:
+  ```
+  {
+    "module": "WeatherForcustGraph",
+    "config": {
+      "rect": [x, y, width, height],
+      "conditions": ["temperature", "humidity"]
+    }
+  }
+  ```
+
+  * Available weather conditions is following:
+    temperature, apparentTemperature, dewPoint, humidity, pressure, windSpeed, uvIndex, ozone
+
+    Refer: https://darksky.net/dev/docs
 
 ## Credit
 
 * [WeatherPi_TFT](https://github.com/LoveBootCaptain/WeatherPi_TFT) His wonderful software is the beginning of my project
 * [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
-* [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
+* [DarkSky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
 * [気象庁防災情報XMLフォーマット](http://xml.kishou.go.jp/)
 * [Google Fonts](https://fonts.google.com/)
-* [Google NotoFonts](https://www.google.com/get/noto/).  
+* [Google NotoFonts](https://www.google.com/get/noto/)
