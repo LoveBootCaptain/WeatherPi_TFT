@@ -19,6 +19,8 @@ dpi = 100
 
 
 def _plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2, ylabel2):
+    logging("Graph plot start.")
+
     # plot graph
     fig, ax1 = plt.subplots(figsize=(rect.width / dpi, rect.height / dpi))
     if y1 is not None:
@@ -55,6 +57,8 @@ def _plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2, ylabel2):
     # draw image
     surface.blit(image, (0, 0))
     screen.blit(surface, (rect.left, rect.top))
+
+    logging.info("Graph plotted.")
 
 
 class GraphUtils:
