@@ -4,6 +4,7 @@
 
 import io
 import threading
+import numpy as np
 import pygame
 import matplotlib
 import matplotlib.pyplot as plt
@@ -24,13 +25,15 @@ def _plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2, ylabel2):
         if ylabel1:
             ax1.yaxis.label.set_color(colormap(0))
             ax1.set_ylabel(ylabel1)
-        ax1.plot(times, y1, color=colormap(0))
+        if sum(x is not np.nan for x in y1) > 0:
+            ax1.plot(times, y1, color=colormap(0))
     if y2 is not None:
         ax2 = ax1.twinx()
         if ylabel2:
             ax2.yaxis.label.set_color(colormap(1))
             ax2.set_ylabel(ylabel2)
-        ax2.plot(times, y2, color=colormap(1))
+        if sum(x is not np.nan for x in y2) > 0:
+            ax2.plot(times, y2, color=colormap(1))
 
     # setting tics
     if (max(times) - min(times)).days > 1:
