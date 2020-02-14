@@ -237,8 +237,10 @@ Temperature and humidity sensors and weather forecast data can be displayed in a
   ```
 
 * WeatherGorcustGraph module
-  It can graphically displays the weather data for the next 48 hours provided by DarkSky. To plot the graph, define up to two weather condition names with the conditions parameter in the module's config.
-  （DarkSkyが提供する今後48時間の天気データをグラフィカルに表示できます。グラフを表示するには、モジュールのconfigにconditionsパラメータで気象条件名を最大２つまで定義します。）
+  It can graphically displays the weather data for the next 48 hours or 7 days provided by DarkSky. To plot the graph, define up to two weather condition names with the conditions parameter in the module's config.
+  （DarkSkyが提供する今後48時間または7日間の天気データをグラフィカルに表示できます。グラフを表示するには、モジュールのconfigにconditionsパラメータで気象条件名を最大２つまで定義します。）
+
+  ![fig](https://user-images.githubusercontent.com/129797/74575281-b4e2ba80-4fc9-11ea-8b8b-72ca6b28c418.png)
 
   example config:
   ```
@@ -246,13 +248,24 @@ Temperature and humidity sensors and weather forecast data can be displayed in a
     "module": "WeatherForcustGraph",
     "config": {
       "rect": [x, y, width, height],
+      "block": "hourly",
       "conditions": ["temperature", "humidity"]
     }
   }
   ```
 
-  * Available weather conditions is following:
-    temperature, apparentTemperature, dewPoint, humidity, pressure, windSpeed, uvIndex, ozone
+  * Abailable block and conditions are following:
+    （有効なblockとconditionは以下の通りです）
+    hourly:
+        temperature, apparentTemperature, dewPoint, humidity,
+        pressure, windSpeed, uvIndex, ozone
+    daily:
+        precipIntensity, precipIntensityMax, precipProbability,
+        temperatureHigh, temperatureLow, apparentTemperatureHigh,
+        apparentTemperatureLow, dewPoint, humidity, pressure,
+        windSpeed, windGust, cloudCover, uvIndex, uvIndexTime,
+        visibility, ozone, temperatureMin, temperatureMax,
+        apparentTemperatureMin, "apparentTemperatureMax
 
     Refer: https://darksky.net/dev/docs
 

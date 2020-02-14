@@ -7,6 +7,34 @@ from modules.WeatherModule import WeatherModule, Utils
 from modules.GraphUtils import GraphUtils
 
 
+def check_condition(block, condition):
+    """check block and condition
+    """
+    hourly = [
+        "precipIntensity", "precipProbability", "temperature",
+        "apparentTemperature", "dewPoint", "humidity", "pressure", "windSpeed",
+        "windGust", "cloudCover", "uvIndex", "visibility", "ozone"
+    ]
+    daily = [
+        "precipIntensity", "precipIntensityMax", "precipProbability",
+        "temperatureHigh", "temperatureLow", "apparentTemperatureHigh",
+        "apparentTemperatureLow", "dewPoint", "humidity", "pressure",
+        "windSpeed", "windGust", "cloudCover", "uvIndex", "uvIndexTime",
+        "visibility", "ozone", "temperatureMin", "temperatureMax",
+        "apparentTemperatureMin", "apparentTemperatureMax"
+    ]
+    if condition is not None:
+        if block == "hourly":
+            if condition not in hourly:
+                return False
+        elif block == "daily":
+            if condition not in daily:
+                return False
+        else:
+            return False
+    return True
+
+
 def adjust_unit(values, condition, units):
     """adjust values units
     """
@@ -14,11 +42,11 @@ def adjust_unit(values, condition, units):
     if condition == "time":
         return datetime.datetime.fromtimestamp(value)
     value = float(value)
-    if condition in ("temparature", "apparentTemperature"):
+    if "temperature" in condition.lower() or condition == "dewPoint":
         return value if units == "si" else Utils.fahrenheit(value)
     if condition == "humidity":
         return value * 100
-    if condition == "windSpeed":
+    if condition in ("windSpeed", "windGust"):
         return round(Utils.kilometer(value) if units == "si" else value, 1)
     return value
 
@@ -27,7 +55,7 @@ class WeatherForcustGraph(WeatherModule):
     """
     Weather forcust graph Module
 
-    This module plots weather condition data for the next 48 hours.
+    This module plots weather condition data for the next 48 hours or 7 days.
     When two weather conditions are specified, a two-axis graph is plotted.
 
     example config:
@@ -35,37 +63,48 @@ class WeatherForcustGraph(WeatherModule):
       "module": "WeatherForcustGraph",
       "config": {
         "rect": [x, y, width, height],
+        "block": "hourly",
         "conditions": ["temperature", "humidity"]
       }
      }
 
     Available weather conditions is following:
-        temperature, apparentTemperature, dewPoint, humidity,
-        pressure, windSpeed, uvIndex, ozone
+        hourly:
+            temperature, apparentTemperature, dewPoint, humidity,
+            pressure, windSpeed, uvIndex, ozone
+        daily:
+            precipIntensity, precipIntensityMax, precipProbability,
+            temperatureHigh, temperatureLow, apparentTemperatureHigh,
+            apparentTemperatureLow, dewPoint, humidity, pressure,
+            windSpeed, windGust, cloudCover, uvIndex, uvIndexTime,
+            visibility, ozone, temperatureMin, temperatureMax,
+            apparentTemperatureMin, apparentTemperatureMax
 
         https://darksky.net/dev/docs
     """
-    CONDITIONS = [
-        "temperature", "apparentTemperature", "dewPoint", "humidity",
-        "pressure", "windSpeed", "uvIndex", "ozone"
-    ]
 
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
-        self.block = "hourly"
-        self.condition1 = None
-        self.condition2 = None
+
+        block = condition1 = condition2 = None
+        if "block" in config:
+            block = config["block"]
         if "conditions" in config:
             conditions = config["conditions"]
             length = len(conditions)
             if length > 0:
-                if conditions[0] not in self.CONDITIONS:
-                    raise ValueError(__class__.__name__)
-                self.condition1 = conditions[0]
+                condition1 = conditions[0]
             if length > 1:
-                if conditions[1] not in self.CONDITIONS:
-                    raise ValueError(__class__.__name__)
-                self.condition2 = conditions[1]
+                condition2 = conditions[1]
+        if not check_condition(block, condition1) or not check_condition(
+                block, condition2):
+            raise ValueError(__class__.__name__)
+
+        self.block = block
+        self.condition1 = condition1
+        self.condition2 = condition2
+        logging.info("weather forcust graph (%s. %s, %s)", block, condition1,
+                     condition2)
 
     def draw(self, screen, weather, updated):
         if weather is None or not updated:
@@ -95,4 +134,4 @@ class WeatherForcustGraph(WeatherModule):
         self.clear_surface()
         GraphUtils.set_font(self.fonts["name"])
         GraphUtils.plot_2axis_graph(screen, self.surface, self.rect, times, y1,
-                                    ylabel1, y2, ylabel2)
+                                    _(ylabel1), y2, _(ylabel2))

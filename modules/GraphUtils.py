@@ -3,6 +3,7 @@
 """
 
 import io
+import logging
 import threading
 import numpy as np
 import pygame
@@ -19,7 +20,7 @@ dpi = 100
 
 
 def _plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2, ylabel2):
-    logging("Graph plot start.")
+    logging.info("Graph plot started. axis: (%s, %s).", ylabel1, ylabel2)
 
     # plot graph
     fig, ax1 = plt.subplots(figsize=(rect.width / dpi, rect.height / dpi))
