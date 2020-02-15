@@ -3,6 +3,7 @@
 """
 
 import datetime
+import logging
 from modules.WeatherModule import WeatherModule, Utils
 from modules.GraphUtils import GraphUtils
 
