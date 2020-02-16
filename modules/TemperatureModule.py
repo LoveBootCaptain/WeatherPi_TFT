@@ -29,7 +29,7 @@ class TemperatureGraph(WeatherModule):
 
         self.clear_surface()
         GraphUtils.set_font(self.fonts["name"])
-        GraphUtils.plot_2axis_graph(screen, self.surface, self.rect, times,
+        GraphUtils.draw_2axis_graph(screen, self.surface, self.rect, times,
                                     temperatures, _("Temperature"), humidities,
                                     _("Humidity"))
 

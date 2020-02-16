@@ -5,6 +5,7 @@
 import io
 import logging
 import threading
+import time
 import numpy as np
 import pygame
 import matplotlib
@@ -12,16 +13,33 @@ import matplotlib.pyplot as plt
 from matplotlib import font_manager
 from matplotlib.dates import DateFormatter, DayLocator, HourLocator
 
-# graph parameters
+# matplotlib parameters
 matplotlib.pyplot.switch_backend("Agg")
 plt.style.use("dark_background")
 colormap = plt.get_cmap("Dark2")
 dpi = 100
 
+# thread lock
+lock = threading.Lock()
 
-def _plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2, ylabel2):
-    logging.info("Graph plot started. axis: (%s, %s).", ylabel1, ylabel2)
 
+def synchronized(wrapped):
+    """synchronized thread decorator
+    """
+
+    def decorator(*args, **kwargs):
+        with lock:
+            start = time.perf_counter()
+            wrapped(*args, **kwargs)
+            execution_time = time.perf_counter() - start
+            logging.info("%s excution time is %.2f sec", wrapped.__name__,
+                         execution_time)
+
+    return decorator
+
+
+@synchronized
+def _draw_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2, ylabel2):
     # plot graph
     fig, ax1 = plt.subplots(figsize=(rect.width / dpi, rect.height / dpi))
     if y1 is not None:
@@ -59,8 +77,6 @@ def _plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2, ylabel2):
     surface.blit(image, (0, 0))
     screen.blit(surface, (rect.left, rect.top))
 
-    logging.info("Graph plotted.")
-
 
 class GraphUtils:
     """Graph Utility class
@@ -76,10 +92,10 @@ class GraphUtils:
             plt.rcParams["font.family"] = font
 
     @staticmethod
-    def plot_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2,
+    def draw_2axis_graph(screen, surface, rect, times, y1, ylabel1, y2,
                          ylabel2):
-        """plot 2-axis graph in another thread
+        """draw 2-axis graph in another thread
         """
-        threading.Thread(target=_plot_2axis_graph,
+        threading.Thread(target=_draw_2axis_graph,
                          args=(screen, surface, rect, times, y1, ylabel1, y2,
                                ylabel2)).start()

@@ -24,16 +24,17 @@ def check_condition(block, condition):
         "visibility", "ozone", "temperatureMin", "temperatureMax",
         "apparentTemperatureMin", "apparentTemperatureMax"
     ]
-    if condition is not None:
+    if condition:
         if block == "hourly":
             if condition not in hourly:
-                return False
+                raise ValueError("{} {} not in {}".format(
+                    block, condition, " ,".join(hourly)))
         elif block == "daily":
             if condition not in daily:
-                return False
+                raise ValueError("{} {} must be one of {}".format(
+                    block, condition, ", ".join(daily)))
         else:
-            return False
-    return True
+            raise ValueError("{} must be hourly or daily".format(block))
 
 
 def adjust_unit(values, condition, units):
@@ -87,25 +88,19 @@ class WeatherForcustGraph(WeatherModule):
     def __init__(self, fonts, location, language, units, config):
         super().__init__(fonts, location, language, units, config)
 
-        block = condition1 = condition2 = None
+        self.block = None
         if "block" in config:
-            block = config["block"]
-        if "conditions" in config:
-            conditions = config["conditions"]
-            length = len(conditions)
-            if length > 0:
-                condition1 = conditions[0]
-            if length > 1:
-                condition2 = conditions[1]
-        if not check_condition(block, condition1) or not check_condition(
-                block, condition2):
-            raise ValueError(__class__.__name__)
+            self.block = config["block"]
 
-        self.block = block
-        self.condition1 = condition1
-        self.condition2 = condition2
-        logging.info("weather forcust graph (%s. %s, %s)", block, condition1,
-                     condition2)
+        self.conditions = []
+        for condition in config["conditions"]:
+            check_condition(self.block, condition)
+            self.conditions.append(condition)
+        if len(self.conditions) < 2:
+            self.conditions.append(None)
+
+        logging.info("weather forcust graph (%s. %s)", self.block,
+                     ",".join(self.conditions))
 
     def draw(self, screen, weather, updated):
         if weather is None or not updated:
@@ -113,26 +108,26 @@ class WeatherForcustGraph(WeatherModule):
 
         data = weather[self.block]["data"]
         times = list(map(lambda x: adjust_unit(x, "time", self.units), data))
-        if self.condition1:
+        if self.conditions[0]:
             y1 = list(
-                map(lambda x: adjust_unit(x, self.condition1, self.units),
+                map(lambda x: adjust_unit(x, self.conditions[0], self.units),
                     data))
             ylabel1 = "".join(
                 map(lambda x: x if x.islower() else " " + x,
-                    self.condition1)).capitalize()
+                    self.conditions[0])).capitalize()
         else:
             y1 = ylabel1 = None
-        if self.condition2:
+        if self.conditions[1]:
             y2 = list(
-                map(lambda x: adjust_unit(x, self.condition2, self.units),
+                map(lambda x: adjust_unit(x, self.conditions[1], self.units),
                     data))
             ylabel2 = "".join(
                 map(lambda x: x if x.islower() else " " + x,
-                    self.condition2)).capitalize()
+                    self.conditions[1])).capitalize()
         else:
             y2 = ylabel2 = None
 
         self.clear_surface()
         GraphUtils.set_font(self.fonts["name"])
-        GraphUtils.plot_2axis_graph(screen, self.surface, self.rect, times, y1,
+        GraphUtils.draw_2axis_graph(screen, self.surface, self.rect, times, y1,
                                     _(ylabel1), y2, _(ylabel2))
