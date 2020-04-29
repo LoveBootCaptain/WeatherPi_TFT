@@ -69,6 +69,7 @@ else:
     # doesn't work on my dev laptop but on the Pi
     locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
 
+# theme settings from theme config
 DISPLAY_WIDTH = theme["DISPLAY"]["WIDTH"]
 DISPLAY_HEIGHT = theme["DISPLAY"]["HEIGHT"]
 
@@ -81,24 +82,24 @@ BLUE = theme["COLOR"]["BLUE"]
 YELLOW = theme["COLOR"]["YELLOW"]
 ORANGE = theme["COLOR"]["ORANGE"]
 
-ICON_PATH = sys.path[0] + '/icons/'
-FONT_PATH = sys.path[0] + '/fonts/'
-LOG_PATH = sys.path[0] + '/logs/'
-
 FONT_MEDIUM = theme["FONT"]["MEDIUM"]
 FONT_BOLD = theme["FONT"]["BOLD"]
 SMALL_SIZE = theme["FONT"]["SMALL_SIZE"]
 BIG_SIZE = theme["FONT"]["BIG_SIZE"]
 
+ICON_PATH = sys.path[0] + '/icons/'
+FONT_PATH = sys.path[0] + '/fonts/'
+LOG_PATH = sys.path[0] + '/logs/'
+
 TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 # TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
-pygame.display.set_caption('WeatherPi_TFT')
+pygame.display.set_caption('WeatherPiTFT')
 
 font_small = pygame.font.Font(FONT_PATH + FONT_MEDIUM, SMALL_SIZE)
 font_big = pygame.font.Font(FONT_PATH + FONT_MEDIUM, BIG_SIZE)
 
-font_small_bold = pygame.font.Font(FONT_PATH + 'Roboto-Bold.ttf', SMALL_SIZE)
-font_big_bold = pygame.font.Font(FONT_PATH + 'Roboto-Bold.ttf', BIG_SIZE)
+font_small_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, SMALL_SIZE)
+font_big_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, BIG_SIZE)
 
 Refresh_Path = ICON_PATH + 'refresh.png'
 NoRefresh_Path = ICON_PATH + 'no-refresh.png'
