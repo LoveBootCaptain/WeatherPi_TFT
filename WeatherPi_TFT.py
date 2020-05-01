@@ -43,26 +43,30 @@ config = json.loads(config_data)
 theme_settings = open(PATH + 'theme.json').read()
 theme = json.loads(theme_settings)
 
-pygame.init()
-
 # if you do local development you can add a mock server (e.g. from postman.io our your homebrew solution)
 # simple add this variables to your config.json to save api-requests
 # or to create your own custom test data for your own dashboard views)
 
-if config['ENV'] == 'dev':
-    server = config['MOCKSERVER_URL']
-    headers = {'X-Api-Key': f'{config["MOCKSERVER_API_KEY"]}'}
+try:
+    if config['ENV'] == 'dev':
+        server = config['MOCKSERVER_URL']
+        headers = {'X-Api-Key': f'{config["MOCKSERVER_API_KEY"]}'}
 
-elif config['ENV'] == 'stage':
-    server = config['WEATHERBIT_URL']
-    headers = {}
+    elif config['ENV'] == 'stage':
+        server = config['WEATHERBIT_URL']
+        headers = {}
 
-else:
+    pygame.init()
+
+except KeyError as e:
+    print(f'NOT A DEV SYSTEM - STARTING IN PROD MODE - {e}')
     server = config['WEATHERBIT_URL']
     headers = {}
 
     # using the dashboard on a raspberry with ili9341 tft displays might make this necessary
-    os.putenv('SDL_FBDEV', '/dev/fb1')
+    # os.putenv('SDL_FBDEV', '/dev/fb1')
+
+    pygame.init()
     pygame.mouse.set_visible(False)
 
     # this is needed to set the output of weekdays to your local os settings
