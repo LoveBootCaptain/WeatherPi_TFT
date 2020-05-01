@@ -1,5 +1,5 @@
 #!/bin/sh
-
+#
 # MIT License
 #
 # Copyright (c) 2016 LoveBootCaptain (https://github.com/LoveBootCaptain)
