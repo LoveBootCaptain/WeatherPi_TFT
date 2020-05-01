@@ -48,18 +48,18 @@ theme = json.loads(theme_settings)
 # or to create your own custom test data for your own dashboard views)
 
 try:
-    if config['ENV'] == 'dev':
+    if config['ENV'] == 'DEV':
         server = config['MOCKSERVER_URL']
         headers = {'X-Api-Key': f'{config["MOCKSERVER_API_KEY"]}'}
 
-    elif config['ENV'] == 'stage':
+    elif config['ENV'] == 'STAGE':
         server = config['WEATHERBIT_URL']
         headers = {}
 
     pygame.init()
+    print(f"{config['ENV']} SYSTEM - STARTING IN LOCAL DEV MODE")
 
 except KeyError as e:
-    print(f'NOT A DEV SYSTEM - STARTING IN PROD MODE - {e}')
     server = config['WEATHERBIT_URL']
     headers = {}
 
@@ -68,6 +68,7 @@ except KeyError as e:
 
     pygame.init()
     pygame.mouse.set_visible(False)
+    print(f"STARTING IN PROD MODE FOR RPi")
 
     # this is needed to set the output of weekdays to your local os settings
     # doesn't work on my dev laptop but on the Pi
@@ -266,6 +267,8 @@ class Update:
             current_endpoint = f'{server}/current'
             hourly_endpoint = f'{server}/forecast/hourly'
             daily_endpoint = f'{server}/forecast/daily'
+
+            print(f'connecting to server: {server}')
 
             options = str(f'&postal_code={weatherbit_postalcode}&country={weatherbit_country}&lang={weatherbit_lang}')
 
