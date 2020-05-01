@@ -6,7 +6,7 @@ a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 di
 
 > first of all, i'm a beginner in python... so don't be to hard to me... i'm still learning
 
-> written with love in python3
+> written with love in python3.7
 
 ![WeatherPi_TFT](./docs/WeatherPi_TFT_01.1.gif)
 
@@ -77,24 +77,21 @@ https://www.raspberrypi.org/downloads/noobs/
 > i used NOOBS v2.1.0 which was the latest version for now
 
 ### setup the SD card
-```
-TODO: write a tutorial for setting up the SD card
-```
+
+follow the instructions from [raspberrypi.org](https://www.raspberrypi.org/documentation/installation/installing-images/README.md) to setup your sd card and operating system
+
 
 ### the first boot
-```
-TODO: write a tutorial for first boot
-```
+
+finish your setup by following [this guide](https://projects.raspberrypi.org/en/projects/raspberry-pi-getting-started/4)
 
 ### enable SPI
-```
-TODO: write a tutorial for setting up SPI
-```
+
+enable SPI in [raspi-config](https://www.raspberrypi.org/documentation/configuration/raspi-config.md) - Interfacing Options
 
 ### connect to your WiFi
-```
-TODO: write a tutorial for connecting to WiFi via terminal
-```
+
+to connect to a wifi network follow this [guide](https://www.raspberrypi.org/documentation/configuration/wireless/README.md)
 
 ### update all tools
 
@@ -111,15 +108,15 @@ cd WeatherPi_TFT
 rm -rf docs/
 ```
 
-### install the dependencies
+### install the dependencies in python3
 
 ```
-TODO: write a requirements.txt
+pip install -r requirements.txt
 ```
 
-### get an api key from darksky / forecast.io
+### get an api key from weatherbit.io
 
-* go to [darksky.net](https://darksky.net/dev/)
+* go to [weatherbit.io](https://www.weatherbit.io/)
 * and register to get an API key
 
 ### add API key and other options to the config file
@@ -134,12 +131,11 @@ cp example.config.json config.json
 ```
 nano config.json
 ```
-* replace `xxxxxxxxxxxxxxxxxxxxxxxxx` in  `"FORECAST_IO_KEY": "xxxxxxxxxxxxxxxxxxxxxxxxx"` with your own API key
-* replace `en` in `"FORECAST_LANGUAGE": "en"` with your preferred language
-* replace `si` in `"FORECAST_UNITS": "si"` with your preferred unit format
-* replace `40.705565` and `-74.1180865` in `"FORECAST_LAT": 40.705565` and `"FORECAST_LON": -74.1180865` with the coordinates of your preferred forecast-location (this example-location data is from new york city)
-* replace `flags` in `"FORECAST_EXCLUDES": "flags"` with whatever you want to exclude in the API-respond
-* for language-support, units, lat , lon and excludes please refer to -> **[DarkSky API Docs](https://darksky.net/dev/docs/forecast)**
+* replace `xxxxxxxxxxxxxxxxxxxxxxxxx` in  `"WEATHERBIT_IO_KEY": "xxxxxxxxxxxxxxxxxxxxxxxxx"` with your own API key
+* replace `en` in `"WEATHERBIT_LANGUAGE": "en"` with your preferred language
+* replace `de` in `"WEATHERBIT_COUNTRY": "de"` with your country
+* replace `10178` in `"WEATHERBIT_POSTALCODE": 10178` with your zip code / postal code (this example-location zip code is from berlin city, germany)
+* for language-support, units, etc please refer to -> **[weatherbit API Docs](https://www.weatherbit.io/api)**
 
 ### set up the TFT
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
+#
 # MIT License
 #
 # Copyright (c) 2016 LoveBootCaptain (https://github.com/LoveBootCaptain)
@@ -35,42 +35,76 @@ import sys
 import pygame
 import requests
 
-os.putenv('SDL_FBDEV', '/dev/fb1')
+PATH = sys.path[0] + '/'
 
-locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
+config_data = open(PATH + 'config.json').read()
+config = json.loads(config_data)
 
-pygame.init()
+theme_settings = open(PATH + 'theme.json').read()
+theme = json.loads(theme_settings)
 
-pygame.mouse.set_visible(False)
+# if you do local development you can add a mock server (e.g. from postman.io our your homebrew solution)
+# simple add this variables to your config.json to save api-requests
+# or to create your own custom test data for your own dashboard views)
 
-DISPLAY_WIDTH = 240
-DISPLAY_HEIGHT = 320
+try:
+    if config['ENV'] == 'DEV':
+        server = config['MOCKSERVER_URL']
+        headers = {'X-Api-Key': f'{config["MOCKSERVER_API_KEY"]}'}
 
-BLACK = (10, 10, 10)
-DARK_GRAY = (43, 43, 43)
-WHITE = (255, 255, 255)
+    elif config['ENV'] == 'STAGE':
+        server = config['WEATHERBIT_URL']
+        headers = {}
 
-RED = (231, 76, 60)
-GREEN = (39, 174, 96)
-BLUE = (52, 152, 219)
+    pygame.init()
+    print(f"{config['ENV']} SYSTEM - STARTING IN LOCAL DEV MODE")
 
-YELLOW = (241, 196, 15)
-ORANGE = (238, 153, 18)
+except KeyError as e:
+    server = config['WEATHERBIT_URL']
+    headers = {}
+
+    # using the dashboard on a raspberry with ili9341 tft displays might make this necessary
+    os.putenv('SDL_FBDEV', '/dev/fb1')
+
+    pygame.init()
+    pygame.mouse.set_visible(False)
+    print(f"STARTING IN PROD MODE FOR RPi")
+
+    # this is needed to set the output of weekdays to your local os settings
+    # doesn't work on my dev laptop but on the Pi
+    locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
+
+# theme settings from theme config
+DISPLAY_WIDTH = theme["DISPLAY"]["WIDTH"]
+DISPLAY_HEIGHT = theme["DISPLAY"]["HEIGHT"]
+
+BLACK = theme["COLOR"]["BLACK"]
+DARK_GRAY = theme["COLOR"]["DARK_GRAY"]
+WHITE = theme["COLOR"]["WHITE"]
+RED = theme["COLOR"]["RED"]
+GREEN = theme["COLOR"]["GREEN"]
+BLUE = theme["COLOR"]["BLUE"]
+YELLOW = theme["COLOR"]["YELLOW"]
+ORANGE = theme["COLOR"]["ORANGE"]
+
+FONT_MEDIUM = theme["FONT"]["MEDIUM"]
+FONT_BOLD = theme["FONT"]["BOLD"]
+SMALL_SIZE = theme["FONT"]["SMALL_SIZE"]
+BIG_SIZE = theme["FONT"]["BIG_SIZE"]
 
 ICON_PATH = sys.path[0] + '/icons/'
 FONT_PATH = sys.path[0] + '/fonts/'
 LOG_PATH = sys.path[0] + '/logs/'
-PATH = sys.path[0] + '/'
 
 TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 # TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
-pygame.display.set_caption('WeatherPi_TFT')
+pygame.display.set_caption('WeatherPiTFT')
 
-font_small = pygame.font.Font(FONT_PATH + 'Roboto-Medium.ttf', 14)
-font_big = pygame.font.Font(FONT_PATH + 'Roboto-Medium.ttf', 30)
+font_small = pygame.font.Font(FONT_PATH + FONT_MEDIUM, SMALL_SIZE)
+font_big = pygame.font.Font(FONT_PATH + FONT_MEDIUM, BIG_SIZE)
 
-font_small_bold = pygame.font.Font(FONT_PATH + 'Roboto-Bold.ttf', 14)
-font_big_bold = pygame.font.Font(FONT_PATH + 'Roboto-Bold.ttf', 30)
+font_small_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, SMALL_SIZE)
+font_big_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, BIG_SIZE)
 
 Refresh_Path = ICON_PATH + 'refresh.png'
 NoRefresh_Path = ICON_PATH + 'no-refresh.png'
@@ -209,7 +243,6 @@ class DrawImage:
         TFT.blit(self.image, (x, self.y))
 
 
-
 class Update:
     @staticmethod
     def update_json():
@@ -224,26 +257,34 @@ class Update:
 
         try:
 
-            config_data = open(PATH + 'config.json').read()
+            weatherbit_io_key = config['WEATHERBIT_IO_KEY']
+            weatherbit_country = config['WEATHERBIT_COUNTRY']
+            weatherbit_lang = config['WEATHERBIT_LANGUAGE']
+            weatherbit_postalcode = config['WEATHERBIT_POSTALCODE']
+            weatherbit_hours = config['WEATHERBIT_HOURS']
+            weatherbit_days = config['WEATHERBIT_DAYS']
 
-            config = json.loads(config_data)
+            current_endpoint = f'{server}/current'
+            hourly_endpoint = f'{server}/forecast/hourly'
+            daily_endpoint = f'{server}/forecast/daily'
 
-            forecast_io_key = config['FORECAST_IO_KEY']
-            forecast_lang = config['FORECAST_LANGUAGE']
-            forecast_units = config['FORECAST_UNITS']
-            forecast_lat = config['FORECAST_LAT']
-            forecast_lon = config['FORECAST_LON']
-            forecast_excludes = config['FORECAST_EXCLUDES']
+            print(f'connecting to server: {server}')
 
-            api_endpoint = 'https://api.forecast.io/forecast/'
+            options = str(f'&postal_code={weatherbit_postalcode}&country={weatherbit_country}&lang={weatherbit_lang}')
 
-            options = '?lang={}&units={}&exclude={}'.format(forecast_lang, forecast_units, forecast_excludes)
+            current_request_url = str(f'{current_endpoint}?key={weatherbit_io_key}{options}')
+            hourly_request_url = str(f'{hourly_endpoint}?key={weatherbit_io_key}{options}&hours={weatherbit_hours}')
+            daily_request_url = str(f'{daily_endpoint}?key={weatherbit_io_key}{options}&days={weatherbit_days}')
 
-            request_url = str(api_endpoint + forecast_io_key + '/{},{}'.format(forecast_lat, forecast_lon) + options)
+            current_data = requests.get(current_request_url, headers=headers).json()
+            hourly_data = requests.get(hourly_request_url, headers=headers).json()
+            daily_data = requests.get(daily_request_url, headers=headers).json()
 
-            # request_url = 'http://weatherpi/latest_weather.json'
-
-            data = requests.get(request_url).json()
+            data = {
+                'current': current_data,
+                'hourly': hourly_data,
+                'daily': daily_data
+            }
 
             with open(LOG_PATH + 'latest_weather.json', 'w') as outputfile:
                 json.dump(data, outputfile, indent=2, sort_keys=True)
@@ -273,7 +314,6 @@ class Update:
         thread.start()
 
         threads.append(thread)
-
 
         try:
 
@@ -312,18 +352,41 @@ class Update:
 
         updated_list = []
 
-        # known conditions:
+        # known weather icons simply mapped caused by rushed api-provider-change, thx apple -.-
+        # ToDo: create more icons, cause the new api-provider delivers more options ( but no wind anymore :D )
         # clear-day, clear-night, partly-cloudy-day, partly-cloudy-night, wind, cloudy, rain, snow, fog
 
-        icon = json_data['currently']['icon']
+        icon_map = {
+            "clear-day": ["c01d"],
+            "clear-night": ["c01n"],
+            "partly-cloudy-day": ["c02d", "c03d"],
+            "partly-cloudy-night": ["c02n", "c03n"],
+            "wind": "",
+            "cloudy": ["c04d", "c04n"],
+            "rain": ["t01d", "t02d", "t03d", "t04d", "t05d", "t01n", "t02n", "t03n", "t04n", "t05n",
+                     "d01d", "d02d", "d03d", "d01n", "d02n", "d03n",
+                     "r01d", "r02d", "r03d", "r04d", "r05d", "r06d", "r01n", "r02n", "r03n", "r04n", "r05n", "r06n",
+                     "f01d", "f01n", "u00d", "u00n"
+                     ],
+            "snow": ["s01d", "s02d", "s03d", "s04d", "s05d", "s06d", "s01n", "s02n", "s03n", "s04n", "s05n", "s06n"],
+            "fog": ["a01d", "a02d", "a03d", "a04d", "a05d", "a06d", "a01n", "a02n", "a03n", "a04n", "a05n", "a06n", ]
+        }
 
-        forecast_icon_1 = json_data['daily']['data'][1]['icon']
-        forecast_icon_2 = json_data['daily']['data'][2]['icon']
-        forecast_icon_3 = json_data['daily']['data'][3]['icon']
+        def map_icon_name(icon_id: str):
+            for key, value in icon_map.items():
+                if icon_id in value:
+                    print(key)
+                    return key
+
+        icon = map_icon_name(json_data['current']['data'][0]['weather']['icon'])
+
+        forecast_icon_1 = map_icon_name(json_data['daily']['data'][1]['weather']['icon'])
+        forecast_icon_2 = map_icon_name(json_data['daily']['data'][2]['weather']['icon'])
+        forecast_icon_3 = map_icon_name(json_data['daily']['data'][3]['weather']['icon'])
 
         forecast = (str(forecast_icon_1), str(forecast_icon_2), str(forecast_icon_3))
 
-        moon_icon = json_data['daily']['data'][0]['moonPhase']
+        moon_icon = json_data['daily']['data'][0]['moon_phase']
 
         moon_icon = int((float(moon_icon) * 100 / 3.57) + 0.25)
 
@@ -396,29 +459,26 @@ class Update:
 
         global json_data, PRECIPCOLOR, PRECIPTYPE
 
-        if int(json_data['currently']['precipProbability'] * 100) == 0:
+        pop = int(json_data['hourly']['data'][0]['pop'])
+        rain = float(json_data['hourly']['data'][0]['precip'])
+        snow = float(json_data['hourly']['data'][0]['snow'])
+
+        if pop == 0:
 
             PRECIPTYPE = 'Niederschlag'
             PRECIPCOLOR = ORANGE
 
         else:
 
-            precip_type = json_data['currently']['precipType']
-
-            if precip_type == 'rain':
+            if rain > 0 and pop > 0:
 
                 PRECIPTYPE = 'Regen'
                 PRECIPCOLOR = BLUE
 
-            elif precip_type == 'snow':
+            elif snow > 0 and pop > 0:
 
                 PRECIPTYPE = 'Schnee'
                 PRECIPCOLOR = WHITE
-
-            else:
-
-                PRECIPTYPE = str(precip_type)
-                PRECIPCOLOR = RED
 
         print('\nupdate PRECIPTYPE to: {}'.format(PRECIPTYPE))
         print('\nupdate PRECIPCOLOR to: {}'.format(PRECIPCOLOR))
@@ -445,7 +505,7 @@ def convert_timestamp(timestamp, param_string):
 
 def draw_wind_layer(y):
 
-    angle = json_data['currently']['windBearing']
+    angle = json_data['current']['data'][0]['wind_dir']
 
     circle_icon = pygame.image.load(ICON_PATH + 'circle.png')
 
@@ -535,31 +595,33 @@ def draw_time_layer():
 
 
 def draw_text_layer():
-    forecast = json_data['daily']['data']
+    current_forecast = json_data['current']['data'][0]
 
-    summary_string = json_data['currently']['summary']
-    temp_out_string = str(json_data['currently']['temperature']) + '°C'
-    rain_string = str(int(json_data['currently']['precipProbability'] * 100)) + ' %'
+    summary_string = current_forecast['weather']['description']
+    temp_out_string = str(current_forecast['temp']) + '°C'
+    rain_string = str(int(json_data['hourly']['data'][0]['pop'])) + ' %'
 
-    forecast_day_1_string = convert_timestamp(forecast[1]['time'], '%a').upper()
-    forecast_day_2_string = convert_timestamp(forecast[2]['time'], '%a').upper()
-    forecast_day_3_string = convert_timestamp(forecast[3]['time'], '%a').upper()
+    daily_forecast = json_data['daily']['data']
 
-    forecast_day_1_min_max_string = str(int(forecast[1]['temperatureMin'])) + ' | ' + str(
-        int(forecast[0]['temperatureMax']))
+    forecast_day_1_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[1]['datetime'], '%Y-%m-%d')), '%a')
+    forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[2]['datetime'], '%Y-%m-%d')), '%a')
+    forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[3]['datetime'], '%Y-%m-%d')), '%a')
 
-    forecast_day_2_min_max_string = str(int(forecast[2]['temperatureMin'])) + ' | ' + str(
-        int(forecast[1]['temperatureMax']))
+    forecast_day_1_min_max_string = str(int(daily_forecast[1]['low_temp'])) + ' | ' + str(
+        int(daily_forecast[0]['high_temp']))
 
-    forecast_day_3_min_max_string = str(int(forecast[3]['temperatureMin'])) + ' | ' + str(
-        int(forecast[2]['temperatureMax']))
+    forecast_day_2_min_max_string = str(int(daily_forecast[2]['low_temp'])) + ' | ' + str(
+        int(daily_forecast[1]['high_temp']))
+
+    forecast_day_3_min_max_string = str(int(daily_forecast[3]['low_temp'])) + ' | ' + str(
+        int(daily_forecast[2]['high_temp']))
 
     north_string = 'N'
 
-    sunrise_string = convert_timestamp(int(json_data['daily']['data'][0]['sunriseTime']), '%H:%M')
-    sunset_string = convert_timestamp(int(json_data['daily']['data'][0]['sunsetTime']), '%H:%M')
+    sunrise_string = current_forecast['sunrise']
+    sunset_string = current_forecast['sunset']
 
-    wind_speed_string = str(round((float(json_data['currently']['windSpeed']) * 1.609344), 1)) + ' km/h'
+    wind_speed_string = str(round((float(current_forecast['wind_spd']) * 3.6), 1)) + ' km/h'
 
     draw_time_layer()
 
@@ -570,9 +632,9 @@ def draw_text_layer():
     DrawString(rain_string, font_big, PRECIPCOLOR, 105).right()
     DrawString(PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right()
 
-    DrawString(forecast_day_1_string, font_small_bold, ORANGE, 165).center(3, 0)
-    DrawString(forecast_day_2_string, font_small_bold, ORANGE, 165).center(3, 1)
-    DrawString(forecast_day_3_string, font_small_bold, ORANGE, 165).center(3, 2)
+    DrawString(forecast_day_1_string.upper(), font_small_bold, ORANGE, 165).center(3, 0)
+    DrawString(forecast_day_2_string.upper(), font_small_bold, ORANGE, 165).center(3, 1)
+    DrawString(forecast_day_3_string.upper(), font_small_bold, ORANGE, 165).center(3, 2)
 
     DrawString(forecast_day_1_min_max_string, font_small_bold, WHITE, 180).center(3, 0)
     DrawString(forecast_day_2_min_max_string, font_small_bold, WHITE, 180).center(3, 1)
