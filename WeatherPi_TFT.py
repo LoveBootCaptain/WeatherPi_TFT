@@ -64,7 +64,7 @@ except KeyError as e:
     headers = {}
 
     # using the dashboard on a raspberry with ili9341 tft displays might make this necessary
-    # os.putenv('SDL_FBDEV', '/dev/fb1')
+    os.putenv('SDL_FBDEV', '/dev/fb1')
 
     pygame.init()
     pygame.mouse.set_visible(False)
