@@ -465,19 +465,19 @@ class Update:
 
         if pop == 0:
 
-            PRECIPTYPE = 'Niederschlag'
+            PRECIPTYPE = theme['LOCALE']['PRECIP_STR']
             PRECIPCOLOR = ORANGE
 
         else:
 
             if rain > 0 and pop > 0:
 
-                PRECIPTYPE = 'Regen'
+                PRECIPTYPE = theme['LOCALE']['RAIN_STR']
                 PRECIPCOLOR = BLUE
 
             elif snow > 0 and pop > 0:
 
-                PRECIPTYPE = 'Schnee'
+                PRECIPTYPE = theme['LOCALE']['SNOW_STR']
                 PRECIPCOLOR = WHITE
 
         print('\nupdate PRECIPTYPE to: {}'.format(PRECIPTYPE))
@@ -555,11 +555,11 @@ def draw_image_layer():
 
     DrawImage(WeatherIcon_Path, 65).center(2, 0)
 
-    if PRECIPTYPE == 'Regen':
+    if PRECIPTYPE == theme['LOCALE']['RAIN_STR']:
 
         DrawImage(PrecipRain_Path, 140).right(45)
 
-    elif PRECIPTYPE == 'Schnee':
+    elif PRECIPTYPE == theme['LOCALE']['SNOW_STR']:
 
         DrawImage(PrecipSnow_Path, 140).right(50)
 

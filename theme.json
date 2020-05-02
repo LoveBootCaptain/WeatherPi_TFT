@@ -18,5 +18,10 @@
     "BOLD": "Roboto-Bold.ttf",
     "SMALL_SIZE": 14,
     "BIG_SIZE": 30
+  },
+  "LOCALE": {
+    "RAIN_STR": "Rain",
+    "SNOW_STR": "Snow",
+    "PRECIP_STR": "Precipitation"
   }
 }
