@@ -541,17 +541,17 @@ def draw_text_layer():
     temp_out_string = str(json_data['currently']['temperature']) + '°C'
     rain_string = str(int(json_data['currently']['precipProbability'] * 100)) + ' %'
 
-    forecast_day_1_string = convert_timestamp(forecast[1]['time'], '%a').upper()
-    forecast_day_2_string = convert_timestamp(forecast[2]['time'], '%a').upper()
-    forecast_day_3_string = convert_timestamp(forecast[3]['time'], '%a').upper()
+    forecast_day_1_string = convert_timestamp(forecast[0]['time'], '%a').upper()
+    forecast_day_2_string = convert_timestamp(forecast[1]['time'], '%a').upper()
+    forecast_day_3_string = convert_timestamp(forecast[2]['time'], '%a').upper()
 
-    forecast_day_1_min_max_string = str(int(forecast[1]['temperatureMin'])) + ' | ' + str(
+    forecast_day_1_min_max_string = str(int(forecast[0]['temperatureMin'])) + ' | ' + str(
         int(forecast[0]['temperatureMax']))
 
-    forecast_day_2_min_max_string = str(int(forecast[2]['temperatureMin'])) + ' | ' + str(
+    forecast_day_2_min_max_string = str(int(forecast[1]['temperatureMin'])) + ' | ' + str(
         int(forecast[1]['temperatureMax']))
 
-    forecast_day_3_min_max_string = str(int(forecast[3]['temperatureMin'])) + ' | ' + str(
+    forecast_day_3_min_max_string = str(int(forecast[2]['temperatureMin'])) + ' | ' + str(
         int(forecast[2]['temperatureMax']))
 
     north_string = 'N'
