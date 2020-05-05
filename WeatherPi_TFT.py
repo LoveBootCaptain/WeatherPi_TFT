@@ -538,7 +538,7 @@ def draw_text_layer():
     forecast = json_data['daily']['data']
 
     summary_string = json_data['currently']['summary']
-    temp_out_string = str(json_data['currently']['temperature']) + '°C'
+    temp_out_string = str(int(json_data['currently']['temperature'] + 0.5)) + ' °C'
     rain_string = str(int(json_data['currently']['precipProbability'] * 100)) + ' %'
 
     forecast_day_1_string = convert_timestamp(forecast[0]['time'], '%a').upper()
