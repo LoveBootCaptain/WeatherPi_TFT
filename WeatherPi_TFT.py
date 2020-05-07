@@ -501,9 +501,22 @@ def convert_timestamp(timestamp, param_string):
     :return: a converted string from timestamp
     """
 
-    timestring = str(datetime.datetime.fromtimestamp(int(timestamp)).strftime(param_string))
+    timestring = str(datetime.datetime.fromtimestamp(int(timestamp)).astimezone().strftime(param_string))
 
     return timestring
+
+
+def get_timestamp(timestring, param_string):
+
+    """
+    :param timestring: takes a timestring
+    :param param_string: use the default convert timestring options to timestamp
+    :return: a converted timestamp of a timestring
+    """
+
+    timestamp = time.mktime(time.strptime(timestring, param_string))
+
+    return timestamp
 
 
 def draw_wind_layer(y):
@@ -621,8 +634,8 @@ def draw_text_layer():
 
     north_string = 'N'
 
-    sunrise_string = current_forecast['sunrise']
-    sunset_string = current_forecast['sunset']
+    sunrise_string = convert_timestamp(daily_forecast[0]['sunrise_ts'], '%H:%M')
+    sunset_string = convert_timestamp(daily_forecast[0]['sunset_ts'], '%H:%M')
 
     wind_speed_string = str(round((float(current_forecast['wind_spd']) * 3.6), 1)) + ' km/h'
 
