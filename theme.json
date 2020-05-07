@@ -1,0 +1,27 @@
+{
+  "DISPLAY": {
+    "WIDTH": 240,
+    "HEIGHT": 320
+  },
+  "COLOR": {
+    "BLACK": [10, 10, 10],
+    "DARK_GRAY": [43, 43, 43],
+    "WHITE": [255, 255, 255],
+    "RED": [231, 76, 60],
+    "GREEN": [39, 174, 96],
+    "BLUE": [52, 152, 219],
+    "YELLOW": [241, 196, 15],
+    "ORANGE": [238, 153, 18]
+  },
+  "FONT": {
+    "MEDIUM": "Roboto-Medium.ttf",
+    "BOLD": "Roboto-Bold.ttf",
+    "SMALL_SIZE": 14,
+    "BIG_SIZE": 30
+  },
+  "LOCALE": {
+    "RAIN_STR": "Rain",
+    "SNOW_STR": "Snow",
+    "PRECIP_STR": "Precipitation"
+  }
+}
