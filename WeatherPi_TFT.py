@@ -56,6 +56,8 @@ try:
         server = config['WEATHERBIT_URL']
         headers = {}
 
+    locale.setlocale(locale.LC_ALL, ('de_DE', 'UTF-8'))
+
     pygame.init()
     print(f"{config['ENV']} SYSTEM - STARTING IN LOCAL DEV MODE")
 
@@ -388,7 +390,8 @@ class Update:
 
         moon_icon = json_data['daily']['data'][0]['moon_phase']
 
-        moon_icon = int((float(moon_icon) * 100 / 3.57) + 0.25)
+        moon_icon = float(round(moon_icon, 2)) * 100 / 3.57 + 0.25
+        moon_icon = int(moon_icon)
 
         moon = 'moon-' + str(moon_icon)
 
@@ -608,13 +611,13 @@ def draw_text_layer():
     forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[3]['datetime'], '%Y-%m-%d')), '%a')
 
     forecast_day_1_min_max_string = str(int(daily_forecast[1]['low_temp'])) + ' | ' + str(
-        int(daily_forecast[0]['high_temp']))
-
-    forecast_day_2_min_max_string = str(int(daily_forecast[2]['low_temp'])) + ' | ' + str(
         int(daily_forecast[1]['high_temp']))
 
-    forecast_day_3_min_max_string = str(int(daily_forecast[3]['low_temp'])) + ' | ' + str(
+    forecast_day_2_min_max_string = str(int(daily_forecast[2]['low_temp'])) + ' | ' + str(
         int(daily_forecast[2]['high_temp']))
+
+    forecast_day_3_min_max_string = str(int(daily_forecast[3]['low_temp'])) + ' | ' + str(
+        int(daily_forecast[3]['high_temp']))
 
     north_string = 'N'
 
