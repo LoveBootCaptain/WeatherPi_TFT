@@ -136,7 +136,18 @@ nano config.json
 * replace `de` in `"WEATHERBIT_COUNTRY": "de"` with your country
 * replace `10178` in `"WEATHERBIT_POSTALCODE": 10178` with your zip code / postal code (this example-location zip code is from berlin city, germany)
 * for language-support, units, etc please refer to -> **[weatherbit API Docs](https://www.weatherbit.io/api)**
-
+* in `"THEME"` you can specify a json file with theming information -> an example for the default theme is in the file `example.theme.json`
+    * you can change some basic theme information
+    * localise hardcoded strings
+        ```
+          "LOCALE": {
+            "RAIN_STR": "Rain",
+            "SNOW_STR": "Snow",
+            "PRECIP_STR": "Precipitation"
+          }
+        ```
+    * or create your own theme with your fonts and add it to your config/theme
+ 
 ### set up the TFT
 
 * in /boot/config.txt, add in the following at the bottom 
@@ -195,7 +206,7 @@ python --version
 
 * it should say something like: 
 ```
-Python 3.4.x
+Python 3.7.x
 ```
 
 
