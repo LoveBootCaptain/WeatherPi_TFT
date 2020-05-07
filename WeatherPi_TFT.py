@@ -40,7 +40,9 @@ PATH = sys.path[0] + '/'
 config_data = open(PATH + 'config.json').read()
 config = json.loads(config_data)
 
-theme_settings = open(PATH + 'theme.json').read()
+theme_config = config["THEME"]
+
+theme_settings = open(PATH + theme_config).read()
 theme = json.loads(theme_settings)
 
 # if you do local development you can add a mock server (e.g. from postman.io our your homebrew solution)
