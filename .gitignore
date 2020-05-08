@@ -93,5 +93,4 @@ ENV/
 /icons/download.py
 /.idea/*
 /config.json
-/theme.json
 /logs/latest_weather.json
