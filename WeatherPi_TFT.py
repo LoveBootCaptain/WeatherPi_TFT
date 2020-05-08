@@ -60,6 +60,7 @@ try:
         headers = {}
 
     locale.setlocale(locale.LC_ALL, ('de_DE', 'UTF-8'))
+    WEATHERBIT_IO_KEY = config['WEATHERBIT_DEV_KEY']
 
     pygame.init()
     print(f"{config['ENV']} SYSTEM - STARTING IN LOCAL DEV MODE")
@@ -73,6 +74,9 @@ except KeyError as e:
 
     pygame.init()
     pygame.mouse.set_visible(False)
+
+    WEATHERBIT_IO_KEY = config['WEATHERBIT_IO_KEY']
+
     print(f"STARTING IN PROD MODE FOR RPi")
 
     # this is needed to set the output of weekdays to your local os settings
@@ -102,6 +106,12 @@ BIG_SIZE = theme["FONT"]["BIG_SIZE"]
 ICON_PATH = sys.path[0] + '/icons/'
 FONT_PATH = sys.path[0] + '/fonts/'
 LOG_PATH = sys.path[0] + '/logs/'
+
+WEATHERBIT_COUNTRY = config['WEATHERBIT_COUNTRY']
+WEATHERBIT_LANG = config['WEATHERBIT_LANGUAGE']
+WEATHERBIT_POSTALCODE = config['WEATHERBIT_POSTALCODE']
+WEATHERBIT_HOURS = config['WEATHERBIT_HOURS']
+WEATHERBIT_DAYS = config['WEATHERBIT_DAYS']
 
 TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 # TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
@@ -277,24 +287,17 @@ class Update:
 
         try:
 
-            weatherbit_io_key = config['WEATHERBIT_IO_KEY']
-            weatherbit_country = config['WEATHERBIT_COUNTRY']
-            weatherbit_lang = config['WEATHERBIT_LANGUAGE']
-            weatherbit_postalcode = config['WEATHERBIT_POSTALCODE']
-            weatherbit_hours = config['WEATHERBIT_HOURS']
-            weatherbit_days = config['WEATHERBIT_DAYS']
-
             current_endpoint = f'{server}/current'
             hourly_endpoint = f'{server}/forecast/hourly'
             daily_endpoint = f'{server}/forecast/daily'
 
             print(f'connecting to server: {server}')
 
-            options = str(f'&postal_code={weatherbit_postalcode}&country={weatherbit_country}&lang={weatherbit_lang}')
+            options = str(f'&postal_code={WEATHERBIT_POSTALCODE}&country={WEATHERBIT_COUNTRY}&lang={WEATHERBIT_LANG}')
 
-            current_request_url = str(f'{current_endpoint}?key={weatherbit_io_key}{options}')
-            hourly_request_url = str(f'{hourly_endpoint}?key={weatherbit_io_key}{options}&hours={weatherbit_hours}')
-            daily_request_url = str(f'{daily_endpoint}?key={weatherbit_io_key}{options}&days={weatherbit_days}')
+            current_request_url = str(f'{current_endpoint}?key={WEATHERBIT_IO_KEY}{options}')
+            hourly_request_url = str(f'{hourly_endpoint}?key={WEATHERBIT_IO_KEY}{options}&hours={WEATHERBIT_HOURS}')
+            daily_request_url = str(f'{daily_endpoint}?key={WEATHERBIT_IO_KEY}{options}&days={WEATHERBIT_DAYS}')
 
             current_data = requests.get(current_request_url, headers=headers).json()
             hourly_data = requests.get(hourly_request_url, headers=headers).json()
@@ -364,7 +367,7 @@ class Update:
     def icon_path():
 
         global WeatherIcon_Path, ForeCastIcon_Day_1_Path, \
-            ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path, PRECIPTYPE, PRECIPCOLOR
+            ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, PRECIPTYPE, PRECIPCOLOR
 
         folder_path = ICON_PATH
         icon_extension = '.png'
@@ -434,10 +437,6 @@ class Update:
                 if 'mini' in path:
 
                     updated_list.append(ICON_PATH + 'mini_unknown.png')
-
-                elif 'moon' in path:
-
-                    updated_list.append(ICON_PATH + 'moon-unknown.png')
 
                 else:
 
@@ -521,6 +520,8 @@ def draw_moon_layer(y):
     moon_age = (((dt.year - 11) % 19) * 11 + [0, 2, 0, 2, 2, 4, 5, 6, 7, 8, 9, 10][dt.month - 1] + dt.day) % 30
 
     image = pygame.Surface((size, size))
+    image.fill(BLACK)
+    image.set_colorkey(BLACK)
     radius = int(size / 2)
 
     # draw light side of the moon
