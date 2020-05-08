@@ -22,8 +22,8 @@
     "BIG_SIZE": 30
   },
   "LOCALE": {
-    "RAIN_STR": "Regen",
-    "SNOW_STR": "Schnee",
-    "PRECIP_STR": "Niederschlag"
+    "RAIN_STR": "Rain",
+    "SNOW_STR": "Snow",
+    "PRECIP_STR": "Precipitation"
   }
 }
