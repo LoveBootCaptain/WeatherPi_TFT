@@ -137,6 +137,7 @@ nano config.json
 * replace `10178` in `"WEATHERBIT_POSTALCODE": 10178` with your zip code / postal code (this example-location zip code is from berlin city, germany)
 * for language-support, units, etc please refer to -> **[weatherbit API Docs](https://www.weatherbit.io/api)**
 * in `"THEME"` you can specify a json file with theming information -> an example for the default theme is in the file `example.theme.json`
+* also you must also try the new `darcula.theme.json` which is an homage to **[jetBrains great darcula theme](https://plugins.jetbrains.com/plugin/12275-dracula-theme)** for their IDE's -> [see screenshots below](#darcula-styled-theme-with-another-font) 
     * you can change some basic theme information
     * localise hardcoded strings
         ```
@@ -146,6 +147,13 @@ nano config.json
             "PRECIP_STR": "Precipitation"
           }
         ```
+    * change colors of status bar icons and the wind direction icon with the theme colors
+        ```
+        "RED" is used for errors in status bar icons and wind direction
+        "BLUE" is used for sync and update in status bar icons and rain precip icon
+        "GREEN" is used for everything fine in status bar icons
+        ```
+    * change every color of an image by adding a color `(r, g, b)` to the optional `fillcolor` parameter in the `DrawImage` class
     * or create your own theme with your fonts and add it to your config/theme
  
 ### set up the TFT

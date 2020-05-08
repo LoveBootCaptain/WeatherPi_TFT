@@ -90,9 +90,11 @@ GREEN = theme["COLOR"]["GREEN"]
 BLUE = theme["COLOR"]["BLUE"]
 YELLOW = theme["COLOR"]["YELLOW"]
 ORANGE = theme["COLOR"]["ORANGE"]
+VIOLET = theme["COLOR"]["VIOLET"]
 
 FONT_MEDIUM = theme["FONT"]["MEDIUM"]
 FONT_BOLD = theme["FONT"]["BOLD"]
+DATE_SIZE = theme["FONT"]["DATE_SIZE"]
 SMALL_SIZE = theme["FONT"]["SMALL_SIZE"]
 BIG_SIZE = theme["FONT"]["BIG_SIZE"]
 
@@ -107,20 +109,15 @@ pygame.display.set_caption('WeatherPiTFT')
 font_small = pygame.font.Font(FONT_PATH + FONT_MEDIUM, SMALL_SIZE)
 font_big = pygame.font.Font(FONT_PATH + FONT_MEDIUM, BIG_SIZE)
 
+date_font = pygame.font.Font(FONT_PATH + FONT_BOLD, DATE_SIZE)
 font_small_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, SMALL_SIZE)
 font_big_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, BIG_SIZE)
 
 Refresh_Path = ICON_PATH + 'refresh.png'
-NoRefresh_Path = ICON_PATH + 'no-refresh.png'
-SyncRefresh_Path = ICON_PATH + 'sync-refresh.png'
 
 WiFi_Path = ICON_PATH + 'wifi.png'
-NoWiFi_Path = ICON_PATH + 'no-wifi.png'
-SyncWiFi_Path = ICON_PATH + 'sync-wifi.png'
 
 Path_Path = ICON_PATH + 'path.png'
-NoPath_Path = ICON_PATH + 'no-path.png'
-SyncPath_Path = ICON_PATH + 'sync-path.png'
 
 WeatherIcon_Path = ICON_PATH + 'unknown.png'
 
@@ -199,16 +196,28 @@ class DrawString:
 
 
 class DrawImage:
-    def __init__(self, image_path, y):
+    def __init__(self, image_path, y, fillcolor=None):
         """
         :param image_path: the path to the image you want to render
         :param y: the y-postion of the image you want to render
         """
 
         self.image_path = image_path
-        self.image = pygame.image.load(self.image_path)
+        self.image = pygame.image.load(self.image_path).convert_alpha()
         self.y = y
         self.size = self.image.get_rect().size
+        self.fillcolor = fillcolor
+
+    @staticmethod
+    def fill(surface, color):
+        """converts the color on an icon"""
+        w, h = surface.get_size()
+        r, g, b = color
+        for x in range(w):
+            for y in range(h):
+                a = surface.get_at((x, y))[3]
+                color = pygame.Color(r, g, b, a)
+                surface.set_at((x, y), color)
 
     def left(self, offset=0):
         """
@@ -244,7 +253,15 @@ class DrawImage:
         takes x from the functions above and the y from the class to render the image
         """
 
-        TFT.blit(self.image, (x, self.y))
+        if self.fillcolor:
+
+            surface = self.image
+            self.fill(surface, self.fillcolor)
+
+            TFT.blit(surface, (x, self.y))
+
+        else:
+            TFT.blit(self.image, (x, self.y))
 
 
 class Update:
@@ -305,7 +322,7 @@ class Update:
 
             pass
 
-        DrawImage(SyncWiFi_Path, 5).left()
+        DrawImage(WiFi_Path, 5, fillcolor=BLUE).left()
         pygame.display.update()
 
     @staticmethod
@@ -337,7 +354,7 @@ class Update:
 
             print('ERROR - json file read by module')
 
-        DrawImage(SyncPath_Path, 5).right(-5)
+        DrawImage(Path_Path, 5, fillcolor=BLUE).right(-5)
         pygame.display.update()
 
         time.sleep(1)
@@ -456,7 +473,7 @@ class Update:
 
         Update.get_precip_type()
 
-        DrawImage(SyncRefresh_Path, 5).right(7)
+        DrawImage(Refresh_Path, 5, fillcolor=BLUE).right(7)
         pygame.display.update()
 
     @staticmethod
@@ -471,7 +488,7 @@ class Update:
         if pop == 0:
 
             PRECIPTYPE = theme['LOCALE']['PRECIP_STR']
-            PRECIPCOLOR = ORANGE
+            PRECIPCOLOR = GREEN
 
         else:
 
@@ -508,30 +525,15 @@ def convert_timestamp(timestamp, param_string):
     return timestring
 
 
-def get_timestamp(timestring, param_string):
-
-    """
-    :param timestring: takes a timestring
-    :param param_string: use the default convert timestring options to timestamp
-    :return: a converted timestamp of a timestring
-    """
-
-    timestamp = time.mktime(time.strptime(timestring, param_string))
-
-    return timestamp
-
-
 def draw_wind_layer(y):
 
     angle = json_data['current']['data'][0]['wind_dir']
 
     circle_icon = pygame.image.load(ICON_PATH + 'circle.png')
 
-    arrow_icon = pygame.transform.rotate(pygame.image.load(ICON_PATH + 'arrow.png'),
-                                         (360 - angle) + 180)  # (360 - angle) + 180
+    arrow_icon = pygame.transform.rotate(pygame.image.load(ICON_PATH + 'arrow.png'), (360 - angle) + 180)
 
     def draw_middle_position_icon(icon):
-
         position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (icon.get_rect()[2] / 2))
 
         position_y = (y - (icon.get_rect()[3] / 2))
@@ -540,6 +542,7 @@ def draw_wind_layer(y):
 
         TFT.blit(icon, position)
 
+    # center the wind direction icon and circle on surface
     draw_middle_position_icon(arrow_icon)
     draw_middle_position_icon(circle_icon)
 
@@ -549,33 +552,33 @@ def draw_wind_layer(y):
 def draw_image_layer():
     if CONNECTION_ERROR:
 
-        DrawImage(NoWiFi_Path, 5).left()
+        DrawImage(WiFi_Path, 5, fillcolor=RED).left()
 
     else:
 
-        DrawImage(WiFi_Path, 5).left()
+        DrawImage(WiFi_Path, 5, fillcolor=GREEN).left()
 
     if REFRESH_ERROR:
 
-        DrawImage(NoRefresh_Path, 5).right(7)
+        DrawImage(Refresh_Path, 5, fillcolor=RED).right(7)
 
     else:
 
-        DrawImage(Refresh_Path, 5).right(7)
+        DrawImage(Refresh_Path, 5, fillcolor=GREEN).right(7)
 
     if PATH_ERROR:
 
-        DrawImage(NoPath_Path, 5).right(-5)
+        DrawImage(Path_Path, 5, fillcolor=RED).right(-5)
 
     else:
 
-        DrawImage(Path_Path, 5).right(-5)
+        DrawImage(Path_Path, 5, fillcolor=GREEN).right(-5)
 
     DrawImage(WeatherIcon_Path, 65).center(2, 0)
 
     if PRECIPTYPE == theme['LOCALE']['RAIN_STR']:
 
-        DrawImage(PrecipRain_Path, 140).right(45)
+        DrawImage(PrecipRain_Path, 140, fillcolor=BLUE).right(45)
 
     elif PRECIPTYPE == theme['LOCALE']['SNOW_STR']:
 
@@ -608,7 +611,7 @@ def draw_time_layer():
     print('\nDay: {}'.format(date_day_string))
     print('Time: {}'.format(date_time_string))
 
-    DrawString(date_day_string, font_small_bold, WHITE, 5).center(1, 0)
+    DrawString(date_day_string, date_font, WHITE, 5).center(1, 0)
     DrawString(date_time_string, font_big_bold, WHITE, 20).center(1, 0)
 
 
@@ -643,7 +646,7 @@ def draw_text_layer():
 
     draw_time_layer()
 
-    DrawString(summary_string, font_small_bold, ORANGE, 55).center(1, 0)
+    DrawString(summary_string, font_small_bold, VIOLET, 55).center(1, 0)
 
     DrawString(temp_out_string, font_big, ORANGE, 75).right()
 
@@ -724,7 +727,7 @@ def loop():
                     quit_all()
 
                 elif event.key == pygame.K_SPACE:
-
+                    pygame.image.save(TFT, f'screenshot-{convert_timestamp(time.time(), "%Y-%m-%d %H-%M-%S")}.png')
                     print('SPACE')
 
     quit_all()
