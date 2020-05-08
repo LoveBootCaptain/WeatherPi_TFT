@@ -94,3 +94,4 @@ ENV/
 /.idea/*
 /config.json
 /logs/latest_weather.json
+/default.theme
