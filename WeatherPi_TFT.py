@@ -531,7 +531,7 @@ def draw_wind_layer(y):
 
     circle_icon = pygame.image.load(ICON_PATH + 'circle.png')
 
-    arrow_icon = pygame.transform.rotate(pygame.image.load(ICON_PATH + 'arrow.png'), (360 - angle) + 180)
+    arrow_icon = pygame.transform.rotate(pygame.image.load(ICON_PATH + 'arrow.png'), -angle)
 
     def draw_middle_position_icon(icon):
         position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (icon.get_rect()[2] / 2))
