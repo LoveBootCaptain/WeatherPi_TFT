@@ -279,7 +279,7 @@ sudo update-rc.d PiButtons defaults
 * [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
 * [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
 * icons: [fa2png](http://fa2png.io/), making them colorful was my work
-* fonts: [google](https://fonts.google.com/)
+* fonts: [google - roboto](https://fonts.google.com/), [jetbrains - mono](https://www.jetbrains.com/lp/mono/)
 
 
 ### screenshots
