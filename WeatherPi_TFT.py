@@ -637,7 +637,7 @@ def draw_text_layer():
     forecast_day_3_min_max_string = str(int(daily_forecast[3]['low_temp'])) + ' | ' + str(
         int(daily_forecast[3]['high_temp']))
 
-    north_string = 'N'
+    wind_direction_string = current_forecast['wind_cdir']
 
     sunrise_string = convert_timestamp(daily_forecast[0]['sunrise_ts'], '%H:%M')
     sunset_string = convert_timestamp(daily_forecast[0]['sunset_ts'], '%H:%M')
@@ -664,7 +664,7 @@ def draw_text_layer():
     DrawString(sunrise_string, font_small_bold, WHITE, 265).left(30)
     DrawString(sunset_string, font_small_bold, WHITE, 292).left(30)
 
-    DrawString(north_string, font_small_bold, WHITE, 250).center(3, 2)
+    DrawString(wind_direction_string, font_small_bold, WHITE, 250).center(3, 2)
     DrawString(wind_speed_string, font_small_bold, WHITE, 300).center(3, 2)
 
     print('\nsummary: {}'.format(summary_string))
