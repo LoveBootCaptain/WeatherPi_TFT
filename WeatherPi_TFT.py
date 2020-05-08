@@ -31,6 +31,7 @@ import os
 import threading
 import time
 import sys
+import math
 
 import pygame
 import requests
@@ -124,8 +125,6 @@ WeatherIcon_Path = ICON_PATH + 'unknown.png'
 ForeCastIcon_Day_1_Path = ICON_PATH + 'mini_unknown.png'
 ForeCastIcon_Day_2_Path = ICON_PATH + 'mini_unknown.png'
 ForeCastIcon_Day_3_Path = ICON_PATH + 'mini_unknown.png'
-
-MoonIcon_Path = ICON_PATH + 'moon-0.png'
 
 SunRise_Path = ICON_PATH + 'sunrise.png'
 SunSet_Path = ICON_PATH + 'sunset.png'
@@ -407,14 +406,7 @@ class Update:
 
         forecast = (str(forecast_icon_1), str(forecast_icon_2), str(forecast_icon_3))
 
-        moon_icon = json_data['daily']['data'][0]['moon_phase']
-
-        moon_icon = float(round(moon_icon, 2)) * 100 / 3.57 + 0.25
-        moon_icon = int(moon_icon)
-
-        moon = 'moon-' + str(moon_icon)
-
-        print(icon, forecast, moon_icon)
+        print(icon, forecast)
 
         WeatherIcon_Path = folder_path + icon + icon_extension
 
@@ -422,10 +414,8 @@ class Update:
         ForeCastIcon_Day_2_Path = folder_path + mini + forecast[1] + icon_extension
         ForeCastIcon_Day_3_Path = folder_path + mini + forecast[2] + icon_extension
 
-        MoonIcon_Path = folder_path + moon + icon_extension
-
         path_list = [WeatherIcon_Path, ForeCastIcon_Day_1_Path,
-                     ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, MoonIcon_Path]
+                     ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path]
 
         print('\nvalidating path: {}\n'.format(path_list))
 
@@ -457,7 +447,6 @@ class Update:
         ForeCastIcon_Day_1_Path = updated_list[1]
         ForeCastIcon_Day_2_Path = updated_list[2]
         ForeCastIcon_Day_3_Path = updated_list[3]
-        MoonIcon_Path = updated_list[4]
 
         global PATH_ERROR
 
@@ -519,10 +508,46 @@ def convert_timestamp(timestamp, param_string):
     :param param_string: use the default convert timestamp to timestring options
     :return: a converted string from timestamp
     """
-
     timestring = str(datetime.datetime.fromtimestamp(int(timestamp)).astimezone().strftime(param_string))
 
     return timestring
+
+
+def draw_moon_layer(y):
+
+    # based on @miyaichi's fork -> great idea :)
+    size = 60
+    dt = datetime.datetime.fromtimestamp(json_data['daily']['data'][0]['ts'])
+    moon_age = (((dt.year - 11) % 19) * 11 + [0, 2, 0, 2, 2, 4, 5, 6, 7, 8, 9, 10][dt.month - 1] + dt.day) % 30
+
+    image = pygame.Surface((size, size))
+    radius = int(size / 2)
+
+    # draw light side of the moon
+    pygame.draw.circle(image, WHITE, (radius, radius), radius)
+
+    # draw dark side of the moon
+    theta = moon_age / 14.765 * math.pi
+    sum_x = sum_length = 0
+    for _y in range(-radius, radius, 1):
+        alpha = math.acos(_y / radius)
+        x = radius * math.sin(alpha)
+        length = radius * math.cos(theta) * math.sin(alpha)
+        if moon_age > 0.5:
+            start = (radius - x, radius + _y)
+            end = (radius + length, radius + _y)
+        else:
+            start = (radius - length, radius + _y)
+            end = (radius + x, radius + _y)
+        pygame.draw.line(image, DARK_GRAY, start, end)
+        sum_x += 2 * x
+        sum_length += end[0] - start[0]
+
+    print(f'moon phase age: {moon_age} percentage: {round(100 - (sum_length / sum_x) * 100, 1)}')
+
+    x = (DISPLAY_WIDTH / 2) - (size / 2)
+
+    TFT.blit(image, (x, y))
 
 
 def draw_wind_layer(y):
@@ -591,15 +616,13 @@ def draw_image_layer():
     DrawImage(SunRise_Path, 260).left()
     DrawImage(SunSet_Path, 290).left()
 
-    DrawImage(MoonIcon_Path, 255).center(1, 0)
-
+    draw_moon_layer(255)
     draw_wind_layer(285)
 
     print('\n' + WeatherIcon_Path)
     print(ForeCastIcon_Day_1_Path)
     print(ForeCastIcon_Day_2_Path)
     print(ForeCastIcon_Day_3_Path)
-    print(MoonIcon_Path)
 
 
 def draw_time_layer():

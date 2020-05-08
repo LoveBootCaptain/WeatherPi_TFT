@@ -14,7 +14,7 @@ a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 di
 ![Weather Icons](./docs/WEATHER_ICONS_1.2.gif)
 
 ### icons for moonphases
-![Moon Icons](./docs/MOON_ICONS.gif)
+moon phase rendering: credits to @miyaichi for his [awesome fork](https://github.com/miyaichi/WeatherPi)
 
 ## Hardware and wiring
 
@@ -280,7 +280,7 @@ sudo update-rc.d PiButtons defaults
 * [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
 * icons: [fa2png](http://fa2png.io/), making them colorful was my work
 * fonts: [google - roboto](https://fonts.google.com/), [jetbrains - mono](https://www.jetbrains.com/lp/mono/)
-
+* moon phase rendering: [@miyaichi for his awesome fork](https://github.com/miyaichi/WeatherPi) and great ideas
 
 ### screenshots
 
