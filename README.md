@@ -16,7 +16,7 @@ a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 di
 comes with 2 themes (default and darcula styled)
 
 ### all available weather icons in 2 sizes
-thx @erikflowers for his awesome weather-icons
+thx @erikflowers for his [awesome weather-icons](https://github.com/erikflowers/weather-icons)
 
 >I colored them and put a little glitter on it :)
 
@@ -79,7 +79,7 @@ BUTTON 2    used for shutdown pi    = GPIO26
 ## buy complete hardware kit
 
 You can also buy a complete set and build it yourself from my friend Hartmut over at his shop
-![AZ Touch PI0 Kit](https://hackster.imgix.net/uploads/attachments/1107444/az-touch_pi0_kit_PkTLQvy02c.jpg)
+![AZ Touch PI0 Kit](https://hackster.imgix.net/uploads/attachments/1107444/az-touch_pi0_kit_PkTLQvy02c.jpg?auto=compress%2Cformat&w=740&h=555&fit=max)
  
 > **[BUY HERE](https://www.hwhardsoft.de/english/projects/az-touch-pi0/)**
 
