@@ -34,6 +34,7 @@ import sys
 import math
 
 import pygame
+from pygame import gfxdraw
 import requests
 
 PATH = sys.path[0] + '/'
@@ -527,7 +528,8 @@ def draw_moon_layer(y):
     radius = int(size / 2)
 
     # draw light side of the moon
-    pygame.draw.circle(image, WHITE, (radius, radius), radius)
+    pygame.gfxdraw.filled_circle(image, radius, radius, radius, WHITE)
+    pygame.gfxdraw.aacircle(image, radius, radius, radius, BLACK)
 
     # draw dark side of the moon
     theta = moon_age / 14.765 * math.pi
@@ -536,13 +538,14 @@ def draw_moon_layer(y):
         alpha = math.acos(_y / radius)
         x = radius * math.sin(alpha)
         length = radius * math.cos(theta) * math.sin(alpha)
-        if moon_age > 0.5:
+        if moon_age > 15:
             start = (radius - x, radius + _y)
             end = (radius + length, radius + _y)
         else:
             start = (radius - length, radius + _y)
             end = (radius + x, radius + _y)
-        pygame.draw.line(image, DARK_GRAY, start, end)
+
+        pygame.gfxdraw.line(image, int(start[0]), int(start[1]), int(end[0]), int(end[1]), DARK_GRAY)
         sum_x += 2 * x
         sum_length += end[0] - start[0]
 
