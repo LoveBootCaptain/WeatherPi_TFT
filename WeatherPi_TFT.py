@@ -396,10 +396,12 @@ class Update:
         }
 
         def map_icon_name(icon_id: str):
-            for key, value in icon_map.items():
-                if icon_id in value:
-                    print(key)
-                    return key
+            try:
+                key, _ = [(k, v) for k, v in icon_map.items() if icon_id in v][0]
+                print(key)
+                return key
+            except IndexError:
+                return 'unknown'
 
         icon = map_icon_name(json_data['current']['data'][0]['weather']['icon'])
 
@@ -407,15 +409,15 @@ class Update:
         forecast_icon_2 = map_icon_name(json_data['daily']['data'][2]['weather']['icon'])
         forecast_icon_3 = map_icon_name(json_data['daily']['data'][3]['weather']['icon'])
 
-        forecast = (str(forecast_icon_1), str(forecast_icon_2), str(forecast_icon_3))
+        forecast = (str(icon), str(forecast_icon_1), str(forecast_icon_2), str(forecast_icon_3))
 
-        print(icon, forecast)
+        print(forecast)
 
-        WeatherIcon_Path = folder_path + icon + icon_extension
+        WeatherIcon_Path = folder_path + forecast[0] + icon_extension
 
-        ForeCastIcon_Day_1_Path = folder_path + mini + forecast[0] + icon_extension
-        ForeCastIcon_Day_2_Path = folder_path + mini + forecast[1] + icon_extension
-        ForeCastIcon_Day_3_Path = folder_path + mini + forecast[2] + icon_extension
+        ForeCastIcon_Day_1_Path = folder_path + mini + forecast[1] + icon_extension
+        ForeCastIcon_Day_2_Path = folder_path + mini + forecast[2] + icon_extension
+        ForeCastIcon_Day_3_Path = folder_path + mini + forecast[3] + icon_extension
 
         path_list = [WeatherIcon_Path, ForeCastIcon_Day_1_Path,
                      ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path]
@@ -600,11 +602,11 @@ def draw_image_layer():
 
         DrawImage(Path_Path, 5, fillcolor=GREEN).right(-5)
 
-    DrawImage(WeatherIcon_Path, 65).center(2, 0)
+    DrawImage(WeatherIcon_Path, 70).center(2, 0, offset=10)
 
     if PRECIPTYPE == theme['LOCALE']['RAIN_STR']:
 
-        DrawImage(PrecipRain_Path, 140, fillcolor=BLUE).right(45)
+        DrawImage(PrecipRain_Path, 140).right(45)
 
     elif PRECIPTYPE == theme['LOCALE']['SNOW_STR']:
 

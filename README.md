@@ -1,16 +1,25 @@
 # WeatherPi_TFT
+![Hardware](./docs/HARDWARE_1.2.jpg)
 
+
+## so it all began
 ![Hardware](./docs/HARDWARE_1.1.jpg)
+
 
 a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 display 
 
-> first of all, i'm a beginner in python... so don't be to hard to me... i'm still learning
 
 > written with love in python3.7
 
 ![WeatherPi_TFT](./docs/WeatherPi_TFT_01.1.gif)
 
+comes with 2 themes (default and darcula styled)
+
 ### all available weather icons in 2 sizes
+thx @erikflowers for his awesome weather-icons
+
+>I colored them and put a little glitter on it :)
+
 ![Weather Icons](./docs/WEATHER_ICONS_1.2.gif)
 
 ### icons for moonphases
@@ -65,6 +74,15 @@ BUTTON 2    used for shutdown pi    = GPIO26
 ```
 * give you the option to put some function on a hardware button (like restart the WeatherPiTFT service, shutdown/reboot your Pi, change display brightness, etc.)
 * feel free to add your own functions in `PiButtons.py`
+
+
+## buy complete hardware kit
+
+You can also buy a complete set and build it yourself from my friend Hartmut over at his shop
+![AZ Touch PI0 Kit](https://hackster.imgix.net/uploads/attachments/1107444/az-touch_pi0_kit_PkTLQvy02c.jpg)
+ 
+> **[BUY HERE](https://www.hwhardsoft.de/english/projects/az-touch-pi0/)**
+
 
 ## Setup your Pi
 
@@ -277,15 +295,17 @@ sudo update-rc.d PiButtons defaults
 
 * [squix78](https://github.com/squix78) for his [esp8266 weather station color](https://github.com/squix78/esp8266-weather-station-color) which inspired me to make it in python for a raspberry and another weather api
 * [adafruit](https://github.com/adafruit) for [hardware](https://www.adafruit.com/) and [tutorials](https://learn.adafruit.com/)
-* [darksky / forecast.io](https://darksky.net) weather api and [documentation](https://darksky.net/dev/)
-* icons: [fa2png](http://fa2png.io/), making them colorful was my work
-* fonts: [google - roboto](https://fonts.google.com/), [jetbrains - mono](https://www.jetbrains.com/lp/mono/)
+* [weatherbit.io](https://www.weatherbit.io/) for weather api and [documentation](https://www.weatherbit.io/api)
+* weather icons: [@erikflowers](https://github.com/erikflowers) [weather-icons](https://github.com/erikflowers/weather-icons), making them colorful was my work
+* statusbar icons: [google](https://github.com/google) [material-design-icons](https://github.com/google/material-design-icons)
+* default font: [google - roboto](https://fonts.google.com/)
+* darcula font: [jetbrains - mono](https://www.jetbrains.com/lp/mono/)
 * moon phase rendering: [@miyaichi for his awesome fork](https://github.com/miyaichi/WeatherPi) and great ideas
 
 ### screenshots
 
 #### darcula styled theme with another font
 
-![Darcula styled Theme for WeatherPi_TFT](./docs/DARKULA_THEME_01.jpg)
+![Darcula styled Theme for WeatherPi_TFT](docs/DARCULA_THEME_01.png)
 
-![WeatherPi_TFT](./docs/DAKULA_THEME_02.png)
+![WeatherPi_TFT](docs/DARCULA_THEME_02.jpg)
