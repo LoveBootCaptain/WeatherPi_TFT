@@ -538,7 +538,7 @@ def draw_moon_layer(y):
         alpha = math.acos(_y / radius)
         x = radius * math.sin(alpha)
         length = radius * math.cos(theta) * math.sin(alpha)
-        if moon_age > 15:
+        if moon_age < 15:
             start = (radius - x, radius + _y)
             end = (radius + length, radius + _y)
         else:
