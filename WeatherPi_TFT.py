@@ -36,6 +36,8 @@ import math
 import pygame
 from pygame import gfxdraw
 import requests
+from PIL import Image
+
 
 PATH = sys.path[0] + '/'
 
@@ -206,17 +208,37 @@ class DrawString:
 
 
 class DrawImage:
-    def __init__(self, image_path, y, fillcolor=None):
+    def __init__(self, image_path, y, size=None, fillcolor=None, angle=None):
         """
         :param image_path: the path to the image you want to render
         :param y: the y-postion of the image you want to render
         """
 
         self.image_path = image_path
-        self.image = pygame.image.load(self.image_path).convert_alpha()
+        # self.image = pygame.image.load(self.image_path).convert_alpha()
+        self.image = Image.open(self.image_path)
         self.y = y
-        self.size = self.image.get_rect().size
+        # self.size = self.image.get_rect().size
+        self.img_size = self.image.size
+        self.size = size
+        self.angle = angle
+
+        if size:
+            width, height = self.image.size
+            if width >= height:
+                width, height = (size, int(size / width * height))
+            else:
+                width, height = (int(size / width * height), size)
+
+            self.image = self.image.resize((width, height), Image.LANCZOS)
+            self.img_size = self.image.size
+
         self.fillcolor = fillcolor
+
+        self.image = pygame.image.fromstring(self.image.tobytes(), self.image.size, self.image.mode)
+
+        if angle:
+            self.image = pygame.transform.rotate(self.image, self.angle)
 
     @staticmethod
     def fill(surface, color):
@@ -243,7 +265,7 @@ class DrawImage:
         :param offset: define some offset pixel to move image a little bit more right (default=0)
         """
 
-        x = (DISPLAY_WIDTH - self.size[0] - 10) - offset
+        x = (DISPLAY_WIDTH - self.img_size[0] - 10) - offset
 
         self.draw_image(x)
 
@@ -254,11 +276,19 @@ class DrawImage:
         :param offset: define some offset pixel to move strings a little bit (default=0)
         """
 
-        x = int(((((DISPLAY_WIDTH / parts) / 2) + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset)
+        x = int(((((DISPLAY_WIDTH / parts) / 2) + ((DISPLAY_WIDTH / parts) * part)) - (self.img_size[0] / 2)) + offset)
 
         self.draw_image(x)
 
-    def draw_image(self, x):
+    def draw_middle_position_icon(self):
+
+        position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (self.image.get_rect()[2] / 2))
+
+        position_y = (self.y - (self.image.get_rect()[3] / 2))
+
+        self.draw_image(x=position_x, y=position_y)
+
+    def draw_image(self, x, y=None):
         """
         takes x from the functions above and the y from the class to render the image
         """
@@ -268,10 +298,15 @@ class DrawImage:
             surface = self.image
             self.fill(surface, self.fillcolor)
 
-            TFT.blit(surface, (x, self.y))
-
+            if not y:
+                TFT.blit(surface, (x, self.y))
+            else:
+                TFT.blit(surface, (x, y))
         else:
-            TFT.blit(self.image, (x, self.y))
+            if not y:
+                TFT.blit(self.image, (x, self.y))
+            else:
+                TFT.blit(self.image, (x, y))
 
 
 class Update:
@@ -325,7 +360,7 @@ class Update:
 
             pass
 
-        DrawImage(WiFi_Path, 5, fillcolor=BLUE).left()
+        DrawImage(WiFi_Path, 5, size=15, fillcolor=BLUE).left()
         pygame.display.update()
 
     @staticmethod
@@ -357,7 +392,7 @@ class Update:
 
             print('ERROR - json file read by module')
 
-        DrawImage(Path_Path, 5, fillcolor=BLUE).right(-5)
+        DrawImage(Path_Path, 5, size=15, fillcolor=BLUE).right(-5)
         pygame.display.update()
 
         time.sleep(1)
@@ -372,43 +407,14 @@ class Update:
 
         folder_path = ICON_PATH
         icon_extension = '.png'
-        mini = 'mini_'
 
         updated_list = []
 
-        # known weather icons simply mapped caused by rushed api-provider-change, thx apple -.-
-        # ToDo: create more icons, cause the new api-provider delivers more options ( but no wind anymore :D )
-        # clear-day, clear-night, partly-cloudy-day, partly-cloudy-night, wind, cloudy, rain, snow, fog
+        icon = json_data['current']['data'][0]['weather']['icon']
 
-        icon_map = {
-            "clear-day": ["c01d"],
-            "clear-night": ["c01n"],
-            "partly-cloudy-day": ["c02d", "c03d"],
-            "partly-cloudy-night": ["c02n", "c03n"],
-            "wind": "",
-            "cloudy": ["c04d", "c04n"],
-            "rain": ["t01d", "t02d", "t03d", "t04d", "t05d", "t01n", "t02n", "t03n", "t04n", "t05n",
-                     "d01d", "d02d", "d03d", "d01n", "d02n", "d03n",
-                     "r01d", "r02d", "r03d", "r04d", "r05d", "r06d", "r01n", "r02n", "r03n", "r04n", "r05n", "r06n",
-                     "f01d", "f01n", "u00d", "u00n"
-                     ],
-            "snow": ["s01d", "s02d", "s03d", "s04d", "s05d", "s06d", "s01n", "s02n", "s03n", "s04n", "s05n", "s06n"],
-            "fog": ["a01d", "a02d", "a03d", "a04d", "a05d", "a06d", "a01n", "a02n", "a03n", "a04n", "a05n", "a06n", ]
-        }
-
-        def map_icon_name(icon_id: str):
-            try:
-                key, _ = [(k, v) for k, v in icon_map.items() if icon_id in v][0]
-                print(key)
-                return key
-            except IndexError:
-                return 'unknown'
-
-        icon = map_icon_name(json_data['current']['data'][0]['weather']['icon'])
-
-        forecast_icon_1 = map_icon_name(json_data['daily']['data'][1]['weather']['icon'])
-        forecast_icon_2 = map_icon_name(json_data['daily']['data'][2]['weather']['icon'])
-        forecast_icon_3 = map_icon_name(json_data['daily']['data'][3]['weather']['icon'])
+        forecast_icon_1 = json_data['daily']['data'][1]['weather']['icon']
+        forecast_icon_2 = json_data['daily']['data'][2]['weather']['icon']
+        forecast_icon_3 = json_data['daily']['data'][3]['weather']['icon']
 
         forecast = (str(icon), str(forecast_icon_1), str(forecast_icon_2), str(forecast_icon_3))
 
@@ -416,9 +422,9 @@ class Update:
 
         WeatherIcon_Path = folder_path + forecast[0] + icon_extension
 
-        ForeCastIcon_Day_1_Path = folder_path + mini + forecast[1] + icon_extension
-        ForeCastIcon_Day_2_Path = folder_path + mini + forecast[2] + icon_extension
-        ForeCastIcon_Day_3_Path = folder_path + mini + forecast[3] + icon_extension
+        ForeCastIcon_Day_1_Path = folder_path + forecast[1] + icon_extension
+        ForeCastIcon_Day_2_Path = folder_path + forecast[2] + icon_extension
+        ForeCastIcon_Day_3_Path = folder_path + forecast[3] + icon_extension
 
         path_list = [WeatherIcon_Path, ForeCastIcon_Day_1_Path,
                      ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path]
@@ -437,13 +443,7 @@ class Update:
 
                 print('FALSE :', path)
 
-                if 'mini' in path:
-
-                    updated_list.append(ICON_PATH + 'mini_unknown.png')
-
-                else:
-
-                    updated_list.append(ICON_PATH + 'unknown.png')
+                updated_list.append(ICON_PATH + 'unknown.png')
 
         WeatherIcon_Path = updated_list[0]
         ForeCastIcon_Day_1_Path = updated_list[1]
@@ -464,7 +464,7 @@ class Update:
 
         Update.get_precip_type()
 
-        DrawImage(Refresh_Path, 5, fillcolor=BLUE).right(7)
+        DrawImage(Refresh_Path, 5, size=15, fillcolor=BLUE).right(7)
         pygame.display.update()
 
     @staticmethod
@@ -544,7 +544,6 @@ def draw_moon_layer(y):
         else:
             start = (radius - length, radius + _y)
             end = (radius + x, radius + _y)
-
         pygame.gfxdraw.line(image, int(start[0]), int(start[1]), int(end[0]), int(end[1]), DARK_GRAY)
         sum_x += 2 * x
         sum_length += end[0] - start[0]
@@ -560,22 +559,9 @@ def draw_wind_layer(y):
 
     angle = json_data['current']['data'][0]['wind_dir']
 
-    circle_icon = pygame.image.load(ICON_PATH + 'circle.png')
-
-    arrow_icon = pygame.transform.rotate(pygame.image.load(ICON_PATH + 'arrow.png'), -angle)
-
-    def draw_middle_position_icon(icon):
-        position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (icon.get_rect()[2] / 2))
-
-        position_y = (y - (icon.get_rect()[3] / 2))
-
-        position = (position_x, position_y)
-
-        TFT.blit(icon, position)
-
     # center the wind direction icon and circle on surface
-    draw_middle_position_icon(arrow_icon)
-    draw_middle_position_icon(circle_icon)
+    DrawImage(ICON_PATH + 'circle.png', y, size=30, fillcolor=WHITE).draw_middle_position_icon()
+    DrawImage(ICON_PATH + 'arrow.png', y, size=30, fillcolor=RED, angle=-angle).draw_middle_position_icon()
 
     print('\nwind direction: {}'.format(angle))
 
@@ -583,44 +569,44 @@ def draw_wind_layer(y):
 def draw_image_layer():
     if CONNECTION_ERROR:
 
-        DrawImage(WiFi_Path, 5, fillcolor=RED).left()
+        DrawImage(WiFi_Path, 5, size=15, fillcolor=RED).left()
 
     else:
 
-        DrawImage(WiFi_Path, 5, fillcolor=GREEN).left()
+        DrawImage(WiFi_Path, 5, size=15, fillcolor=GREEN).left()
 
     if REFRESH_ERROR:
 
-        DrawImage(Refresh_Path, 5, fillcolor=RED).right(7)
+        DrawImage(Refresh_Path, 5, size=15, fillcolor=RED).right(7)
 
     else:
 
-        DrawImage(Refresh_Path, 5, fillcolor=GREEN).right(7)
+        DrawImage(Refresh_Path, 5, size=15, fillcolor=GREEN).right(7)
 
     if PATH_ERROR:
 
-        DrawImage(Path_Path, 5, fillcolor=RED).right(-5)
+        DrawImage(Path_Path, 5, size=15, fillcolor=RED).right(-5)
 
     else:
 
-        DrawImage(Path_Path, 5, fillcolor=GREEN).right(-5)
+        DrawImage(Path_Path, 5, size=15, fillcolor=GREEN).right(-5)
 
-    DrawImage(WeatherIcon_Path, 70).center(2, 0, offset=10)
+    DrawImage(WeatherIcon_Path, 70, size=100).center(2, 0, offset=10)
 
     if PRECIPTYPE == theme['LOCALE']['RAIN_STR']:
 
-        DrawImage(PrecipRain_Path, 140).right(45)
+        DrawImage(PrecipRain_Path, 140, size=20).right(45)
 
     elif PRECIPTYPE == theme['LOCALE']['SNOW_STR']:
 
-        DrawImage(PrecipSnow_Path, 140).right(50)
+        DrawImage(PrecipSnow_Path, 140, size=20).right(50)
 
-    DrawImage(ForeCastIcon_Day_1_Path, 200).center(3, 0)
-    DrawImage(ForeCastIcon_Day_2_Path, 200).center(3, 1)
-    DrawImage(ForeCastIcon_Day_3_Path, 200).center(3, 2)
+    DrawImage(ForeCastIcon_Day_1_Path, 200, size=50).center(3, 0)
+    DrawImage(ForeCastIcon_Day_2_Path, 200, size=50).center(3, 1)
+    DrawImage(ForeCastIcon_Day_3_Path, 200, size=50).center(3, 2)
 
-    DrawImage(SunRise_Path, 260).left()
-    DrawImage(SunSet_Path, 290).left()
+    DrawImage(SunRise_Path, 260, size=25).left()
+    DrawImage(SunSet_Path, 290, size=25).left()
 
     draw_moon_layer(255)
     draw_wind_layer(285)
