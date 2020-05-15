@@ -6,5 +6,9 @@
   "WEATHERBIT_POSTALCODE": 10178,
   "WEATHERBIT_HOURS": 1,
   "WEATHERBIT_DAYS": 4,
-  "THEME": "example.theme.json"
+  "THEME": "example.theme",
+  "TIMER": {
+    "UPDATE": 300,
+    "RELOAD": 60
+  }
 }

@@ -3,8 +3,16 @@
     "WIDTH": 240,
     "HEIGHT": 320
   },
+  "DATE_FORMAT": {
+    "DATE": "%A - %d. %b %Y",
+    "TIME": "%H:%M:%S",
+    "FORECAST_DAY": "%a",
+    "SUNRISE_SUNSET": "%H:%M"
+  },
   "COLOR": {
-    "BLACK": [10, 10, 10],
+    "BACKGROUND": [0, 0, 0],
+    "MAIN_FONT": [255, 255, 255],
+    "BLACK": [0, 0, 0],
     "DARK_GRAY": [43, 43, 43],
     "WHITE": [255, 255, 255],
     "RED": [231, 76, 60],
@@ -18,6 +26,7 @@
     "MEDIUM": "Roboto-Medium.ttf",
     "BOLD": "Roboto-Bold.ttf",
     "DATE_SIZE": 14,
+    "CLOCK_SIZE": 30,
     "SMALL_SIZE": 14,
     "BIG_SIZE": 30
   },

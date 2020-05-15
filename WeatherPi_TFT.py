@@ -90,6 +90,8 @@ except KeyError as e:
 DISPLAY_WIDTH = theme["DISPLAY"]["WIDTH"]
 DISPLAY_HEIGHT = theme["DISPLAY"]["HEIGHT"]
 
+BACKGROUND = tuple(theme["COLOR"]["BACKGROUND"])
+MAIN_FONT = tuple(theme["COLOR"]["MAIN_FONT"])
 BLACK = tuple(theme["COLOR"]["BLACK"])
 DARK_GRAY = tuple(theme["COLOR"]["DARK_GRAY"])
 WHITE = tuple(theme["COLOR"]["WHITE"])
@@ -103,6 +105,7 @@ VIOLET = tuple(theme["COLOR"]["VIOLET"])
 FONT_MEDIUM = theme["FONT"]["MEDIUM"]
 FONT_BOLD = theme["FONT"]["BOLD"]
 DATE_SIZE = theme["FONT"]["DATE_SIZE"]
+CLOCK_SIZE = theme["FONT"]["CLOCK_SIZE"]
 SMALL_SIZE = theme["FONT"]["SMALL_SIZE"]
 BIG_SIZE = theme["FONT"]["BIG_SIZE"]
 
@@ -124,6 +127,7 @@ font_small = pygame.font.Font(FONT_PATH + FONT_MEDIUM, SMALL_SIZE)
 font_big = pygame.font.Font(FONT_PATH + FONT_MEDIUM, BIG_SIZE)
 
 date_font = pygame.font.Font(FONT_PATH + FONT_BOLD, DATE_SIZE)
+clock_font = pygame.font.Font(FONT_PATH + FONT_BOLD, CLOCK_SIZE)
 font_small_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, SMALL_SIZE)
 font_big_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, BIG_SIZE)
 
@@ -239,13 +243,13 @@ class DrawImage:
         self.image = pygame.image.fromstring(self.image.tobytes(), self.image.size, self.image.mode)
 
     @staticmethod
-    def fill(surface, color):
+    def fill(surface, color: tuple):
         """converts the color on an icon"""
         w, h = surface.get_size()
         r, g, b = color
         for x in range(w):
             for y in range(h):
-                a = surface.get_at((x, y))[3]
+                a: int = surface.get_at((x, y))[3]
                 color = pygame.Color(r, g, b, a)
                 surface.set_at((x, y), color)
 
@@ -313,7 +317,7 @@ class Update:
 
         global threads, CONNECTION_ERROR
 
-        thread = threading.Timer(300, Update.update_json)
+        thread = threading.Timer(config["TIMER"]["UPDATE"], Update.update_json)
 
         thread.start()
 
@@ -366,7 +370,7 @@ class Update:
 
         global threads, json_data, REFRESH_ERROR
 
-        thread = threading.Timer(30, Update.read_json)
+        thread = threading.Timer(config["TIMER"]["RELOAD"], Update.read_json)
 
         thread.start()
 
@@ -520,7 +524,7 @@ def draw_moon_layer(y, size):
     dt = datetime.datetime.fromtimestamp(json_data['daily']['data'][0]['ts'])
     moon_age = (((dt.year - 11) % 19) * 11 + [0, 2, 0, 2, 2, 4, 5, 6, 7, 8, 9, 10][dt.month - 1] + dt.day) % 30
 
-    image = Image.new("RGB", (_size + 2, _size + 2))
+    image = Image.new("RGBA", (_size + 2, _size + 2))
     draw = ImageDraw.Draw(image)
 
     radius = int(_size / 2)
@@ -595,7 +599,7 @@ def draw_image_layer():
 
         DrawImage(Path_Path, 5, size=15, fillcolor=GREEN).right(-5)
 
-    DrawImage(WeatherIcon_Path, 70, size=100).center(2, 0, offset=10)
+    DrawImage(WeatherIcon_Path, 68, size=100).center(2, 0, offset=10)
 
     if PRECIPTYPE == theme['LOCALE']['RAIN_STR']:
 
@@ -624,28 +628,28 @@ def draw_image_layer():
 def draw_time_layer():
     timestamp = time.time()
 
-    date_time_string = convert_timestamp(timestamp, '%H:%M:%S')
-    date_day_string = convert_timestamp(timestamp, '%A - %d. %b %Y')
+    date_day_string = convert_timestamp(timestamp, theme["DATE_FORMAT"]["DATE"])
+    date_time_string = convert_timestamp(timestamp, theme["DATE_FORMAT"]["TIME"])
 
     print('\nDay: {}'.format(date_day_string))
     print('Time: {}'.format(date_time_string))
 
-    DrawString(date_day_string, date_font, WHITE, 5).center(1, 0)
-    DrawString(date_time_string, font_big_bold, WHITE, 20).center(1, 0)
+    DrawString(date_day_string, date_font, MAIN_FONT, 0).center(1, 0)
+    DrawString(date_time_string, clock_font, MAIN_FONT, 15).center(1, 0)
 
 
 def draw_text_layer():
     current_forecast = json_data['current']['data'][0]
 
     summary_string = current_forecast['weather']['description']
-    temp_out_string = str(current_forecast['temp']) + '°C'
+    temp_out_string = str(int(current_forecast['temp'])) + '°C'
     rain_string = str(int(json_data['hourly']['data'][0]['pop'])) + ' %'
 
     daily_forecast = json_data['daily']['data']
 
-    forecast_day_1_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[1]['datetime'], '%Y-%m-%d')), '%a')
-    forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[2]['datetime'], '%Y-%m-%d')), '%a')
-    forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[3]['datetime'], '%Y-%m-%d')), '%a')
+    forecast_day_1_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[1]['datetime'], '%Y-%m-%d')), theme["DATE_FORMAT"]["FORECAST_DAY"])
+    forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[2]['datetime'], '%Y-%m-%d')), theme["DATE_FORMAT"]["FORECAST_DAY"])
+    forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[3]['datetime'], '%Y-%m-%d')), theme["DATE_FORMAT"]["FORECAST_DAY"])
 
     forecast_day_1_min_max_string = str(int(daily_forecast[1]['low_temp'])) + ' | ' + str(
         int(daily_forecast[1]['high_temp']))
@@ -658,33 +662,33 @@ def draw_text_layer():
 
     wind_direction_string = current_forecast['wind_cdir']
 
-    sunrise_string = convert_timestamp(daily_forecast[0]['sunrise_ts'], '%H:%M')
-    sunset_string = convert_timestamp(daily_forecast[0]['sunset_ts'], '%H:%M')
+    sunrise_string = convert_timestamp(daily_forecast[0]['sunrise_ts'], theme["DATE_FORMAT"]["SUNRISE_SUNSET"])
+    sunset_string = convert_timestamp(daily_forecast[0]['sunset_ts'], theme["DATE_FORMAT"]["SUNRISE_SUNSET"])
 
     wind_speed_string = str(round((float(current_forecast['wind_spd']) * 3.6), 1)) + ' km/h'
 
     draw_time_layer()
 
-    DrawString(summary_string, font_small_bold, VIOLET, 55).center(1, 0)
+    DrawString(summary_string, font_small_bold, VIOLET, 50).center(1, 0)
 
     DrawString(temp_out_string, font_big, ORANGE, 75).right()
 
     DrawString(rain_string, font_big, PRECIPCOLOR, 105).right()
     DrawString(PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right()
 
-    DrawString(forecast_day_1_string.upper(), font_small_bold, ORANGE, 165).center(3, 0)
-    DrawString(forecast_day_2_string.upper(), font_small_bold, ORANGE, 165).center(3, 1)
-    DrawString(forecast_day_3_string.upper(), font_small_bold, ORANGE, 165).center(3, 2)
+    DrawString(forecast_day_1_string, font_small_bold, ORANGE, 165).center(3, 0)
+    DrawString(forecast_day_2_string, font_small_bold, ORANGE, 165).center(3, 1)
+    DrawString(forecast_day_3_string, font_small_bold, ORANGE, 165).center(3, 2)
 
-    DrawString(forecast_day_1_min_max_string, font_small_bold, WHITE, 180).center(3, 0)
-    DrawString(forecast_day_2_min_max_string, font_small_bold, WHITE, 180).center(3, 1)
-    DrawString(forecast_day_3_min_max_string, font_small_bold, WHITE, 180).center(3, 2)
+    DrawString(forecast_day_1_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 0)
+    DrawString(forecast_day_2_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 1)
+    DrawString(forecast_day_3_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 2)
 
-    DrawString(sunrise_string, font_small_bold, WHITE, 265).left(30)
-    DrawString(sunset_string, font_small_bold, WHITE, 292).left(30)
+    DrawString(sunrise_string, font_small_bold, MAIN_FONT, 265).left(30)
+    DrawString(sunset_string, font_small_bold, MAIN_FONT, 292).left(30)
 
-    DrawString(wind_direction_string, font_small_bold, WHITE, 250).center(3, 2)
-    DrawString(wind_speed_string, font_small_bold, WHITE, 300).center(3, 2)
+    DrawString(wind_direction_string, font_small_bold, MAIN_FONT, 250).center(3, 2)
+    DrawString(wind_speed_string, font_small_bold, MAIN_FONT, 300).center(3, 2)
 
     print('\nsummary: {}'.format(summary_string))
     print('temp out: {}'.format(temp_out_string))
@@ -699,7 +703,7 @@ def draw_text_layer():
 
 
 def draw_to_tft():
-    TFT.fill(BLACK)
+    TFT.fill(BACKGROUND)
 
     draw_image_layer()
     draw_text_layer()

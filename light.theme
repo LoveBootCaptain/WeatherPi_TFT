@@ -4,16 +4,16 @@
     "HEIGHT": 320
   },
   "DATE_FORMAT": {
-    "DATE": "%a - %d.%m.%Y",
+    "DATE": "%A - %d. %b %Y",
     "TIME": "%H:%M:%S",
     "FORECAST_DAY": "%a",
     "SUNRISE_SUNSET": "%H:%M"
   },
   "COLOR": {
-    "BACKGROUND": [43, 43, 43],
-    "MAIN_FONT": [255, 255, 255],
+    "BACKGROUND": [250, 235, 215],
+    "MAIN_FONT": [43, 43, 43],
     "BLACK": [0, 0, 0],
-    "DARK_GRAY": [66, 66, 66],
+    "DARK_GRAY": [43, 43, 43],
     "WHITE": [255, 255, 255],
     "RED": [214, 74, 75],
     "GREEN": [106, 135, 89],
@@ -31,8 +31,8 @@
     "BIG_SIZE": 30
   },
   "LOCALE": {
-    "RAIN_STR": "Rain",
-    "SNOW_STR": "Snow",
-    "PRECIP_STR": "Precipitation"
+    "RAIN_STR": "Regen",
+    "SNOW_STR": "Schnee",
+    "PRECIP_STR": "Niederschlag"
   }
 }
