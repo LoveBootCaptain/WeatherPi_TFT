@@ -36,7 +36,7 @@ import math
 import pygame
 from pygame import gfxdraw
 import requests
-from PIL import Image
+from PIL import Image, ImageDraw
 
 
 PATH = sys.path[0] + '/'
@@ -90,15 +90,15 @@ except KeyError as e:
 DISPLAY_WIDTH = theme["DISPLAY"]["WIDTH"]
 DISPLAY_HEIGHT = theme["DISPLAY"]["HEIGHT"]
 
-BLACK = theme["COLOR"]["BLACK"]
-DARK_GRAY = theme["COLOR"]["DARK_GRAY"]
-WHITE = theme["COLOR"]["WHITE"]
-RED = theme["COLOR"]["RED"]
-GREEN = theme["COLOR"]["GREEN"]
-BLUE = theme["COLOR"]["BLUE"]
-YELLOW = theme["COLOR"]["YELLOW"]
-ORANGE = theme["COLOR"]["ORANGE"]
-VIOLET = theme["COLOR"]["VIOLET"]
+BLACK = tuple(theme["COLOR"]["BLACK"])
+DARK_GRAY = tuple(theme["COLOR"]["DARK_GRAY"])
+WHITE = tuple(theme["COLOR"]["WHITE"])
+RED = tuple(theme["COLOR"]["RED"])
+GREEN = tuple(theme["COLOR"]["GREEN"])
+BLUE = tuple(theme["COLOR"]["BLUE"])
+YELLOW = tuple(theme["COLOR"]["YELLOW"])
+ORANGE = tuple(theme["COLOR"]["ORANGE"])
+VIOLET = tuple(theme["COLOR"]["VIOLET"])
 
 FONT_MEDIUM = theme["FONT"]["MEDIUM"]
 FONT_BOLD = theme["FONT"]["BOLD"]
@@ -215,13 +215,14 @@ class DrawImage:
         """
 
         self.image_path = image_path
-        # self.image = pygame.image.load(self.image_path).convert_alpha()
         self.image = Image.open(self.image_path)
         self.y = y
-        # self.size = self.image.get_rect().size
         self.img_size = self.image.size
         self.size = size
         self.angle = angle
+
+        if angle:
+            self.image = self.image.rotate(self.angle, resample=Image.BICUBIC)
 
         if size:
             width, height = self.image.size
@@ -236,9 +237,6 @@ class DrawImage:
         self.fillcolor = fillcolor
 
         self.image = pygame.image.fromstring(self.image.tobytes(), self.image.size, self.image.mode)
-
-        if angle:
-            self.image = pygame.transform.rotate(self.image, self.angle)
 
     @staticmethod
     def fill(surface, color):
@@ -515,40 +513,46 @@ def convert_timestamp(timestamp, param_string):
     return timestring
 
 
-def draw_moon_layer(y):
+def draw_moon_layer(y, size):
 
     # based on @miyaichi's fork -> great idea :)
-    size = 60
+    _size = 300
     dt = datetime.datetime.fromtimestamp(json_data['daily']['data'][0]['ts'])
     moon_age = (((dt.year - 11) % 19) * 11 + [0, 2, 0, 2, 2, 4, 5, 6, 7, 8, 9, 10][dt.month - 1] + dt.day) % 30
 
-    image = pygame.Surface((size, size))
-    image.fill(BLACK)
-    image.set_colorkey(BLACK)
-    radius = int(size / 2)
+    image = Image.new("RGB", (_size + 2, _size + 2))
+    draw = ImageDraw.Draw(image)
 
-    # draw light side of the moon
-    pygame.gfxdraw.filled_circle(image, radius, radius, radius, WHITE)
-    pygame.gfxdraw.aacircle(image, radius, radius, radius, BLACK)
+    radius = int(_size / 2)
+
+    # draw full moon
+    draw.ellipse([(1, 1), (_size, _size)], fill=WHITE)
 
     # draw dark side of the moon
     theta = moon_age / 14.765 * math.pi
     sum_x = sum_length = 0
+
     for _y in range(-radius, radius, 1):
         alpha = math.acos(_y / radius)
         x = radius * math.sin(alpha)
         length = radius * math.cos(theta) * math.sin(alpha)
+
         if moon_age < 15:
             start = (radius - x, radius + _y)
             end = (radius + length, radius + _y)
         else:
             start = (radius - length, radius + _y)
             end = (radius + x, radius + _y)
-        pygame.gfxdraw.line(image, int(start[0]), int(start[1]), int(end[0]), int(end[1]), DARK_GRAY)
+
+        draw.line((start, end), fill=DARK_GRAY)
+
         sum_x += 2 * x
         sum_length += end[0] - start[0]
 
     print(f'moon phase age: {moon_age} percentage: {round(100 - (sum_length / sum_x) * 100, 1)}')
+
+    image = image.resize((size, size), Image.LANCZOS)
+    image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
 
     x = (DISPLAY_WIDTH / 2) - (size / 2)
 
@@ -608,7 +612,7 @@ def draw_image_layer():
     DrawImage(SunRise_Path, 260, size=25).left()
     DrawImage(SunSet_Path, 290, size=25).left()
 
-    draw_moon_layer(255)
+    draw_moon_layer(255, 60)
     draw_wind_layer(285)
 
     print('\n' + WeatherIcon_Path)
