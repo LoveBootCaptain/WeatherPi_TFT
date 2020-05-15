@@ -27,17 +27,15 @@
 import datetime
 import json
 import locale
+import math
 import os
+import sys
 import threading
 import time
-import sys
-import math
 
 import pygame
-from pygame import gfxdraw
 import requests
 from PIL import Image, ImageDraw
-
 
 PATH = sys.path[0] + '/'
 
