@@ -32,12 +32,32 @@ import os
 import sys
 import threading
 import time
+import logging
 
 import pygame
 import requests
 from PIL import Image, ImageDraw
 
 PATH = sys.path[0] + '/'
+
+# create logger
+logger = logging.getLogger(__package__)
+logging.getLogger("PIL").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logger.setLevel(logging.INFO)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+logger.addHandler(ch)
 
 config_data = open(PATH + 'config.json').read()
 config = json.loads(config_data)
@@ -64,9 +84,9 @@ try:
     WEATHERBIT_IO_KEY = config['WEATHERBIT_DEV_KEY']
 
     pygame.init()
-    print(f"{config['ENV']} SYSTEM - STARTING IN LOCAL DEV MODE")
+    logger.info(f"{config['ENV']} SYSTEM - STARTING IN LOCAL DEV MODE")
 
-except KeyError as e:
+except KeyError as config_ex:
     server = config['WEATHERBIT_URL']
     headers = {}
 
@@ -78,11 +98,13 @@ except KeyError as e:
 
     WEATHERBIT_IO_KEY = config['WEATHERBIT_IO_KEY']
 
-    print(f"STARTING IN PROD MODE FOR RPi")
+    logger.info(f"STARTING IN PROD MODE FOR RPi: {config_ex}")
 
     # this is needed to set the output of weekdays to your local os settings
     # doesn't work on my dev laptop but on the Pi
     locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
+
+clock = pygame.time.Clock()
 
 # theme settings from theme config
 DISPLAY_WIDTH = theme["DISPLAY"]["WIDTH"]
@@ -210,7 +232,7 @@ class DrawString:
 
 
 class DrawImage:
-    def __init__(self, image_path, y, size=None, fillcolor=None, angle=None):
+    def __init__(self, image_path, y=None, size=None, fillcolor=None, angle=None):
         """
         :param image_path: the path to the image you want to render
         :param y: the y-postion of the image you want to render
@@ -286,9 +308,15 @@ class DrawImage:
 
         position_y = (self.y - (self.image.get_rect()[3] / 2))
 
-        self.draw_image(x=position_x, y=position_y)
+        self.draw_image(x=position_x, _y=position_y)
 
-    def draw_image(self, x, y=None):
+    def draw_position(self, pos: tuple):
+        x, y = pos
+        if y == 0:
+            y += 1
+        self.draw_image(x=int(x), _y=int(y))
+
+    def draw_image(self, x, _y=None):
         """
         takes x from the functions above and the y from the class to render the image
         """
@@ -298,15 +326,15 @@ class DrawImage:
             surface = self.image
             self.fill(surface, self.fillcolor)
 
-            if not y:
+            if _y:
+                TFT.blit(surface, (x, _y))
+            else:
                 TFT.blit(surface, (x, self.y))
-            else:
-                TFT.blit(surface, (x, y))
         else:
-            if not y:
-                TFT.blit(self.image, (x, self.y))
+            if _y:
+                TFT.blit(self.image, (x, _y))
             else:
-                TFT.blit(self.image, (x, y))
+                TFT.blit(self.image, (x, self.y))
 
 
 class Update:
@@ -327,7 +355,7 @@ class Update:
             hourly_endpoint = f'{server}/forecast/hourly'
             daily_endpoint = f'{server}/forecast/daily'
 
-            print(f'connecting to server: {server}')
+            logger.info(f'connecting to server: {server}')
 
             options = str(f'&postal_code={WEATHERBIT_POSTALCODE}&country={WEATHERBIT_COUNTRY}&lang={WEATHERBIT_LANG}')
 
@@ -348,20 +376,19 @@ class Update:
             with open(LOG_PATH + 'latest_weather.json', 'w') as outputfile:
                 json.dump(data, outputfile, indent=2, sort_keys=True)
 
-            print('\njson file saved')
+            logger.info('json file saved')
 
             CONNECTION_ERROR = False
 
-        except (requests.HTTPError, requests.ConnectionError):
+        except (requests.HTTPError, requests.ConnectionError) as update_ex:
 
             CONNECTION_ERROR = True
 
-            print('Connection ERROR')
+            logger.warning(f'Connection ERROR: {update_ex}')
 
             pass
 
         DrawImage(WiFi_Path, 5, size=15, fillcolor=BLUE).left()
-        pygame.display.update()
 
     @staticmethod
     def read_json():
@@ -380,20 +407,20 @@ class Update:
 
             new_json_data = json.loads(data)
 
-            print('\njson file read by module')
+            logger.info('json file read by module')
+            logger.info(f'{new_json_data}')
 
             json_data = new_json_data
 
             REFRESH_ERROR = False
 
-        except IOError:
+        except IOError as read_ex:
 
             REFRESH_ERROR = True
 
-            print('ERROR - json file read by module')
+            logger.warning(f'ERROR - json file read by module: {read_ex}')
 
         DrawImage(Path_Path, 5, size=15, fillcolor=BLUE).right(-5)
-        pygame.display.update()
 
         time.sleep(1)
 
@@ -418,7 +445,7 @@ class Update:
 
         forecast = (str(icon), str(forecast_icon_1), str(forecast_icon_2), str(forecast_icon_3))
 
-        print(forecast)
+        logger.debug(forecast)
 
         WeatherIcon_Path = folder_path + forecast[0] + icon_extension
 
@@ -429,19 +456,19 @@ class Update:
         path_list = [WeatherIcon_Path, ForeCastIcon_Day_1_Path,
                      ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path]
 
-        print('\nvalidating path: {}\n'.format(path_list))
+        logger.debug(f'validating path: {path_list}')
 
         for path in path_list:
 
             if os.path.isfile(path):
 
-                print('TRUE :', path)
+                logger.debug(f'TRUE : {path}')
 
                 updated_list.append(path)
 
             else:
 
-                print('FALSE :', path)
+                logger.warning(f'FALSE : {path}')
 
                 updated_list.append(ICON_PATH + 'unknown.png')
 
@@ -460,12 +487,11 @@ class Update:
 
             PATH_ERROR = False
 
-        print('\nupdate path for icons: {}'.format(updated_list))
+        logger.info(f'update path for icons: {updated_list}')
 
         Update.get_precip_type()
 
         DrawImage(Refresh_Path, 5, size=15, fillcolor=BLUE).right(7)
-        pygame.display.update()
 
     @staticmethod
     def get_precip_type():
@@ -493,9 +519,9 @@ class Update:
                 PRECIPTYPE = theme['LOCALE']['SNOW_STR']
                 PRECIPCOLOR = WHITE
 
-        print('\nupdate PRECIPTYPE to: {}'.format(PRECIPTYPE))
-        print('\nupdate PRECIPCOLOR to: {}'.format(PRECIPCOLOR))
-        print('\nupdated PATH')
+        logger.info(f'update PRECIPPOP to: {pop} %')
+        logger.info(f'update PRECIPTYPE to: {PRECIPTYPE}')
+        logger.info(f'update PRECIPCOLOR to: {PRECIPCOLOR}')
 
     @staticmethod
     def run():
@@ -504,7 +530,6 @@ class Update:
 
 
 def convert_timestamp(timestamp, param_string):
-
     """
     :param timestamp: takes a normal integer unix timestamp
     :param param_string: use the default convert timestamp to timestring options
@@ -516,7 +541,6 @@ def convert_timestamp(timestamp, param_string):
 
 
 def draw_moon_layer(y, size):
-
     # based on @miyaichi's fork -> great idea :)
     _size = 300
     dt = datetime.datetime.fromtimestamp(json_data['daily']['data'][0]['ts'])
@@ -551,7 +575,7 @@ def draw_moon_layer(y, size):
         sum_x += 2 * x
         sum_length += end[0] - start[0]
 
-    print(f'moon phase age: {moon_age} percentage: {round(100 - (sum_length / sum_x) * 100, 1)}')
+    logger.debug(f'moon phase age: {moon_age} percentage: {round(100 - (sum_length / sum_x) * 100, 1)}')
 
     image = image.resize((size, size), Image.LANCZOS)
     image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
@@ -562,14 +586,13 @@ def draw_moon_layer(y, size):
 
 
 def draw_wind_layer(y):
-
     angle = json_data['current']['data'][0]['wind_dir']
 
     # center the wind direction icon and circle on surface
     DrawImage(ICON_PATH + 'circle.png', y, size=30, fillcolor=WHITE).draw_middle_position_icon()
     DrawImage(ICON_PATH + 'arrow.png', y, size=30, fillcolor=RED, angle=-angle).draw_middle_position_icon()
 
-    print('\nwind direction: {}'.format(angle))
+    logger.debug(f'wind direction: {angle}')
 
 
 def draw_image_layer():
@@ -617,10 +640,10 @@ def draw_image_layer():
     draw_moon_layer(255, 60)
     draw_wind_layer(285)
 
-    print('\n' + WeatherIcon_Path)
-    print(ForeCastIcon_Day_1_Path)
-    print(ForeCastIcon_Day_2_Path)
-    print(ForeCastIcon_Day_3_Path)
+    logger.debug(WeatherIcon_Path)
+    logger.debug(ForeCastIcon_Day_1_Path)
+    logger.debug(ForeCastIcon_Day_2_Path)
+    logger.debug(ForeCastIcon_Day_3_Path)
 
 
 def draw_time_layer():
@@ -629,8 +652,8 @@ def draw_time_layer():
     date_day_string = convert_timestamp(timestamp, theme["DATE_FORMAT"]["DATE"])
     date_time_string = convert_timestamp(timestamp, theme["DATE_FORMAT"]["TIME"])
 
-    print('\nDay: {}'.format(date_day_string))
-    print('Time: {}'.format(date_time_string))
+    logger.debug(f'Day: {date_day_string}')
+    logger.debug(f'Time: {date_time_string}')
 
     DrawString(date_day_string, date_font, MAIN_FONT, 0).center(1, 0)
     DrawString(date_time_string, clock_font, MAIN_FONT, 15).center(1, 0)
@@ -645,9 +668,12 @@ def draw_text_layer():
 
     daily_forecast = json_data['daily']['data']
 
-    forecast_day_1_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[1]['datetime'], '%Y-%m-%d')), theme["DATE_FORMAT"]["FORECAST_DAY"])
-    forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[2]['datetime'], '%Y-%m-%d')), theme["DATE_FORMAT"]["FORECAST_DAY"])
-    forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[3]['datetime'], '%Y-%m-%d')), theme["DATE_FORMAT"]["FORECAST_DAY"])
+    forecast_day_1_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[1]['datetime'], '%Y-%m-%d')),
+                                              theme["DATE_FORMAT"]["FORECAST_DAY"])
+    forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[2]['datetime'], '%Y-%m-%d')),
+                                              theme["DATE_FORMAT"]["FORECAST_DAY"])
+    forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[3]['datetime'], '%Y-%m-%d')),
+                                              theme["DATE_FORMAT"]["FORECAST_DAY"])
 
     forecast_day_1_min_max_string = str(int(daily_forecast[1]['low_temp'])) + ' | ' + str(
         int(daily_forecast[1]['high_temp']))
@@ -664,7 +690,6 @@ def draw_text_layer():
     sunset_string = convert_timestamp(daily_forecast[0]['sunset_ts'], theme["DATE_FORMAT"]["SUNRISE_SUNSET"])
 
     wind_speed_string = str(round((float(current_forecast['wind_spd']) * 3.6), 1)) + ' km/h'
-
     draw_time_layer()
 
     DrawString(summary_string, font_small_bold, VIOLET, 50).center(1, 0)
@@ -688,16 +713,15 @@ def draw_text_layer():
     DrawString(wind_direction_string, font_small_bold, MAIN_FONT, 250).center(3, 2)
     DrawString(wind_speed_string, font_small_bold, MAIN_FONT, 300).center(3, 2)
 
-    print('\nsummary: {}'.format(summary_string))
-    print('temp out: {}'.format(temp_out_string))
-    print('{}: {}'.format(PRECIPTYPE, rain_string))
-    print('forecast: '
-          + forecast_day_1_string + ' ' + forecast_day_1_min_max_string + ' ; '
-          + forecast_day_2_string + ' ' + forecast_day_2_min_max_string + ' ; '
-          + forecast_day_3_string + ' ' + forecast_day_3_min_max_string
-          )
-    print('sunrise: {} ; sunset {}'.format(sunrise_string, sunset_string))
-    print('WindSpeed: {}'.format(wind_speed_string))
+    logger.debug(f'summary: {summary_string}')
+    logger.debug(f'temp out: {temp_out_string}')
+    logger.debug(f'{PRECIPTYPE}: {rain_string}')
+    logger.debug(f'forecast: '
+                 f'{forecast_day_1_string} {forecast_day_1_min_max_string}; '
+                 f'{forecast_day_2_string} {forecast_day_2_min_max_string}; '
+                 f'{forecast_day_3_string} {forecast_day_3_min_max_string}')
+    logger.debug(f'sunrise: {sunrise_string} ; sunset {sunset_string}')
+    logger.debug(f'WindSpeed: {wind_speed_string}')
 
 
 def draw_to_tft():
@@ -706,20 +730,24 @@ def draw_to_tft():
     draw_image_layer()
     draw_text_layer()
 
-    pygame.display.update()
-
-    time.sleep(1)
-
 
 def quit_all():
     global threads
 
     for thread in threads:
+        logger.debug(f'Thread killed {thread}')
         thread.cancel()
         thread.join()
 
     pygame.quit()
     quit()
+
+
+def draw_event(color=RED):
+    pos = pygame.mouse.get_pos()
+    size = 16
+    new_pos = (pos[0] - size / 2, pos[1] - size / 2)
+    DrawImage(ICON_PATH + 'circle.png', size=size, fillcolor=color).draw_position(new_pos)
 
 
 def loop():
@@ -739,6 +767,11 @@ def loop():
 
                 quit_all()
 
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+
+                if pygame.MOUSEBUTTONDOWN:
+                    draw_event()
+
             elif event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_ESCAPE:
@@ -750,6 +783,9 @@ def loop():
                 elif event.key == pygame.K_SPACE:
                     pygame.image.save(TFT, f'screenshot-{convert_timestamp(time.time(), "%Y-%m-%d %H-%M-%S")}.png')
                     print('SPACE')
+
+        pygame.display.update()
+        clock.tick(config['TIMER']['FPS'])
 
     quit_all()
 
