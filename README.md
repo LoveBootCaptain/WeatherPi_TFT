@@ -139,32 +139,67 @@ pip install -r requirements.txt
 
 ### add API key and other options to the config file
 
-* create a new config-file
+#### create a new config-file
 ```bash
 cd
 cd WeatherPi_TFT
 cp example.config.json config.json
 ```
-* edit the config.json file
+#### edit the config.json file
 ```
 nano config.json
 ```
+#### configure your display options    
+```
+  "DISPLAY": {
+    "WIDTH": 240,
+    "HEIGHT": 320,
+    "FPS": 30,
+    "FRAMEBUFFER": "/dev/fb1",
+    "PWM": false
+  },
+``` 
+* as long as you configure a 3:4 ratio the dashboard will be scaled
+* `FPS` is used for pygame internal ticks - 30 fps is more than enough to render clock transitions smoothly
+* set `FRAMEBUFFER` according to your display, some use fb0 some fb1, for local set it to `false`
+* set `PWM` to your GPIO pin if your display support pwm brightness - may need some code adjustments on your side depending on your display (some are bright enough with pwm 25, some ore not) otherwhise set it to `false`
+
+#### configure weatherbit.io settings
+
 * replace `xxxxxxxxxxxxxxxxxxxxxxxxx` in  `"WEATHERBIT_IO_KEY": "xxxxxxxxxxxxxxxxxxxxxxxxx"` with your own API key
 * replace `en` in `"WEATHERBIT_LANGUAGE": "en"` with your preferred language
 * replace `de` in `"WEATHERBIT_COUNTRY": "de"` with your country
 * replace `10178` in `"WEATHERBIT_POSTALCODE": 10178` with your zip code / postal code (this example-location zip code is from berlin city, germany)
 * for language-support, units, etc please refer to -> **[weatherbit API Docs](https://www.weatherbit.io/api)**
-* in `"THEME"` you can specify a json file with theming information -> an example for the default theme is in the file `example.theme.json`
+
+#### localise hardcoded strings and ISO settings
+```
+  "LOCALE": {
+    "ISO": "de_DE",
+    "RAIN_STR": "Regen",
+    "SNOW_STR": "Schnee",
+    "PRECIP_STR": "Niederschlag"
+  },
+```
+#### timer options
+```
+  "TIMER": {
+    "UPDATE": 300,
+    "RELOAD": 30
+  },
+```
+* the `UPDATE` timer defines how often the API will be called in seconds
+* `RELOAD` defines who often the information on the display will be updated 
+
+### theme file and theme options
+set your theme file [darcula.theme, light.theme or example.theme] in `config.json`
+```
+"THEME": "darcula.theme",
+```
+
+* inside your THEME you can specify with json file with theming information -> an example for the default theme is in the file `example.theme.json`
 * you must also try the new `darcula.theme.json` which is an homage to **[jetBrains great darcula theme](https://plugins.jetbrains.com/plugin/12275-dracula-theme)** for their IDE's -> [see screenshots below](#darcula-styled-theme-with-another-font) 
     * you can change some basic theme information
-    * localise hardcoded strings
-        ```
-          "LOCALE": {
-            "RAIN_STR": "Rain",
-            "SNOW_STR": "Snow",
-            "PRECIP_STR": "Precipitation"
-          }
-        ```
     * change colors of status bar icons and the wind direction icon with the theme colors
         ```
         "RED" is used for errors in status bar icons and wind direction

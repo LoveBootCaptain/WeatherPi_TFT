@@ -1,4 +1,11 @@
 {
+  "DISPLAY": {
+    "WIDTH": 240,
+    "HEIGHT": 320,
+    "FPS": 30,
+    "FRAMEBUFFER": "/dev/fb1",
+    "PWM": false
+  },
   "WEATHERBIT_URL": "https://api.weatherbit.io/v2.0",
   "WEATHERBIT_IO_KEY": "xxxxxxxxxxxxxxxxxxxxxxxxx",
   "WEATHERBIT_COUNTRY": "de",
@@ -6,9 +13,16 @@
   "WEATHERBIT_POSTALCODE": 10178,
   "WEATHERBIT_HOURS": 1,
   "WEATHERBIT_DAYS": 4,
+  "LOCALE": {
+    "ISO": "en_GB",
+    "RAIN_STR": "Rain",
+    "SNOW_STR": "Snow",
+    "PRECIP_STR": "Precipitation"
+  },
   "THEME": "example.theme",
   "TIMER": {
     "UPDATE": 300,
     "RELOAD": 60
-  }
+  },
+  "ENV": "Pi"
 }

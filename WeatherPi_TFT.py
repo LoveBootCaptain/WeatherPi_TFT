@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # MIT License
@@ -27,12 +27,12 @@
 import datetime
 import json
 import locale
+import logging
 import math
 import os
 import sys
 import threading
 import time
-import logging
 
 import pygame
 import requests
@@ -67,48 +67,58 @@ theme_config = config["THEME"]
 theme_settings = open(PATH + theme_config).read()
 theme = json.loads(theme_settings)
 
-# if you do local development you can add a mock server (e.g. from postman.io our your homebrew solution)
-# simple add this variables to your config.json to save api-requests
-# or to create your own custom test data for your own dashboard views)
+pygame.display.init()
+pygame.font.init()
+pygame.mouse.set_visible(True)
+
+server = config['WEATHERBIT_URL']
+headers = {}
+WEATHERBIT_IO_KEY = config['WEATHERBIT_DEV_KEY']
+
+locale.setlocale(locale.LC_ALL, (config['LOCALE']['ISO'], 'UTF-8'))
 
 try:
+    # if you do local development you can add a mock server (e.g. from postman.io our your homebrew solution)
+    # simple add this variables to your config.json to save api-requests
+    # or to create your own custom test data for your own dashboard views)
     if config['ENV'] == 'DEV':
         server = config['MOCKSERVER_URL']
         headers = {'X-Api-Key': f'{config["MOCKSERVER_API_KEY"]}'}
 
     elif config['ENV'] == 'STAGE':
-        server = config['WEATHERBIT_URL']
-        headers = {}
+        pass
 
-    locale.setlocale(locale.LC_ALL, ('de_DE', 'UTF-8'))
-    WEATHERBIT_IO_KEY = config['WEATHERBIT_DEV_KEY']
+    elif config['ENV'] == 'Pi':
+        if config['DISPLAY']['FRAMEBUFFER'] is not False:
+            # using the dashboard on a raspberry with tft displays might make this necessary
+            os.putenv('SDL_FBDEV', config['DISPLAY']['FRAMEBUFFER'])
 
-    pygame.init()
-    logger.info(f"{config['ENV']} SYSTEM - STARTING IN LOCAL DEV MODE")
+        WEATHERBIT_IO_KEY = config['WEATHERBIT_IO_KEY']
+        pygame.mouse.set_visible(False)
 
-except KeyError as config_ex:
-    server = config['WEATHERBIT_URL']
-    headers = {}
+    logger.info(f"STARTING IN {config['ENV']} MODE")
 
-    # using the dashboard on a raspberry with ili9341 tft displays might make this necessary
-    os.putenv('SDL_FBDEV', '/dev/fb1')
 
-    pygame.init()
-    pygame.mouse.set_visible(False)
-
-    WEATHERBIT_IO_KEY = config['WEATHERBIT_IO_KEY']
-
-    logger.info(f"STARTING IN PROD MODE FOR RPi: {config_ex}")
-
-    # this is needed to set the output of weekdays to your local os settings
-    # doesn't work on my dev laptop but on the Pi
-    locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
+except Exception as config_ex:
+    logger.warning(config_ex)
+    quit()
 
 clock = pygame.time.Clock()
 
+pwm = config['DISPLAY']['PWM']
+
+if pwm:
+    os.system(f"gpio -g mode {pwm} pwm")
+
 # theme settings from theme config
-DISPLAY_WIDTH = theme["DISPLAY"]["WIDTH"]
-DISPLAY_HEIGHT = theme["DISPLAY"]["HEIGHT"]
+DISPLAY_WIDTH = config["DISPLAY"]["WIDTH"]
+DISPLAY_HEIGHT = config["DISPLAY"]["HEIGHT"]
+
+SURFACE_WIDTH = 240
+SURFACE_HEIGHT = 320
+
+SCALE = int(DISPLAY_WIDTH / SURFACE_WIDTH)
+FPS = config['DISPLAY']['FPS']
 
 BACKGROUND = tuple(theme["COLOR"]["BACKGROUND"])
 MAIN_FONT = tuple(theme["COLOR"]["MAIN_FONT"])
@@ -139,8 +149,10 @@ WEATHERBIT_POSTALCODE = config['WEATHERBIT_POSTALCODE']
 WEATHERBIT_HOURS = config['WEATHERBIT_HOURS']
 WEATHERBIT_DAYS = config['WEATHERBIT_DAYS']
 
-TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-# TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
+TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN if config['ENV'] == 'Pi' else 0)
+TFT.fill(BACKGROUND)
+
+tft = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
 pygame.display.set_caption('WeatherPiTFT')
 
 font_small = pygame.font.Font(FONT_PATH + FONT_MEDIUM, SMALL_SIZE)
@@ -175,13 +187,17 @@ PATH_ERROR = True
 PRECIPTYPE = 'NULL'
 PRECIPCOLOR = WHITE
 
+CONNECTION = True
+READING = True
+UPDATING = True
+
 threads = []
 
 json_data = {}
 
 
 class DrawString:
-    def __init__(self, string, font, color, y):
+    def __init__(self, string: str, font, color, y: int):
         """
         :param string: the input string
         :param font: the fonts object
@@ -191,7 +207,7 @@ class DrawString:
         self.string = string
         self.font = font
         self.color = color
-        self.y = y
+        self.y = int(y)
         self.size = self.font.size(self.string)
 
     def left(self, offset=0):
@@ -199,7 +215,7 @@ class DrawString:
         :param offset: define some offset pixel to move strings a little bit more left (default=0)
         """
 
-        x = 10 + offset
+        x = int(10 + offset)
 
         self.draw_string(x)
 
@@ -208,7 +224,7 @@ class DrawString:
         :param offset: define some offset pixel to move strings a little bit more right (default=0)
         """
 
-        x = (DISPLAY_WIDTH - self.size[0] - 10) - offset
+        x = int((SURFACE_WIDTH - self.size[0] - 10) - offset)
 
         self.draw_string(x)
 
@@ -219,7 +235,7 @@ class DrawString:
         :param offset: define some offset pixel to move strings a little bit (default=0)
         """
 
-        x = ((((DISPLAY_WIDTH / parts) / 2) + ((DISPLAY_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset
+        x = int(((((SURFACE_WIDTH / parts) / 2) + ((SURFACE_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset)
 
         self.draw_string(x)
 
@@ -228,7 +244,7 @@ class DrawString:
         takes x and y from the functions above and render the fonts
         """
 
-        TFT.blit(self.font.render(self.string, True, self.color), (x, self.y))
+        tft.blit(self.font.render(self.string, True, self.color), (x, self.y))
 
 
 class DrawImage:
@@ -263,10 +279,10 @@ class DrawImage:
         self.image = pygame.image.fromstring(self.image.tobytes(), self.image.size, self.image.mode)
 
     @staticmethod
-    def fill(surface, color: tuple):
+    def fill(surface, fillcolor: tuple):
         """converts the color on an icon"""
         w, h = surface.get_size()
-        r, g, b = color
+        r, g, b = fillcolor
         for x in range(w):
             for y in range(h):
                 a: int = surface.get_at((x, y))[3]
@@ -278,7 +294,7 @@ class DrawImage:
         :param offset: define some offset pixel to move image a little bit more left(default=0)
         """
 
-        x = 10 + offset
+        x = int(10 + offset)
 
         self.draw_image(x)
 
@@ -287,7 +303,7 @@ class DrawImage:
         :param offset: define some offset pixel to move image a little bit more right (default=0)
         """
 
-        x = (DISPLAY_WIDTH - self.img_size[0] - 10) - offset
+        x = int((SURFACE_WIDTH - self.img_size[0] - 10) - offset)
 
         self.draw_image(x)
 
@@ -298,15 +314,15 @@ class DrawImage:
         :param offset: define some offset pixel to move strings a little bit (default=0)
         """
 
-        x = int(((((DISPLAY_WIDTH / parts) / 2) + ((DISPLAY_WIDTH / parts) * part)) - (self.img_size[0] / 2)) + offset)
+        x = int(((((SURFACE_WIDTH / parts) / 2) + ((SURFACE_WIDTH / parts) * part)) - (self.img_size[0] / 2)) + offset)
 
         self.draw_image(x)
 
     def draw_middle_position_icon(self):
 
-        position_x = (DISPLAY_WIDTH - ((DISPLAY_WIDTH / 3) / 2) - (self.image.get_rect()[2] / 2))
+        position_x = int((SURFACE_WIDTH - ((SURFACE_WIDTH / 3) / 2) - (self.image.get_rect()[2] / 2)))
 
-        position_y = (self.y - (self.image.get_rect()[3] / 2))
+        position_y = int((self.y - (self.image.get_rect()[3] / 2)))
 
         self.draw_image(x=position_x, _y=position_y)
 
@@ -327,27 +343,33 @@ class DrawImage:
             self.fill(surface, self.fillcolor)
 
             if _y:
-                TFT.blit(surface, (x, _y))
+                tft.blit(surface, (x, int(_y)))
             else:
-                TFT.blit(surface, (x, self.y))
+                tft.blit(surface, (x, self.y))
         else:
             if _y:
-                TFT.blit(self.image, (x, _y))
+                tft.blit(self.image, (x, int(_y)))
             else:
-                TFT.blit(self.image, (x, self.y))
+                tft.blit(self.image, (x, self.y))
 
 
 class Update:
     @staticmethod
     def update_json():
 
-        global threads, CONNECTION_ERROR
+        if pwm:
+            os.system(f'gpio -g pwm {pwm} {get_brightness()}')
+            print(get_brightness(), pwm)
+
+        global threads, CONNECTION_ERROR, CONNECTION
 
         thread = threading.Timer(config["TIMER"]["UPDATE"], Update.update_json)
 
         thread.start()
 
         threads.append(thread)
+
+        CONNECTION = pygame.time.get_ticks() + 1500  # 1.5 seconds
 
         try:
 
@@ -386,20 +408,18 @@ class Update:
 
             logger.warning(f'Connection ERROR: {update_ex}')
 
-            pass
-
-        DrawImage(WiFi_Path, 5, size=15, fillcolor=BLUE).left()
-
     @staticmethod
     def read_json():
 
-        global threads, json_data, REFRESH_ERROR
+        global threads, json_data, REFRESH_ERROR, READING
 
         thread = threading.Timer(config["TIMER"]["RELOAD"], Update.read_json)
 
         thread.start()
 
         threads.append(thread)
+
+        READING = pygame.time.get_ticks() + 1500  # 1.5 seconds
 
         try:
 
@@ -420,17 +440,16 @@ class Update:
 
             logger.warning(f'ERROR - json file read by module: {read_ex}')
 
-        DrawImage(Path_Path, 5, size=15, fillcolor=BLUE).right(-5)
-
-        time.sleep(1)
-
         Update.icon_path()
 
     @staticmethod
     def icon_path():
 
         global WeatherIcon_Path, ForeCastIcon_Day_1_Path, \
-            ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, PRECIPTYPE, PRECIPCOLOR
+            ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, PRECIPTYPE, PRECIPCOLOR, UPDATING
+
+        pygame.time.delay(1500)
+        UPDATING = pygame.time.get_ticks() + 1500  # 1.5 seconds
 
         folder_path = ICON_PATH
         icon_extension = '.png'
@@ -491,8 +510,6 @@ class Update:
 
         Update.get_precip_type()
 
-        DrawImage(Refresh_Path, 5, size=15, fillcolor=BLUE).right(7)
-
     @staticmethod
     def get_precip_type():
 
@@ -504,19 +521,19 @@ class Update:
 
         if pop == 0:
 
-            PRECIPTYPE = theme['LOCALE']['PRECIP_STR']
+            PRECIPTYPE = config['LOCALE']['PRECIP_STR']
             PRECIPCOLOR = GREEN
 
         else:
 
             if rain > 0 and pop > 0:
 
-                PRECIPTYPE = theme['LOCALE']['RAIN_STR']
+                PRECIPTYPE = config['LOCALE']['RAIN_STR']
                 PRECIPCOLOR = BLUE
 
             elif snow > 0 and pop > 0:
 
-                PRECIPTYPE = theme['LOCALE']['SNOW_STR']
+                PRECIPTYPE = config['LOCALE']['SNOW_STR']
                 PRECIPCOLOR = WHITE
 
         logger.info(f'update PRECIPPOP to: {pop} %')
@@ -527,6 +544,13 @@ class Update:
     def run():
         Update.update_json()
         Update.read_json()
+
+
+def get_brightness():
+    current_time = time.time()
+    current_time = int(convert_timestamp(current_time, '%H'))
+
+    return 25 if current_time >= 20 or current_time <= 5 else 100
 
 
 def convert_timestamp(timestamp, param_string):
@@ -580,9 +604,9 @@ def draw_moon_layer(y, size):
     image = image.resize((size, size), Image.LANCZOS)
     image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
 
-    x = (DISPLAY_WIDTH / 2) - (size / 2)
+    x = (SURFACE_WIDTH / 2) - (size / 2)
 
-    TFT.blit(image, (x, y))
+    tft.blit(image, (x, y))
 
 
 def draw_wind_layer(y):
@@ -595,38 +619,46 @@ def draw_wind_layer(y):
     logger.debug(f'wind direction: {angle}')
 
 
+def draw_statusbar():
+
+    global CONNECTION, READING, UPDATING
+
+    DrawImage(WiFi_Path, 5, size=15, fillcolor=RED).left() \
+        if CONNECTION_ERROR else DrawImage(WiFi_Path, 5, size=15, fillcolor=GREEN).left()
+
+    DrawImage(Refresh_Path, 5, size=15, fillcolor=RED).right(7) \
+        if REFRESH_ERROR else DrawImage(Refresh_Path, 5, size=15, fillcolor=GREEN).right(7)
+
+    DrawImage(Path_Path, 5, size=15, fillcolor=RED).right(-5) \
+        if PATH_ERROR else DrawImage(Path_Path, 5, size=15, fillcolor=GREEN).right(-5)
+
+    if CONNECTION:
+        DrawImage(WiFi_Path, 5, size=15, fillcolor=BLUE).left()
+        if pygame.time.get_ticks() >= CONNECTION:
+            CONNECTION = None
+
+    if READING:
+        DrawImage(Path_Path, 5, size=15, fillcolor=BLUE).right(-5)
+        if pygame.time.get_ticks() >= READING:
+            READING = None
+
+    if UPDATING:
+        DrawImage(Refresh_Path, 5, size=15, fillcolor=BLUE).right(7)
+        if pygame.time.get_ticks() >= UPDATING:
+            UPDATING = None
+
+
 def draw_image_layer():
-    if CONNECTION_ERROR:
 
-        DrawImage(WiFi_Path, 5, size=15, fillcolor=RED).left()
-
-    else:
-
-        DrawImage(WiFi_Path, 5, size=15, fillcolor=GREEN).left()
-
-    if REFRESH_ERROR:
-
-        DrawImage(Refresh_Path, 5, size=15, fillcolor=RED).right(7)
-
-    else:
-
-        DrawImage(Refresh_Path, 5, size=15, fillcolor=GREEN).right(7)
-
-    if PATH_ERROR:
-
-        DrawImage(Path_Path, 5, size=15, fillcolor=RED).right(-5)
-
-    else:
-
-        DrawImage(Path_Path, 5, size=15, fillcolor=GREEN).right(-5)
+    draw_statusbar()
 
     DrawImage(WeatherIcon_Path, 68, size=100).center(2, 0, offset=10)
 
-    if PRECIPTYPE == theme['LOCALE']['RAIN_STR']:
+    if PRECIPTYPE == config['LOCALE']['RAIN_STR']:
 
         DrawImage(PrecipRain_Path, 140, size=20).right(45)
 
-    elif PRECIPTYPE == theme['LOCALE']['SNOW_STR']:
+    elif PRECIPTYPE == config['LOCALE']['SNOW_STR']:
 
         DrawImage(PrecipSnow_Path, 140, size=20).right(50)
 
@@ -725,22 +757,23 @@ def draw_text_layer():
 
 
 def draw_to_tft():
-    TFT.fill(BACKGROUND)
+    tft.fill(BACKGROUND)
 
     draw_image_layer()
     draw_text_layer()
 
 
 def quit_all():
+
     global threads
 
     for thread in threads:
-        logger.debug(f'Thread killed {thread}')
+        logger.info(f'Thread killed {thread}')
         thread.cancel()
         thread.join()
 
     pygame.quit()
-    quit()
+    sys.exit()
 
 
 def draw_event(color=RED):
@@ -751,6 +784,7 @@ def draw_event(color=RED):
 
 
 def loop():
+
     Update.run()
 
     running = True
@@ -781,11 +815,20 @@ def loop():
                     quit_all()
 
                 elif event.key == pygame.K_SPACE:
-                    pygame.image.save(TFT, f'screenshot-{convert_timestamp(time.time(), "%Y-%m-%d %H-%M-%S")}.png')
-                    print('SPACE')
+                    shot_time = convert_timestamp(time.time(), "%Y-%m-%d %H-%M-%S")
+                    pygame.image.save(tft, f'screenshot-{shot_time}.png')
+                    logger.info(f'Screenshot created at {shot_time}')
+
+        scaled_tft = pygame.transform.smoothscale(tft, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
+        _, _, w, h = scaled_tft.get_rect()
+
+        pos = int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HEIGHT - (SURFACE_HEIGHT * SCALE)) / 2)
+
+        TFT.blit(pygame.transform.smoothscale(scaled_tft, (w, h)), pos)
 
         pygame.display.update()
-        clock.tick(config['TIMER']['FPS'])
+
+        clock.tick(FPS)
 
     quit_all()
 
