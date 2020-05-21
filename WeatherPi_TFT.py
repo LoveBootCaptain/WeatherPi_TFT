@@ -73,7 +73,6 @@ pygame.mouse.set_visible(True)
 
 server = config['WEATHERBIT_URL']
 headers = {}
-WEATHERBIT_IO_KEY = config['WEATHERBIT_DEV_KEY']
 
 locale.setlocale(locale.LC_ALL, (config['LOCALE']['ISO'], 'UTF-8'))
 
@@ -83,10 +82,11 @@ try:
     # or to create your own custom test data for your own dashboard views)
     if config['ENV'] == 'DEV':
         server = config['MOCKSERVER_URL']
+        WEATHERBIT_IO_KEY = config['WEATHERBIT_DEV_KEY']
         headers = {'X-Api-Key': f'{config["MOCKSERVER_API_KEY"]}'}
 
     elif config['ENV'] == 'STAGE':
-        pass
+        WEATHERBIT_IO_KEY = config['WEATHERBIT_DEV_KEY']
 
     elif config['ENV'] == 'Pi':
         if config['DISPLAY']['FRAMEBUFFER'] is not False:
