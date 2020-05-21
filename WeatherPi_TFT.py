@@ -108,7 +108,10 @@ clock = pygame.time.Clock()
 pwm = config['DISPLAY']['PWM']
 
 if pwm:
+    logger.info(f'set PWM for brightness control to PIN {pwm}')
     os.system(f"gpio -g mode {pwm} pwm")
+else:
+    logger.info('no PWM for brightness control configured')
 
 # theme settings from theme config
 DISPLAY_WIDTH = config["DISPLAY"]["WIDTH"]
@@ -354,12 +357,15 @@ class DrawImage:
 
 
 class Update:
+
     @staticmethod
     def update_json():
 
-        if pwm:
-            os.system(f'gpio -g pwm {pwm} {get_brightness()}')
-            print(get_brightness(), pwm)
+        brightness = get_brightness()
+
+        os.system(f'gpio -g pwm {pwm} {brightness}') if pwm else None
+
+        logger.info(f'set brightness: {brightness}, pwm configured: {pwm}')
 
         global threads, CONNECTION_ERROR, CONNECTION
 
@@ -623,14 +629,11 @@ def draw_statusbar():
 
     global CONNECTION, READING, UPDATING
 
-    DrawImage(WiFi_Path, 5, size=15, fillcolor=RED).left() \
-        if CONNECTION_ERROR else DrawImage(WiFi_Path, 5, size=15, fillcolor=GREEN).left()
+    DrawImage(WiFi_Path, 5, size=15, fillcolor=RED if CONNECTION_ERROR else GREEN).left()
 
-    DrawImage(Refresh_Path, 5, size=15, fillcolor=RED).right(7) \
-        if REFRESH_ERROR else DrawImage(Refresh_Path, 5, size=15, fillcolor=GREEN).right(7)
+    DrawImage(Refresh_Path, 5, size=15, fillcolor=RED if REFRESH_ERROR else GREEN).right(7)
 
-    DrawImage(Path_Path, 5, size=15, fillcolor=RED).right(-5) \
-        if PATH_ERROR else DrawImage(Path_Path, 5, size=15, fillcolor=GREEN).right(-5)
+    DrawImage(Path_Path, 5, size=15, fillcolor=RED if PATH_ERROR else GREEN).right(-5)
 
     if CONNECTION:
         DrawImage(WiFi_Path, 5, size=15, fillcolor=BLUE).left()
