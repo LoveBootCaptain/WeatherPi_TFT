@@ -1,8 +1,4 @@
 {
-  "DISPLAY": {
-    "WIDTH": 240,
-    "HEIGHT": 320
-  },
   "DATE_FORMAT": {
     "DATE": "%a - %d.%m.%Y",
     "TIME": "%H:%M:%S",
@@ -29,10 +25,5 @@
     "CLOCK_SIZE": 30,
     "SMALL_SIZE": 14,
     "BIG_SIZE": 30
-  },
-  "LOCALE": {
-    "RAIN_STR": "Rain",
-    "SNOW_STR": "Snow",
-    "PRECIP_STR": "Precipitation"
   }
 }
