@@ -453,7 +453,6 @@ class Update:
         try:
 
             current_endpoint = f'{server}/current'
-            # hourly_endpoint = f'{server}/forecast/hourly'
             daily_endpoint = f'{server}/forecast/daily'
 
             logger.info(f'connecting to server: {server}')
@@ -461,11 +460,9 @@ class Update:
             options = str(f'&postal_code={WEATHERBIT_POSTALCODE}&country={WEATHERBIT_COUNTRY}&lang={WEATHERBIT_LANG}')
 
             current_request_url = str(f'{current_endpoint}?key={WEATHERBIT_IO_KEY}{options}')
-            # hourly_request_url = str(f'{hourly_endpoint}?key={WEATHERBIT_IO_KEY}{options}&hours={WEATHERBIT_HOURS}')
             daily_request_url = str(f'{daily_endpoint}?key={WEATHERBIT_IO_KEY}{options}&days={WEATHERBIT_DAYS}')
 
             current_data = requests.get(current_request_url, headers=headers).json()
-            # hourly_data = requests.get(hourly_request_url, headers=headers).json()
             daily_data = requests.get(daily_request_url, headers=headers).json()
 
             data = {

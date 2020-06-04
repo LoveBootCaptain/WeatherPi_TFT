@@ -22,7 +22,7 @@
   },
   "THEME": "example.theme",
   "TIMER": {
-    "UPDATE": 300,
+    "UPDATE": 420,
     "RELOAD": 60
   },
   "ENV": "Pi"
