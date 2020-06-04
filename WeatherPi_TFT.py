@@ -38,7 +38,6 @@ import random
 import pygame
 import requests
 from PIL import Image, ImageDraw
-from functools import lru_cache
 
 PATH = sys.path[0] + '/'
 
@@ -73,7 +72,7 @@ theme = json.loads(theme_settings)
 pygame.display.init()
 pygame.mixer.quit()
 pygame.font.init()
-pygame.mouse.set_visible(True)
+pygame.mouse.set_visible(config['DISPLAY']['MOUSE'])
 
 server = config['WEATHERBIT_URL']
 headers = {}
@@ -96,10 +95,8 @@ try:
         if config['DISPLAY']['FRAMEBUFFER'] is not False:
             # using the dashboard on a raspberry with tft displays might make this necessary
             os.putenv('SDL_FBDEV', config['DISPLAY']['FRAMEBUFFER'])
-            os.environ['SDL_VIDEODRIVER'] = 'fbcon'
 
         WEATHERBIT_IO_KEY = config['WEATHERBIT_IO_KEY']
-        pygame.mouse.set_visible(False)
 
     logger.info(f"STARTING IN {config['ENV']} MODE")
 
@@ -174,23 +171,12 @@ clock_font = pygame.font.Font(FONT_PATH + FONT_BOLD, CLOCK_SIZE)
 font_small_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, SMALL_SIZE)
 font_big_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, BIG_SIZE)
 
-Refresh_Path = ICON_PATH + 'refresh.png'
 
-WiFi_Path = ICON_PATH + 'wifi.png'
+WeatherIcon = 'unknown'
 
-Path_Path = ICON_PATH + 'path.png'
-
-WeatherIcon_Path = ICON_PATH + 'unknown.png'
-
-ForeCastIcon_Day_1_Path = ICON_PATH + 'mini_unknown.png'
-ForeCastIcon_Day_2_Path = ICON_PATH + 'mini_unknown.png'
-ForeCastIcon_Day_3_Path = ICON_PATH + 'mini_unknown.png'
-
-SunRise_Path = ICON_PATH + 'sunrise.png'
-SunSet_Path = ICON_PATH + 'sunset.png'
-
-PrecipSnow_Path = ICON_PATH + 'precipsnow.png'
-PrecipRain_Path = ICON_PATH + 'preciprain.png'
+ForeCastIcon_Day_1 = 'unknown'
+ForeCastIcon_Day_2 = 'unknown'
+ForeCastIcon_Day_3 = 'unknown'
 
 CONNECTION_ERROR = True
 REFRESH_ERROR = True
@@ -207,7 +193,6 @@ threads = []
 json_data = {}
 
 
-@lru_cache()
 class Particles(object):
     def __init__(self):
         self.size = 20
@@ -270,7 +255,6 @@ my_particles = Particles()
 my_particles_list = my_particles.create_particle_list()
 
 
-@lru_cache()
 class DrawString:
     def __init__(self, string: str, font, color, y: int):
         """
@@ -322,16 +306,29 @@ class DrawString:
         tft.blit(self.font.render(self.string, True, self.color), (x, self.y))
 
 
-@lru_cache()
+def image_factory(image_path):
+    result = {}
+    for img in os.listdir(image_path):
+        image_id = img.split('.')[0]
+        if image_id == "":
+            pass
+        else:
+            result[image_id] = Image.open(image_path + img)
+    return result
+
+
+images = image_factory(ICON_PATH)
+
+
 class DrawImage:
-    def __init__(self, image_path, y=None, size=None, fillcolor=None, angle=None):
+    def __init__(self, image: object, y=None, size=None, fillcolor=None, angle=None):
         """
         :param image_path: the path to the image you want to render
         :param y: the y-postion of the image you want to render
         """
 
-        self.image_path = image_path
-        self.image = Image.open(self.image_path)
+        # self.image_path = image_path
+        self.image = image
         self.y = y
         self.img_size = self.image.size
         self.size = size
@@ -520,13 +517,12 @@ class Update:
     @staticmethod
     def icon_path():
 
-        global WeatherIcon_Path, ForeCastIcon_Day_1_Path, \
-            ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path, PRECIPTYPE, PRECIPCOLOR, UPDATING
+        global WeatherIcon, ForeCastIcon_Day_1, \
+            ForeCastIcon_Day_2, ForeCastIcon_Day_3, PRECIPTYPE, PRECIPCOLOR, UPDATING
 
         pygame.time.delay(1500)
         UPDATING = pygame.time.get_ticks() + 1500  # 1.5 seconds
 
-        folder_path = ICON_PATH
         icon_extension = '.png'
 
         updated_list = []
@@ -541,35 +537,26 @@ class Update:
 
         logger.debug(forecast)
 
-        WeatherIcon_Path = folder_path + forecast[0] + icon_extension
+        logger.debug(f'validating path: {forecast}')
 
-        ForeCastIcon_Day_1_Path = folder_path + forecast[1] + icon_extension
-        ForeCastIcon_Day_2_Path = folder_path + forecast[2] + icon_extension
-        ForeCastIcon_Day_3_Path = folder_path + forecast[3] + icon_extension
+        for icon in forecast:
 
-        path_list = [WeatherIcon_Path, ForeCastIcon_Day_1_Path,
-                     ForeCastIcon_Day_2_Path, ForeCastIcon_Day_3_Path]
+            if os.path.isfile(ICON_PATH + icon + icon_extension):
 
-        logger.debug(f'validating path: {path_list}')
+                logger.debug(f'TRUE : {icon}')
 
-        for path in path_list:
-
-            if os.path.isfile(path):
-
-                logger.debug(f'TRUE : {path}')
-
-                updated_list.append(path)
+                updated_list.append(icon)
 
             else:
 
-                logger.warning(f'FALSE : {path}')
+                logger.warning(f'FALSE : {icon}')
 
-                updated_list.append(ICON_PATH + 'unknown.png')
+                updated_list.append('unknown')
 
-        WeatherIcon_Path = updated_list[0]
-        ForeCastIcon_Day_1_Path = updated_list[1]
-        ForeCastIcon_Day_2_Path = updated_list[2]
-        ForeCastIcon_Day_3_Path = updated_list[3]
+        WeatherIcon = updated_list[0]
+        ForeCastIcon_Day_1 = updated_list[1]
+        ForeCastIcon_Day_2 = updated_list[2]
+        ForeCastIcon_Day_3 = updated_list[3]
 
         global PATH_ERROR
 
@@ -688,8 +675,8 @@ def draw_wind_layer(y):
     angle = json_data['current']['data'][0]['wind_dir']
 
     # center the wind direction icon and circle on surface
-    DrawImage(ICON_PATH + 'circle.png', y, size=30, fillcolor=WHITE).draw_middle_position_icon()
-    DrawImage(ICON_PATH + 'arrow.png', y, size=30, fillcolor=RED, angle=-angle).draw_middle_position_icon()
+    DrawImage(images['circle'], y, size=30, fillcolor=WHITE).draw_middle_position_icon()
+    DrawImage(images['arrow'], y, size=30, fillcolor=RED, angle=-angle).draw_middle_position_icon()
 
     logger.debug(f'wind direction: {angle}')
 
@@ -698,24 +685,24 @@ def draw_statusbar():
 
     global CONNECTION, READING, UPDATING
 
-    DrawImage(WiFi_Path, 5, size=15, fillcolor=RED if CONNECTION_ERROR else GREEN).left()
+    DrawImage(images['wifi'], 5, size=15, fillcolor=RED if CONNECTION_ERROR else GREEN).left()
 
-    DrawImage(Refresh_Path, 5, size=15, fillcolor=RED if REFRESH_ERROR else GREEN).right(7)
+    DrawImage(images['refresh'], 5, size=15, fillcolor=RED if REFRESH_ERROR else GREEN).right(7)
 
-    DrawImage(Path_Path, 5, size=15, fillcolor=RED if PATH_ERROR else GREEN).right(-5)
+    DrawImage(images['path'], 5, size=15, fillcolor=RED if PATH_ERROR else GREEN).right(-5)
 
     if CONNECTION:
-        DrawImage(WiFi_Path, 5, size=15, fillcolor=BLUE).left()
+        DrawImage(images['wifi'], 5, size=15, fillcolor=BLUE).left()
         if pygame.time.get_ticks() >= CONNECTION:
             CONNECTION = None
 
     if READING:
-        DrawImage(Path_Path, 5, size=15, fillcolor=BLUE).right(-5)
+        DrawImage(images['path'], 5, size=15, fillcolor=BLUE).right(-5)
         if pygame.time.get_ticks() >= READING:
             READING = None
 
     if UPDATING:
-        DrawImage(Refresh_Path, 5, size=15, fillcolor=BLUE).right(7)
+        DrawImage(images['refresh'], 5, size=15, fillcolor=BLUE).right(7)
         if pygame.time.get_ticks() >= UPDATING:
             UPDATING = None
 
@@ -724,22 +711,22 @@ def draw_image_layer():
 
     draw_statusbar()
 
-    DrawImage(WeatherIcon_Path, 68, size=100).center(2, 0, offset=10)
+    DrawImage(images[WeatherIcon], 68, size=100).center(2, 0, offset=10)
 
-    DrawImage(ForeCastIcon_Day_1_Path, 200, size=50).center(3, 0)
-    DrawImage(ForeCastIcon_Day_2_Path, 200, size=50).center(3, 1)
-    DrawImage(ForeCastIcon_Day_3_Path, 200, size=50).center(3, 2)
+    DrawImage(images[ForeCastIcon_Day_1], 200, size=50).center(3, 0)
+    DrawImage(images[ForeCastIcon_Day_2], 200, size=50).center(3, 1)
+    DrawImage(images[ForeCastIcon_Day_3], 200, size=50).center(3, 2)
 
-    DrawImage(SunRise_Path, 260, size=25).left()
-    DrawImage(SunSet_Path, 290, size=25).left()
+    DrawImage(images['sunrise'], 260, size=25).left()
+    DrawImage(images['sunset'], 290, size=25).left()
 
     draw_moon_layer(255, 60)
     draw_wind_layer(285)
 
-    logger.debug(WeatherIcon_Path)
-    logger.debug(ForeCastIcon_Day_1_Path)
-    logger.debug(ForeCastIcon_Day_2_Path)
-    logger.debug(ForeCastIcon_Day_3_Path)
+    logger.debug(WeatherIcon)
+    logger.debug(ForeCastIcon_Day_1)
+    logger.debug(ForeCastIcon_Day_2)
+    logger.debug(ForeCastIcon_Day_3)
 
 
 def draw_fps():

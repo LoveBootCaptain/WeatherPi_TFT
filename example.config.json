@@ -5,7 +5,8 @@
     "FPS": 30,
     "FRAMEBUFFER": "/dev/fb1",
     "PWM": false,
-    "SHOW_FPS": false
+    "SHOW_FPS": false,
+    "MOUSE": false
   },
   "WEATHERBIT_URL": "https://api.weatherbit.io/v2.0",
   "WEATHERBIT_IO_KEY": "xxxxxxxxxxxxxxxxxxxxxxxxx",
