@@ -33,10 +33,12 @@ import os
 import sys
 import threading
 import time
+import random
 
 import pygame
 import requests
 from PIL import Image, ImageDraw
+from functools import lru_cache
 
 PATH = sys.path[0] + '/'
 
@@ -67,7 +69,9 @@ theme_config = config["THEME"]
 theme_settings = open(PATH + theme_config).read()
 theme = json.loads(theme_settings)
 
+# pygame.init()
 pygame.display.init()
+pygame.mixer.quit()
 pygame.font.init()
 pygame.mouse.set_visible(True)
 
@@ -92,6 +96,7 @@ try:
         if config['DISPLAY']['FRAMEBUFFER'] is not False:
             # using the dashboard on a raspberry with tft displays might make this necessary
             os.putenv('SDL_FBDEV', config['DISPLAY']['FRAMEBUFFER'])
+            os.environ['SDL_VIDEODRIVER'] = 'fbcon'
 
         WEATHERBIT_IO_KEY = config['WEATHERBIT_IO_KEY']
         pygame.mouse.set_visible(False)
@@ -131,9 +136,12 @@ WHITE = tuple(theme["COLOR"]["WHITE"])
 RED = tuple(theme["COLOR"]["RED"])
 GREEN = tuple(theme["COLOR"]["GREEN"])
 BLUE = tuple(theme["COLOR"]["BLUE"])
+LIGHT_BLUE = tuple((BLUE[0], 210, BLUE[2]))
+DARK_BLUE = tuple((BLUE[0], 100, 255))
 YELLOW = tuple(theme["COLOR"]["YELLOW"])
 ORANGE = tuple(theme["COLOR"]["ORANGE"])
 VIOLET = tuple(theme["COLOR"]["VIOLET"])
+COLOR_LIST = [BLUE, LIGHT_BLUE, DARK_BLUE]
 
 FONT_MEDIUM = theme["FONT"]["MEDIUM"]
 FONT_BOLD = theme["FONT"]["BOLD"]
@@ -199,6 +207,70 @@ threads = []
 json_data = {}
 
 
+@lru_cache()
+class Particles(object):
+    def __init__(self):
+        self.size = 20
+        self.count = 15
+        self.surf = pygame.Surface((self.size, self.size))
+
+    def create_particle_list(self):
+
+        particle_list = []
+
+        for i in range(self.count):
+            x = random.randrange(0, self.size)
+            y = random.randrange(0, self.size)
+            w = 1
+            h = random.randint(2, 3)
+            speed = random.choice([1, 2, 3])
+            color = random.choice(COLOR_LIST)
+            direct = random.choice([0, 0, 1])
+            particle_list.append([x, y, w, h, speed, color, direct])
+        return particle_list
+
+    def move(self, surf, particle_list):
+        # Process each snow flake in the list
+        self.surf.fill(BACKGROUND)
+        self.surf.set_colorkey(BACKGROUND)
+
+        if not PRECIPTYPE == config['LOCALE']['PRECIP_STR']:
+
+            for i in range(len(particle_list)):
+
+                particle = particle_list[i]
+                x, y, w, h, speed, color, direct = particle
+
+                # Draw the snow flake
+                if PRECIPTYPE == config['LOCALE']['RAIN_STR']:
+                    pygame.draw.rect(self.surf, color, (x, y, w, h), 0)
+                else:
+                    pygame.draw.rect(self.surf, PRECIPCOLOR, (x, y, 2, 2), 0)
+
+                # Move the snow flake down one pixel
+                particle_list[i][1] += speed if PRECIPTYPE == config['LOCALE']['RAIN_STR'] else 1
+                if random.choice([True, False]):
+                    if PRECIPTYPE == config['LOCALE']['SNOW_STR']:
+                        particle_list[i][0] += 1 if direct else 0
+
+                # If the snow flake has moved off the bottom of the screen
+                if particle_list[i][1] > self.size:
+                    # Reset it just above the top
+                    y -= self.size
+                    particle_list[i][1] = y
+                    # Give it a new x position
+                    x = random.randrange(0, self.size)
+                    particle_list[i][0] = x
+            # pygame.time.delay(75)
+
+            surf.blit(self.surf, (155, 140))
+
+
+my_particles = Particles()
+my_particles_list = my_particles.create_particle_list()
+
+
+@lru_cache()
 class DrawString:
     def __init__(self, string: str, font, color, y: int):
         """
@@ -250,6 +322,7 @@ class DrawString:
         tft.blit(self.font.render(self.string, True, self.color), (x, self.y))
 
 
+@lru_cache()
 class DrawImage:
     def __init__(self, image_path, y=None, size=None, fillcolor=None, angle=None):
         """
@@ -380,7 +453,7 @@ class Update:
         try:
 
             current_endpoint = f'{server}/current'
-            hourly_endpoint = f'{server}/forecast/hourly'
+            # hourly_endpoint = f'{server}/forecast/hourly'
             daily_endpoint = f'{server}/forecast/daily'
 
             logger.info(f'connecting to server: {server}')
@@ -388,16 +461,15 @@ class Update:
             options = str(f'&postal_code={WEATHERBIT_POSTALCODE}&country={WEATHERBIT_COUNTRY}&lang={WEATHERBIT_LANG}')
 
             current_request_url = str(f'{current_endpoint}?key={WEATHERBIT_IO_KEY}{options}')
-            hourly_request_url = str(f'{hourly_endpoint}?key={WEATHERBIT_IO_KEY}{options}&hours={WEATHERBIT_HOURS}')
+            # hourly_request_url = str(f'{hourly_endpoint}?key={WEATHERBIT_IO_KEY}{options}&hours={WEATHERBIT_HOURS}')
             daily_request_url = str(f'{daily_endpoint}?key={WEATHERBIT_IO_KEY}{options}&days={WEATHERBIT_DAYS}')
 
             current_data = requests.get(current_request_url, headers=headers).json()
-            hourly_data = requests.get(hourly_request_url, headers=headers).json()
+            # hourly_data = requests.get(hourly_request_url, headers=headers).json()
             daily_data = requests.get(daily_request_url, headers=headers).json()
 
             data = {
                 'current': current_data,
-                'hourly': hourly_data,
                 'daily': daily_data
             }
 
@@ -521,9 +593,9 @@ class Update:
 
         global json_data, PRECIPCOLOR, PRECIPTYPE
 
-        pop = int(json_data['hourly']['data'][0]['pop'])
-        rain = float(json_data['hourly']['data'][0]['precip'])
-        snow = float(json_data['hourly']['data'][0]['snow'])
+        pop = int(json_data['daily']['data'][0]['pop'])
+        rain = float(json_data['daily']['data'][0]['precip'])
+        snow = float(json_data['daily']['data'][0]['snow'])
 
         if pop == 0:
 
@@ -657,14 +729,6 @@ def draw_image_layer():
 
     DrawImage(WeatherIcon_Path, 68, size=100).center(2, 0, offset=10)
 
-    if PRECIPTYPE == config['LOCALE']['RAIN_STR']:
-
-        DrawImage(PrecipRain_Path, 140, size=20).right(45)
-
-    elif PRECIPTYPE == config['LOCALE']['SNOW_STR']:
-
-        DrawImage(PrecipSnow_Path, 140, size=20).right(50)
-
     DrawImage(ForeCastIcon_Day_1_Path, 200, size=50).center(3, 0)
     DrawImage(ForeCastIcon_Day_2_Path, 200, size=50).center(3, 1)
     DrawImage(ForeCastIcon_Day_3_Path, 200, size=50).center(3, 2)
@@ -679,6 +743,10 @@ def draw_image_layer():
     logger.debug(ForeCastIcon_Day_1_Path)
     logger.debug(ForeCastIcon_Day_2_Path)
     logger.debug(ForeCastIcon_Day_3_Path)
+
+
+def draw_fps():
+    DrawString(str(int(clock.get_fps())), font_small_bold, RED, 20).left()
 
 
 def draw_time_layer():
@@ -699,7 +767,7 @@ def draw_text_layer():
 
     summary_string = current_forecast['weather']['description']
     temp_out_string = str(int(current_forecast['temp'])) + '°C'
-    rain_string = str(int(json_data['hourly']['data'][0]['pop'])) + ' %'
+    rain_string = str(int(json_data['daily']['data'][0]['pop'])) + ' %'
 
     daily_forecast = json_data['daily']['data']
 
@@ -761,7 +829,8 @@ def draw_text_layer():
 
 def draw_to_tft():
     tft.fill(BACKGROUND)
-
+    if config["DISPLAY"]["SHOW_FPS"]:
+        draw_fps()
     draw_image_layer()
     draw_text_layer()
 
@@ -822,6 +891,7 @@ def loop():
                     pygame.image.save(tft, f'screenshot-{shot_time}.png')
                     logger.info(f'Screenshot created at {shot_time}')
 
+        my_particles.move(tft, my_particles_list)
         scaled_tft = pygame.transform.smoothscale(tft, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
         _, _, w, h = scaled_tft.get_rect()
 

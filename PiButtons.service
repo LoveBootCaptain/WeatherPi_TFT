@@ -1,0 +1,13 @@
+[Unit]
+Description=PiButtons
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/WeatherPi_TFT/venv
+ExecStart=/home/pi/WeatherPi_TFT/venv/bin/python3 /home/pi/WeatherPi_TFT/PiButtons.py --serve-in-foreground
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

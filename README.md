@@ -126,11 +126,22 @@ cd WeatherPi_TFT
 rm -rf docs/
 ```
 
-### install the dependencies in python3
+### install a venv (virtual environment) and install the dependencies in python3
 
 ```
+sudo pip3 install virtualenv 
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
+deactivate
 ```
+
+#### NOTE: pygame version 2.0.0.dev8 and SDL2 is required
+
+* If you have proplems installing pygame find more details here: https://www.pygame.org/wiki/GettingStarted
+* Follow steps from here to install SDL2 on your Pi if not already in your OS image: https://gist.github.com/Lokathor/e6fec720b722b8a6f78e399698cae6e4
+
+I hope this process will be improved and easier when pygame 2.0.0 get's it's official release.
 
 ### get an api key from weatherbit.io
 
@@ -228,12 +239,9 @@ fbcon=map:10 fbcon=font:VGA8x8 logo.nologo
 ```bash
 cd
 cd WeatherPi_TFT
-sudo cp WeatherPi_TFT_Service.sh /etc/init.d/WeatherPiTFT
-sudo cp PiButtons_Service.sh /etc/init.d/PiButtons
-sudo chmod +x /etc/init.d/WeatherPiTFT
-sudo chmod +x /etc/init.d/PiButtons
-sudo chmod +x Weatherpi_TFT.py
-sudo chmod +x PiButtons.py
+sudo cp WeatherPiTFT.service /etc/systemd/system/WeatherPiTFT.service
+sudo cp PiButtons.service /etc/systemd/system/PiButtons.service
+sudo systemctl daemon-reload
 ```
 
 ### run python with root privileges
@@ -296,23 +304,23 @@ sudo reboot
 
 * for the WeatherPiTFT Service
 ```bash
-sudo service WeatherPiTFT start
-sudo service WeatherPiTFT stop
-sudo service WeatherPiTFT restart
-sudo service WeatherPiTFT status
+sudo systemctl start WeatherPiTFT.service
+sudo systemctl stop WeatherPiTFT.service
+sudo systemctl restart WeatherPiTFT.service
+sudo systemctl status WeatherPiTFT.service
 ```
 * for the PiButtons Service
 ```bash
-sudo service PiButtons start
-sudo service PiButtons stop
-sudo service PiButtons restart
-sudo service PiButtons status
+sudo systemctl start PiButtons.service
+sudo systemctl stop PiButtons.service
+sudo systemctl restart PiButtons.service
+sudo systemctl status PiButtons.service
 ```
 
 * if this is doing what it should you can run the service every time you boot your pi
 ```bash
-sudo update-rc.d WeatherPiTFT defaults
-sudo update-rc.d PiButtons defaults
+sudo systemctl enable WeatherPiTFT.service
+sudo systemctl enable PiButtons.service
 ```
 
 ## Troubleshooting

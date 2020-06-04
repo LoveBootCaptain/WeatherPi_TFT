@@ -4,7 +4,8 @@
     "HEIGHT": 320,
     "FPS": 30,
     "FRAMEBUFFER": "/dev/fb1",
-    "PWM": false
+    "PWM": false,
+    "SHOW_FPS": false
   },
   "WEATHERBIT_URL": "https://api.weatherbit.io/v2.0",
   "WEATHERBIT_IO_KEY": "xxxxxxxxxxxxxxxxxxxxxxxxx",
