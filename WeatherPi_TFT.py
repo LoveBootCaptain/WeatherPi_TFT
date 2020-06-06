@@ -30,10 +30,10 @@ import locale
 import logging
 import math
 import os
+import random
 import sys
 import threading
 import time
-import random
 
 import pygame
 import requests
@@ -93,7 +93,7 @@ try:
 
     elif config['ENV'] == 'Pi':
         if config['DISPLAY']['FRAMEBUFFER'] is not False:
-            # using the dashboard on a raspberry with tft displays might make this necessary
+            # using the dashboard on a raspberry with TFT displays might make this necessary
             os.putenv('SDL_FBDEV', config['DISPLAY']['FRAMEBUFFER'])
 
         WEATHERBIT_IO_KEY = config['WEATHERBIT_IO_KEY']
@@ -123,6 +123,8 @@ SURFACE_WIDTH = 240
 SURFACE_HEIGHT = 320
 
 SCALE = int(DISPLAY_WIDTH / SURFACE_WIDTH)
+FIT_SCREEN = int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HEIGHT - (SURFACE_HEIGHT * SCALE)) / 2)
+
 FPS = config['DISPLAY']['FPS']
 
 BACKGROUND = tuple(theme["COLOR"]["BACKGROUND"])
@@ -157,10 +159,11 @@ WEATHERBIT_POSTALCODE = config['WEATHERBIT_POSTALCODE']
 WEATHERBIT_HOURS = config['WEATHERBIT_HOURS']
 WEATHERBIT_DAYS = config['WEATHERBIT_DAYS']
 
-TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN if config['ENV'] == 'Pi' else 0)
-TFT.fill(BACKGROUND)
+display_surf = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT),
+                                       pygame.FULLSCREEN if config['ENV'] == 'Pi' else 0)
+display_surf.fill(BACKGROUND)
 
-tft = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+dynamic_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
 weather_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
 
 pygame.display.set_caption('WeatherPiTFT')
@@ -172,7 +175,6 @@ date_font = pygame.font.Font(FONT_PATH + FONT_BOLD, DATE_SIZE)
 clock_font = pygame.font.Font(FONT_PATH + FONT_BOLD, CLOCK_SIZE)
 font_small_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, SMALL_SIZE)
 font_big_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, BIG_SIZE)
-
 
 WeatherIcon = 'unknown'
 
@@ -193,6 +195,17 @@ UPDATING = True
 threads = []
 
 json_data = {}
+
+
+def image_factory(image_path):
+    result = {}
+    for img in os.listdir(image_path):
+        image_id = img.split('.')[0]
+        if image_id == "":
+            pass
+        else:
+            result[image_id] = Image.open(image_path + img)
+    return result
 
 
 class Particles(object):
@@ -305,25 +318,12 @@ class DrawString:
         self.surf.blit(self.font.render(self.string, True, self.color), (x, self.y))
 
 
-def image_factory(image_path):
-    result = {}
-    for img in os.listdir(image_path):
-        image_id = img.split('.')[0]
-        if image_id == "":
-            pass
-        else:
-            result[image_id] = Image.open(image_path + img)
-    return result
-
-
 class DrawImage:
-    def __init__(self, surf, image: object, y=None, size=None, fillcolor=None, angle=None):
+    def __init__(self, surf, image=Image, y=None, size=None, fillcolor=None, angle=None):
         """
-        :param image_path: the path to the image you want to render
-        :param y: the y-postion of the image you want to render
+        :param image: image from the image_factory()
+        :param y: the y-position of the image you want to render
         """
-
-        # self.image_path = image_path
         self.image = image
         self.y = y
         self.img_size = self.image.size
@@ -341,8 +341,9 @@ class DrawImage:
             else:
                 width, height = (int(size / width * height), size)
 
-            self.image = self.image.resize((width, height), Image.LANCZOS)
-            self.img_size = self.image.size
+            new_image = self.image.resize((width, height), Image.LANCZOS)
+            self.image = new_image
+            self.img_size = new_image.size
 
         self.fillcolor = fillcolor
 
@@ -394,15 +395,15 @@ class DrawImage:
 
         position_y = int((self.y - (self.image.get_rect()[3] / 2)))
 
-        self.draw_image(x=position_x, _y=position_y)
+        self.draw_image(draw_x=position_x, draw_y=position_y)
 
     def draw_position(self, pos: tuple):
         x, y = pos
         if y == 0:
             y += 1
-        self.draw_image(x=int(x), _y=int(y))
+        self.draw_image(draw_x=int(x), draw_y=int(y))
 
-    def draw_image(self, x, _y=None):
+    def draw_image(self, draw_x, draw_y=None):
         """
         takes x from the functions above and the y from the class to render the image
         """
@@ -412,15 +413,15 @@ class DrawImage:
             surface = self.image
             self.fill(surface, self.fillcolor)
 
-            if _y:
-                self.surf.blit(surface, (x, int(_y)))
+            if draw_y:
+                self.surf.blit(surface, (draw_x, int(draw_y)))
             else:
-                self.surf.blit(surface, (x, self.y))
+                self.surf.blit(surface, (draw_x, self.y))
         else:
-            if _y:
-                self.surf.blit(self.image, (x, int(_y)))
+            if draw_y:
+                self.surf.blit(self.image, (draw_x, int(draw_y)))
             else:
-                self.surf.blit(self.image, (x, self.y))
+                self.surf.blit(self.image, (draw_x, self.y))
 
 
 class Update:
@@ -607,9 +608,10 @@ class Update:
         global weather_surf
 
         new_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+        new_surf.fill(BACKGROUND)
 
         DrawImage(new_surf, images['wifi'], 5, size=15, fillcolor=RED if CONNECTION_ERROR else GREEN).left()
-        DrawImage(new_surf, images['refresh'], 5, size=15, fillcolor=RED if REFRESH_ERROR else GREEN).right(7)
+        DrawImage(new_surf, images['refresh'], 5, size=15, fillcolor=RED if REFRESH_ERROR else GREEN).right(8)
         DrawImage(new_surf, images['path'], 5, size=15, fillcolor=RED if PATH_ERROR else GREEN).right(-5)
 
         DrawImage(new_surf, images[WeatherIcon], 68, size=100).center(2, 0, offset=10)
@@ -678,16 +680,16 @@ class Update:
         DrawString(new_surf, wind_direction_string, font_small_bold, MAIN_FONT, 250).center(3, 2)
         DrawString(new_surf, wind_speed_string, font_small_bold, MAIN_FONT, 300).center(3, 2)
 
-        weather_surf = scale_surf(new_surf)
+        weather_surf = create_scaled_surf(new_surf)
 
         logger.info(f'summary: {summary_string}')
         logger.info(f'temp out: {temp_out_string}')
         logger.info(f'{PRECIPTYPE}: {rain_string}')
         logger.info(f'icon: {WeatherIcon}')
         logger.info(f'forecast: '
-                     f'{forecast_day_1_string} {forecast_day_1_min_max_string} {ForeCastIcon_Day_1}; '
-                     f'{forecast_day_2_string} {forecast_day_2_min_max_string} {ForeCastIcon_Day_2}; '
-                     f'{forecast_day_3_string} {forecast_day_3_min_max_string} {ForeCastIcon_Day_3}')
+                    f'{forecast_day_1_string} {forecast_day_1_min_max_string} {ForeCastIcon_Day_1}; '
+                    f'{forecast_day_2_string} {forecast_day_2_min_max_string} {ForeCastIcon_Day_2}; '
+                    f'{forecast_day_3_string} {forecast_day_3_min_max_string} {ForeCastIcon_Day_3}')
         logger.info(f'sunrise: {sunrise_string} ; sunset {sunset_string}')
         logger.info(f'WindSpeed: {wind_speed_string}')
 
@@ -726,11 +728,11 @@ def draw_time_layer():
     logger.debug(f'Day: {date_day_string}')
     logger.debug(f'Time: {date_time_string}')
 
-    DrawString(tft, date_day_string, date_font, MAIN_FONT, 0).center(1, 0)
-    DrawString(tft, date_time_string, clock_font, MAIN_FONT, 15).center(1, 0)
+    DrawString(dynamic_surf, date_day_string, date_font, MAIN_FONT, 0).center(1, 0)
+    DrawString(dynamic_surf, date_time_string, clock_font, MAIN_FONT, 15).center(1, 0)
 
 
-def draw_moon_layer(moon_surf, y, size):
+def draw_moon_layer(surf, y, size):
     # based on @miyaichi's fork -> great idea :)
     _size = 300
     dt = datetime.datetime.fromtimestamp(json_data['daily']['data'][0]['ts'])
@@ -772,41 +774,38 @@ def draw_moon_layer(moon_surf, y, size):
 
     x = (SURFACE_WIDTH / 2) - (size / 2)
 
-    moon_surf.blit(image, (x, y))
+    surf.blit(image, (x, y))
 
 
-def draw_wind_layer(wind_surf, angle, y):
-
+def draw_wind_layer(surf, angle, y):
     # center the wind direction icon and circle on surface
-    DrawImage(wind_surf, images['circle'], y, size=30, fillcolor=WHITE).draw_middle_position_icon()
-    DrawImage(wind_surf, images['arrow'], y, size=30, fillcolor=RED, angle=-angle).draw_middle_position_icon()
+    DrawImage(surf, images['circle'], y, size=30, fillcolor=WHITE).draw_middle_position_icon()
+    DrawImage(surf, images['arrow'], y, size=30, fillcolor=RED, angle=-angle).draw_middle_position_icon()
 
     logger.debug(f'wind direction: {angle}')
 
 
 def draw_statusbar():
-
     global CONNECTION, READING, UPDATING
 
     if CONNECTION:
-        DrawImage(tft, images['wifi'], 5, size=15, fillcolor=BLUE).left()
+        DrawImage(dynamic_surf, images['wifi'], 5, size=15, fillcolor=BLUE).left()
         if pygame.time.get_ticks() >= CONNECTION:
             CONNECTION = None
 
-    if READING:
-        DrawImage(tft, images['path'], 5, size=15, fillcolor=BLUE).right(-5)
-        if pygame.time.get_ticks() >= READING:
-            READING = None
-
     if UPDATING:
-        DrawImage(tft, images['refresh'], 5, size=15, fillcolor=BLUE).right(7)
+        DrawImage(dynamic_surf, images['refresh'], 5, size=15, fillcolor=BLUE).right(8)
         if pygame.time.get_ticks() >= UPDATING:
             UPDATING = None
 
+    if READING:
+        DrawImage(dynamic_surf, images['path'], 5, size=15, fillcolor=BLUE).right(-5)
+        if pygame.time.get_ticks() >= READING:
+            READING = None
+
 
 def draw_fps():
-
-    DrawString(tft, str(int(clock.get_fps())), font_small_bold, RED, 20).left()
+    DrawString(dynamic_surf, str(int(clock.get_fps())), font_small_bold, RED, 20).left()
 
 
 # ToDo: get touch input working with scaled displays
@@ -814,18 +813,16 @@ def draw_event(color=RED):
     pos = pygame.mouse.get_pos()
     size = 16
     new_pos = (pos[0] - size / 2, pos[1] - size / 2)
-    DrawImage(tft, images['circle'], size=size, fillcolor=color).draw_position(new_pos)
+    DrawImage(dynamic_surf, images['circle'], size=size, fillcolor=color).draw_position(new_pos)
 
 
-def scale_surf(surf_to_scale):
-
-    scaled_surf = pygame.transform.smoothscale(surf_to_scale, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
+def create_scaled_surf(surf):
+    scaled_surf = pygame.transform.smoothscale(surf, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
 
     return scaled_surf
 
 
 def quit_all():
-
     global threads
 
     for thread in threads:
@@ -838,7 +835,6 @@ def quit_all():
 
 
 def loop():
-
     Update.run()
 
     running = True
@@ -868,16 +864,14 @@ def loop():
 
                 elif event.key == pygame.K_SPACE:
                     shot_time = convert_timestamp(time.time(), "%Y-%m-%d %H-%M-%S")
-                    pygame.image.save(tft, f'screenshot-{shot_time}.png')
+                    pygame.image.save(dynamic_surf, f'screenshot-{shot_time}.png')
                     logger.info(f'Screenshot created at {shot_time}')
 
-        pos = int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HEIGHT - (SURFACE_HEIGHT * SCALE)) / 2)
+        display_surf.fill(BACKGROUND)
+        display_surf.blit(weather_surf, FIT_SCREEN)
 
-        TFT.fill(BACKGROUND)
-        TFT.blit(weather_surf, pos)
-
-        tft.set_colorkey(BACKGROUND)
-        tft.fill(BACKGROUND)
+        dynamic_surf.fill(BACKGROUND)
+        dynamic_surf.set_colorkey(BACKGROUND)
 
         draw_statusbar()
         draw_time_layer()
@@ -885,11 +879,11 @@ def loop():
         if config["DISPLAY"]["SHOW_FPS"]:
             draw_fps()
 
-        my_particles.move(tft, my_particles_list)
+        my_particles.move(dynamic_surf, my_particles_list)
 
-        scaled_tft = scale_surf(tft)
+        scaled_surf = create_scaled_surf(dynamic_surf)
 
-        TFT.blit(scaled_tft, pos)
+        display_surf.blit(scaled_surf, FIT_SCREEN)
 
         pygame.display.update()
 
