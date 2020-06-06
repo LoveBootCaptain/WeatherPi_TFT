@@ -161,6 +161,8 @@ TFT = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN
 TFT.fill(BACKGROUND)
 
 tft = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+weather_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+
 pygame.display.set_caption('WeatherPiTFT')
 
 font_small = pygame.font.Font(FONT_PATH + FONT_MEDIUM, SMALL_SIZE)
@@ -251,12 +253,8 @@ class Particles(object):
             surf.blit(self.surf, (155, 140))
 
 
-my_particles = Particles()
-my_particles_list = my_particles.create_particle_list()
-
-
 class DrawString:
-    def __init__(self, string: str, font, color, y: int):
+    def __init__(self, surf, string: str, font, color, y: int):
         """
         :param string: the input string
         :param font: the fonts object
@@ -268,6 +266,7 @@ class DrawString:
         self.color = color
         self.y = int(y)
         self.size = self.font.size(self.string)
+        self.surf = surf
 
     def left(self, offset=0):
         """
@@ -303,7 +302,7 @@ class DrawString:
         takes x and y from the functions above and render the fonts
         """
 
-        tft.blit(self.font.render(self.string, True, self.color), (x, self.y))
+        self.surf.blit(self.font.render(self.string, True, self.color), (x, self.y))
 
 
 def image_factory(image_path):
@@ -317,11 +316,8 @@ def image_factory(image_path):
     return result
 
 
-images = image_factory(ICON_PATH)
-
-
 class DrawImage:
-    def __init__(self, image: object, y=None, size=None, fillcolor=None, angle=None):
+    def __init__(self, surf, image: object, y=None, size=None, fillcolor=None, angle=None):
         """
         :param image_path: the path to the image you want to render
         :param y: the y-postion of the image you want to render
@@ -333,6 +329,7 @@ class DrawImage:
         self.img_size = self.image.size
         self.size = size
         self.angle = angle
+        self.surf = surf
 
         if angle:
             self.image = self.image.rotate(self.angle, resample=Image.BICUBIC)
@@ -416,14 +413,14 @@ class DrawImage:
             self.fill(surface, self.fillcolor)
 
             if _y:
-                tft.blit(surface, (x, int(_y)))
+                self.surf.blit(surface, (x, int(_y)))
             else:
-                tft.blit(surface, (x, self.y))
+                self.surf.blit(surface, (x, self.y))
         else:
             if _y:
-                tft.blit(self.image, (x, int(_y)))
+                self.surf.blit(self.image, (x, int(_y)))
             else:
-                tft.blit(self.image, (x, self.y))
+                self.surf.blit(self.image, (x, self.y))
 
 
 class Update:
@@ -433,7 +430,7 @@ class Update:
 
         brightness = get_brightness()
 
-        os.system(f'gpio -g pwm {pwm} {brightness}') if pwm else None
+        os.system(f'gpio -g pwm {pwm} {brightness}') if pwm is not False else logger.info('not setting pwm')
 
         logger.info(f'set brightness: {brightness}, pwm configured: {pwm}')
 
@@ -602,6 +599,100 @@ class Update:
         logger.info(f'update PRECIPTYPE to: {PRECIPTYPE}')
         logger.info(f'update PRECIPCOLOR to: {PRECIPCOLOR}')
 
+        Update.create_surface()
+
+    @staticmethod
+    def create_surface():
+
+        global weather_surf
+
+        new_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+
+        DrawImage(new_surf, images['wifi'], 5, size=15, fillcolor=RED if CONNECTION_ERROR else GREEN).left()
+        DrawImage(new_surf, images['refresh'], 5, size=15, fillcolor=RED if REFRESH_ERROR else GREEN).right(7)
+        DrawImage(new_surf, images['path'], 5, size=15, fillcolor=RED if PATH_ERROR else GREEN).right(-5)
+
+        DrawImage(new_surf, images[WeatherIcon], 68, size=100).center(2, 0, offset=10)
+        DrawImage(new_surf, images[ForeCastIcon_Day_1], 200, size=50).center(3, 0)
+        DrawImage(new_surf, images[ForeCastIcon_Day_2], 200, size=50).center(3, 1)
+        DrawImage(new_surf, images[ForeCastIcon_Day_3], 200, size=50).center(3, 2)
+
+        DrawImage(new_surf, images['sunrise'], 260, size=25).left()
+        DrawImage(new_surf, images['sunset'], 290, size=25).left()
+
+        angle = json_data['current']['data'][0]['wind_dir']
+
+        draw_wind_layer(new_surf, angle, 285)
+
+        draw_moon_layer(new_surf, 255, 60)
+
+        current_forecast = json_data['current']['data'][0]
+
+        summary_string = current_forecast['weather']['description']
+        temp_out_string = str(int(current_forecast['temp'])) + '°C'
+        rain_string = str(int(json_data['daily']['data'][0]['pop'])) + ' %'
+
+        daily_forecast = json_data['daily']['data']
+
+        forecast_day_1_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[1]['datetime'], '%Y-%m-%d')),
+                                                  theme["DATE_FORMAT"]["FORECAST_DAY"])
+        forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[2]['datetime'], '%Y-%m-%d')),
+                                                  theme["DATE_FORMAT"]["FORECAST_DAY"])
+        forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[3]['datetime'], '%Y-%m-%d')),
+                                                  theme["DATE_FORMAT"]["FORECAST_DAY"])
+
+        forecast_day_1_min_max_string = str(int(daily_forecast[1]['low_temp'])) + ' | ' + str(
+            int(daily_forecast[1]['high_temp']))
+
+        forecast_day_2_min_max_string = str(int(daily_forecast[2]['low_temp'])) + ' | ' + str(
+            int(daily_forecast[2]['high_temp']))
+
+        forecast_day_3_min_max_string = str(int(daily_forecast[3]['low_temp'])) + ' | ' + str(
+            int(daily_forecast[3]['high_temp']))
+
+        wind_direction_string = current_forecast['wind_cdir']
+
+        sunrise_string = convert_timestamp(daily_forecast[0]['sunrise_ts'], theme["DATE_FORMAT"]["SUNRISE_SUNSET"])
+        sunset_string = convert_timestamp(daily_forecast[0]['sunset_ts'], theme["DATE_FORMAT"]["SUNRISE_SUNSET"])
+
+        wind_speed_string = str(round((float(current_forecast['wind_spd']) * 3.6), 1)) + ' km/h'
+
+        DrawString(new_surf, summary_string, font_small_bold, VIOLET, 50).center(1, 0)
+
+        DrawString(new_surf, temp_out_string, font_big, ORANGE, 75).right()
+
+        DrawString(new_surf, rain_string, font_big, PRECIPCOLOR, 105).right()
+        DrawString(new_surf, PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right()
+
+        DrawString(new_surf, forecast_day_1_string, font_small_bold, ORANGE, 165).center(3, 0)
+        DrawString(new_surf, forecast_day_2_string, font_small_bold, ORANGE, 165).center(3, 1)
+        DrawString(new_surf, forecast_day_3_string, font_small_bold, ORANGE, 165).center(3, 2)
+
+        DrawString(new_surf, forecast_day_1_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 0)
+        DrawString(new_surf, forecast_day_2_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 1)
+        DrawString(new_surf, forecast_day_3_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 2)
+
+        DrawString(new_surf, sunrise_string, font_small_bold, MAIN_FONT, 265).left(30)
+        DrawString(new_surf, sunset_string, font_small_bold, MAIN_FONT, 292).left(30)
+
+        DrawString(new_surf, wind_direction_string, font_small_bold, MAIN_FONT, 250).center(3, 2)
+        DrawString(new_surf, wind_speed_string, font_small_bold, MAIN_FONT, 300).center(3, 2)
+
+        weather_surf = scale_surf(new_surf)
+
+        logger.info(f'summary: {summary_string}')
+        logger.info(f'temp out: {temp_out_string}')
+        logger.info(f'{PRECIPTYPE}: {rain_string}')
+        logger.info(f'icon: {WeatherIcon}')
+        logger.info(f'forecast: '
+                     f'{forecast_day_1_string} {forecast_day_1_min_max_string} {ForeCastIcon_Day_1}; '
+                     f'{forecast_day_2_string} {forecast_day_2_min_max_string} {ForeCastIcon_Day_2}; '
+                     f'{forecast_day_3_string} {forecast_day_3_min_max_string} {ForeCastIcon_Day_3}')
+        logger.info(f'sunrise: {sunrise_string} ; sunset {sunset_string}')
+        logger.info(f'WindSpeed: {wind_speed_string}')
+
+        return weather_surf
+
     @staticmethod
     def run():
         Update.update_json()
@@ -626,7 +717,20 @@ def convert_timestamp(timestamp, param_string):
     return timestring
 
 
-def draw_moon_layer(y, size):
+def draw_time_layer():
+    timestamp = time.time()
+
+    date_day_string = convert_timestamp(timestamp, theme["DATE_FORMAT"]["DATE"])
+    date_time_string = convert_timestamp(timestamp, theme["DATE_FORMAT"]["TIME"])
+
+    logger.debug(f'Day: {date_day_string}')
+    logger.debug(f'Time: {date_time_string}')
+
+    DrawString(tft, date_day_string, date_font, MAIN_FONT, 0).center(1, 0)
+    DrawString(tft, date_time_string, clock_font, MAIN_FONT, 15).center(1, 0)
+
+
+def draw_moon_layer(moon_surf, y, size):
     # based on @miyaichi's fork -> great idea :)
     _size = 300
     dt = datetime.datetime.fromtimestamp(json_data['daily']['data'][0]['ts'])
@@ -668,15 +772,14 @@ def draw_moon_layer(y, size):
 
     x = (SURFACE_WIDTH / 2) - (size / 2)
 
-    tft.blit(image, (x, y))
+    moon_surf.blit(image, (x, y))
 
 
-def draw_wind_layer(y):
-    angle = json_data['current']['data'][0]['wind_dir']
+def draw_wind_layer(wind_surf, angle, y):
 
     # center the wind direction icon and circle on surface
-    DrawImage(images['circle'], y, size=30, fillcolor=WHITE).draw_middle_position_icon()
-    DrawImage(images['arrow'], y, size=30, fillcolor=RED, angle=-angle).draw_middle_position_icon()
+    DrawImage(wind_surf, images['circle'], y, size=30, fillcolor=WHITE).draw_middle_position_icon()
+    DrawImage(wind_surf, images['arrow'], y, size=30, fillcolor=RED, angle=-angle).draw_middle_position_icon()
 
     logger.debug(f'wind direction: {angle}')
 
@@ -685,138 +788,40 @@ def draw_statusbar():
 
     global CONNECTION, READING, UPDATING
 
-    DrawImage(images['wifi'], 5, size=15, fillcolor=RED if CONNECTION_ERROR else GREEN).left()
-
-    DrawImage(images['refresh'], 5, size=15, fillcolor=RED if REFRESH_ERROR else GREEN).right(7)
-
-    DrawImage(images['path'], 5, size=15, fillcolor=RED if PATH_ERROR else GREEN).right(-5)
-
     if CONNECTION:
-        DrawImage(images['wifi'], 5, size=15, fillcolor=BLUE).left()
+        DrawImage(tft, images['wifi'], 5, size=15, fillcolor=BLUE).left()
         if pygame.time.get_ticks() >= CONNECTION:
             CONNECTION = None
 
     if READING:
-        DrawImage(images['path'], 5, size=15, fillcolor=BLUE).right(-5)
+        DrawImage(tft, images['path'], 5, size=15, fillcolor=BLUE).right(-5)
         if pygame.time.get_ticks() >= READING:
             READING = None
 
     if UPDATING:
-        DrawImage(images['refresh'], 5, size=15, fillcolor=BLUE).right(7)
+        DrawImage(tft, images['refresh'], 5, size=15, fillcolor=BLUE).right(7)
         if pygame.time.get_ticks() >= UPDATING:
             UPDATING = None
 
 
-def draw_image_layer():
-
-    draw_statusbar()
-
-    DrawImage(images[WeatherIcon], 68, size=100).center(2, 0, offset=10)
-
-    DrawImage(images[ForeCastIcon_Day_1], 200, size=50).center(3, 0)
-    DrawImage(images[ForeCastIcon_Day_2], 200, size=50).center(3, 1)
-    DrawImage(images[ForeCastIcon_Day_3], 200, size=50).center(3, 2)
-
-    DrawImage(images['sunrise'], 260, size=25).left()
-    DrawImage(images['sunset'], 290, size=25).left()
-
-    draw_moon_layer(255, 60)
-    draw_wind_layer(285)
-
-    logger.debug(WeatherIcon)
-    logger.debug(ForeCastIcon_Day_1)
-    logger.debug(ForeCastIcon_Day_2)
-    logger.debug(ForeCastIcon_Day_3)
-
-
 def draw_fps():
-    DrawString(str(int(clock.get_fps())), font_small_bold, RED, 20).left()
+
+    DrawString(tft, str(int(clock.get_fps())), font_small_bold, RED, 20).left()
 
 
-def draw_time_layer():
-    timestamp = time.time()
-
-    date_day_string = convert_timestamp(timestamp, theme["DATE_FORMAT"]["DATE"])
-    date_time_string = convert_timestamp(timestamp, theme["DATE_FORMAT"]["TIME"])
-
-    logger.debug(f'Day: {date_day_string}')
-    logger.debug(f'Time: {date_time_string}')
-
-    DrawString(date_day_string, date_font, MAIN_FONT, 0).center(1, 0)
-    DrawString(date_time_string, clock_font, MAIN_FONT, 15).center(1, 0)
+# ToDo: get touch input working with scaled displays
+def draw_event(color=RED):
+    pos = pygame.mouse.get_pos()
+    size = 16
+    new_pos = (pos[0] - size / 2, pos[1] - size / 2)
+    DrawImage(tft, images['circle'], size=size, fillcolor=color).draw_position(new_pos)
 
 
-def draw_text_layer():
-    current_forecast = json_data['current']['data'][0]
+def scale_surf(surf_to_scale):
 
-    summary_string = current_forecast['weather']['description']
-    temp_out_string = str(int(current_forecast['temp'])) + '°C'
-    rain_string = str(int(json_data['daily']['data'][0]['pop'])) + ' %'
+    scaled_surf = pygame.transform.smoothscale(surf_to_scale, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
 
-    daily_forecast = json_data['daily']['data']
-
-    forecast_day_1_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[1]['datetime'], '%Y-%m-%d')),
-                                              theme["DATE_FORMAT"]["FORECAST_DAY"])
-    forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[2]['datetime'], '%Y-%m-%d')),
-                                              theme["DATE_FORMAT"]["FORECAST_DAY"])
-    forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[3]['datetime'], '%Y-%m-%d')),
-                                              theme["DATE_FORMAT"]["FORECAST_DAY"])
-
-    forecast_day_1_min_max_string = str(int(daily_forecast[1]['low_temp'])) + ' | ' + str(
-        int(daily_forecast[1]['high_temp']))
-
-    forecast_day_2_min_max_string = str(int(daily_forecast[2]['low_temp'])) + ' | ' + str(
-        int(daily_forecast[2]['high_temp']))
-
-    forecast_day_3_min_max_string = str(int(daily_forecast[3]['low_temp'])) + ' | ' + str(
-        int(daily_forecast[3]['high_temp']))
-
-    wind_direction_string = current_forecast['wind_cdir']
-
-    sunrise_string = convert_timestamp(daily_forecast[0]['sunrise_ts'], theme["DATE_FORMAT"]["SUNRISE_SUNSET"])
-    sunset_string = convert_timestamp(daily_forecast[0]['sunset_ts'], theme["DATE_FORMAT"]["SUNRISE_SUNSET"])
-
-    wind_speed_string = str(round((float(current_forecast['wind_spd']) * 3.6), 1)) + ' km/h'
-    draw_time_layer()
-
-    DrawString(summary_string, font_small_bold, VIOLET, 50).center(1, 0)
-
-    DrawString(temp_out_string, font_big, ORANGE, 75).right()
-
-    DrawString(rain_string, font_big, PRECIPCOLOR, 105).right()
-    DrawString(PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right()
-
-    DrawString(forecast_day_1_string, font_small_bold, ORANGE, 165).center(3, 0)
-    DrawString(forecast_day_2_string, font_small_bold, ORANGE, 165).center(3, 1)
-    DrawString(forecast_day_3_string, font_small_bold, ORANGE, 165).center(3, 2)
-
-    DrawString(forecast_day_1_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 0)
-    DrawString(forecast_day_2_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 1)
-    DrawString(forecast_day_3_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 2)
-
-    DrawString(sunrise_string, font_small_bold, MAIN_FONT, 265).left(30)
-    DrawString(sunset_string, font_small_bold, MAIN_FONT, 292).left(30)
-
-    DrawString(wind_direction_string, font_small_bold, MAIN_FONT, 250).center(3, 2)
-    DrawString(wind_speed_string, font_small_bold, MAIN_FONT, 300).center(3, 2)
-
-    logger.debug(f'summary: {summary_string}')
-    logger.debug(f'temp out: {temp_out_string}')
-    logger.debug(f'{PRECIPTYPE}: {rain_string}')
-    logger.debug(f'forecast: '
-                 f'{forecast_day_1_string} {forecast_day_1_min_max_string}; '
-                 f'{forecast_day_2_string} {forecast_day_2_min_max_string}; '
-                 f'{forecast_day_3_string} {forecast_day_3_min_max_string}')
-    logger.debug(f'sunrise: {sunrise_string} ; sunset {sunset_string}')
-    logger.debug(f'WindSpeed: {wind_speed_string}')
-
-
-def draw_to_tft():
-    tft.fill(BACKGROUND)
-    if config["DISPLAY"]["SHOW_FPS"]:
-        draw_fps()
-    draw_image_layer()
-    draw_text_layer()
+    return scaled_surf
 
 
 def quit_all():
@@ -832,13 +837,6 @@ def quit_all():
     sys.exit()
 
 
-def draw_event(color=RED):
-    pos = pygame.mouse.get_pos()
-    size = 16
-    new_pos = (pos[0] - size / 2, pos[1] - size / 2)
-    DrawImage(ICON_PATH + 'circle.png', size=size, fillcolor=color).draw_position(new_pos)
-
-
 def loop():
 
     Update.run()
@@ -846,8 +844,6 @@ def loop():
     running = True
 
     while running:
-
-        draw_to_tft()
 
         for event in pygame.event.get():
 
@@ -875,13 +871,25 @@ def loop():
                     pygame.image.save(tft, f'screenshot-{shot_time}.png')
                     logger.info(f'Screenshot created at {shot_time}')
 
-        my_particles.move(tft, my_particles_list)
-        scaled_tft = pygame.transform.smoothscale(tft, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
-        _, _, w, h = scaled_tft.get_rect()
-
         pos = int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HEIGHT - (SURFACE_HEIGHT * SCALE)) / 2)
 
-        TFT.blit(pygame.transform.smoothscale(scaled_tft, (w, h)), pos)
+        TFT.fill(BACKGROUND)
+        TFT.blit(weather_surf, pos)
+
+        tft.set_colorkey(BACKGROUND)
+        tft.fill(BACKGROUND)
+
+        draw_statusbar()
+        draw_time_layer()
+
+        if config["DISPLAY"]["SHOW_FPS"]:
+            draw_fps()
+
+        my_particles.move(tft, my_particles_list)
+
+        scaled_tft = scale_surf(tft)
+
+        TFT.blit(scaled_tft, pos)
 
         pygame.display.update()
 
@@ -893,6 +901,10 @@ def loop():
 if __name__ == '__main__':
 
     try:
+
+        my_particles = Particles()
+        my_particles_list = my_particles.create_particle_list()
+        images = image_factory(ICON_PATH)
 
         loop()
 
