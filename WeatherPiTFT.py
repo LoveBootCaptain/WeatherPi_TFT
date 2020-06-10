@@ -98,6 +98,7 @@ try:
         if config['DISPLAY']['FRAMEBUFFER'] is not False:
             # using the dashboard on a raspberry with TFT displays might make this necessary
             os.putenv('SDL_FBDEV', config['DISPLAY']['FRAMEBUFFER'])
+            os.environ["SDL_VIDEODRIVER"] = "fbcon"
 
         WEATHERBIT_IO_KEY = config['WEATHERBIT_IO_KEY']
 
@@ -117,8 +118,8 @@ else:
     logger.info('no PWM for brightness control configured')
 
 # theme settings from theme config
-DISPLAY_WIDTH = config["DISPLAY"]["WIDTH"]
-DISPLAY_HEIGHT = config["DISPLAY"]["HEIGHT"]
+DISPLAY_WIDTH = int(config["DISPLAY"]["WIDTH"])
+DISPLAY_HEIGHT = int(config["DISPLAY"]["HEIGHT"])
 
 SURFACE_WIDTH = 240
 SURFACE_HEIGHT = 320
@@ -129,16 +130,13 @@ FIT_SCREEN = int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HE
 FPS = config['DISPLAY']['FPS']
 AA = config['DISPLAY']['AA']
 
-# pygame.init()
 pygame.display.init()
-# pygame.mixer.init()
-# pygame.mixer.quit()
+pygame.mixer.quit()
 pygame.font.init()
 pygame.mouse.set_visible(config['DISPLAY']['MOUSE'])
-
-
 pygame.display.set_caption('WeatherPiTFT')
-tft_surf = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+
+tft_surf = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.NOFRAME if config['ENV'] == 'Pi' else 0)
 
 display_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
 dynamic_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
