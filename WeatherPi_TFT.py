@@ -81,6 +81,7 @@ WEATHERBIT_DAYS = config['WEATHERBIT_DAYS']
 
 locale.setlocale(locale.LC_ALL, (config['LOCALE']['ISO'], 'UTF-8'))
 
+
 try:
     # if you do local development you can add a mock server (e.g. from postman.io our your homebrew solution)
     # simple add this variables to your config.json to save api-requests
@@ -128,11 +129,16 @@ FIT_SCREEN = int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HE
 FPS = config['DISPLAY']['FPS']
 AA = config['DISPLAY']['AA']
 
-pygame.init()
+# pygame.init()
+pygame.display.init()
+# pygame.mixer.init()
+# pygame.mixer.quit()
+pygame.font.init()
 pygame.mouse.set_visible(config['DISPLAY']['MOUSE'])
 
+
 pygame.display.set_caption('WeatherPiTFT')
-tft_surf = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN if config['ENV'] == 'Pi' else 0)
+tft_surf = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 
 display_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
 dynamic_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))

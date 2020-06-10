@@ -41,7 +41,7 @@ DAEMON_OPTS=""
 
 # This next line determines what user the script runs as.
 # Root generally not recommended but necessary if you are using the Raspberry Pi GPIO from Python.
-DAEMON_USER=root
+DAEMON_USER=pi
 
 # The process ID of the script when it runs is stored here:
 PIDFILE=/var/run/${DAEMON_NAME}.pid
