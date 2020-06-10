@@ -128,8 +128,10 @@ rm -rf docs/
 
 ### install the dependencies in python3
 
+since the script has to be run by a root user you have to install the dependencies with `sudo`
+
 ```
-pip3 install -r requirements.txt
+sudo pip3 install -r requirements.txt
 ```
 
 #### NOTE: pygame version 2.0.0.dev8 and SDL2 is required
