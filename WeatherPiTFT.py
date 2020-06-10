@@ -456,10 +456,11 @@ class Update:
 
             current_request_url = str(f'{current_endpoint}?key={WEATHERBIT_IO_KEY}{options}')
             daily_request_url = str(f'{daily_endpoint}?key={WEATHERBIT_IO_KEY}{options}&days={WEATHERBIT_DAYS}')
+            stats_request_url = str(f'{stats_endpoint}?key={WEATHERBIT_IO_KEY}')
 
             current_data = requests.get(current_request_url, headers=HEADERS).json()
             daily_data = requests.get(daily_request_url, headers=HEADERS).json()
-            stats_data = requests.get(stats_endpoint, headers=HEADERS).json()
+            stats_data = requests.get(stats_request_url, headers=HEADERS).json()
 
             data = {
                 'current': current_data,
@@ -605,12 +606,13 @@ class Update:
     def create_surface():
 
         current_forecast = JSON_DATA['current']['data'][0]
+        daily_forecast = JSON_DATA['daily']['data']
+        stats_data = JSON_DATA['stats']
 
         summary_string = current_forecast['weather']['description']
         temp_out_string = str(int(current_forecast['temp'])) + '°C'
         rain_string = str(int(JSON_DATA['daily']['data'][0]['pop'])) + ' %'
 
-        daily_forecast = JSON_DATA['daily']['data']
         today = daily_forecast[0]
         day_1 = daily_forecast[1]
         day_2 = daily_forecast[2]
@@ -655,6 +657,10 @@ class Update:
         draw_wind_layer(new_surf, current_forecast['wind_dir'], 285)
 
         draw_moon_layer(new_surf, 255, 60)
+
+        # draw all the strings
+        if config["DISPLAY"]["SHOW_API_STATS"]:
+            DrawString(new_surf, str(stats_data['calls_remaining']), FONT_SMALL_BOLD, BLUE, 20).right(offset=-5)
 
         DrawString(new_surf, summary_string, FONT_SMALL_BOLD, VIOLET, 50).center(1, 0)
 

@@ -3,9 +3,11 @@
     "WIDTH": 240,
     "HEIGHT": 320,
     "FPS": 30,
+    "AA": false,
     "FRAMEBUFFER": "/dev/fb1",
     "PWM": false,
     "SHOW_FPS": false,
+    "SHOW_API_STATS": true,
     "MOUSE": false
   },
   "WEATHERBIT_URL": "https://api.weatherbit.io/v2.0",
