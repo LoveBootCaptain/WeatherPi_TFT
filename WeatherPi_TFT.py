@@ -40,6 +40,9 @@ import requests
 from PIL import Image, ImageDraw
 
 PATH = sys.path[0] + '/'
+ICON_PATH = PATH + '/icons/'
+FONT_PATH = PATH + '/fonts/'
+LOG_PATH = PATH + '/logs/'
 
 # create logger
 logger = logging.getLogger(__package__)
@@ -68,14 +71,13 @@ theme_config = config["THEME"]
 theme_settings = open(PATH + theme_config).read()
 theme = json.loads(theme_settings)
 
-# pygame.init()
-pygame.display.init()
-pygame.mixer.quit()
-pygame.font.init()
-pygame.mouse.set_visible(config['DISPLAY']['MOUSE'])
-
-server = config['WEATHERBIT_URL']
-headers = {}
+SERVER = config['WEATHERBIT_URL']
+HEADERS = {}
+WEATHERBIT_COUNTRY = config['WEATHERBIT_COUNTRY']
+WEATHERBIT_LANG = config['WEATHERBIT_LANGUAGE']
+WEATHERBIT_POSTALCODE = config['WEATHERBIT_POSTALCODE']
+WEATHERBIT_HOURS = config['WEATHERBIT_HOURS']
+WEATHERBIT_DAYS = config['WEATHERBIT_DAYS']
 
 locale.setlocale(locale.LC_ALL, (config['LOCALE']['ISO'], 'UTF-8'))
 
@@ -84,9 +86,9 @@ try:
     # simple add this variables to your config.json to save api-requests
     # or to create your own custom test data for your own dashboard views)
     if config['ENV'] == 'DEV':
-        server = config['MOCKSERVER_URL']
+        SERVER = config['MOCKSERVER_URL']
         WEATHERBIT_IO_KEY = config['WEATHERBIT_DEV_KEY']
-        headers = {'X-Api-Key': f'{config["MOCKSERVER_API_KEY"]}'}
+        HEADERS = {'X-Api-Key': f'{config["MOCKSERVER_API_KEY"]}'}
 
     elif config['ENV'] == 'STAGE':
         WEATHERBIT_IO_KEY = config['WEATHERBIT_DEV_KEY']
@@ -101,17 +103,15 @@ try:
     logger.info(f"STARTING IN {config['ENV']} MODE")
 
 
-except Exception as config_ex:
-    logger.warning(config_ex)
+except Exception as e:
+    logger.warning(e)
     quit()
 
-clock = pygame.time.Clock()
+PWM = config['DISPLAY']['PWM']
 
-pwm = config['DISPLAY']['PWM']
-
-if pwm:
-    logger.info(f'set PWM for brightness control to PIN {pwm}')
-    os.system(f"gpio -g mode {pwm} pwm")
+if PWM:
+    logger.info(f'set PWM for brightness control to PIN {PWM}')
+    os.system(f"gpio -g mode {PWM} pwm")
 else:
     logger.info('no PWM for brightness control configured')
 
@@ -126,6 +126,22 @@ SCALE = int(DISPLAY_WIDTH / SURFACE_WIDTH)
 FIT_SCREEN = int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HEIGHT - (SURFACE_HEIGHT * SCALE)) / 2)
 
 FPS = config['DISPLAY']['FPS']
+AA = config['DISPLAY']['AA']
+
+pygame.init()
+pygame.mouse.set_visible(config['DISPLAY']['MOUSE'])
+
+pygame.display.set_caption('WeatherPiTFT')
+tft_surf = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN if config['ENV'] == 'Pi' else 0)
+
+display_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+dynamic_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+time_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+weather_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+
+clock = pygame.time.Clock()
+
+logger.info(f'display with {DISPLAY_WIDTH}px width and {DISPLAY_HEIGHT}px height is set to {FPS} FPS with AA {AA}')
 
 BACKGROUND = tuple(theme["COLOR"]["BACKGROUND"])
 MAIN_FONT = tuple(theme["COLOR"]["MAIN_FONT"])
@@ -149,38 +165,18 @@ CLOCK_SIZE = theme["FONT"]["CLOCK_SIZE"]
 SMALL_SIZE = theme["FONT"]["SMALL_SIZE"]
 BIG_SIZE = theme["FONT"]["BIG_SIZE"]
 
-ICON_PATH = sys.path[0] + '/icons/'
-FONT_PATH = sys.path[0] + '/fonts/'
-LOG_PATH = sys.path[0] + '/logs/'
+FONT_SMALL = pygame.font.Font(FONT_PATH + FONT_MEDIUM, SMALL_SIZE)
+FONT_SMALL_BOLD = pygame.font.Font(FONT_PATH + FONT_BOLD, SMALL_SIZE)
+FONT_BIG = pygame.font.Font(FONT_PATH + FONT_MEDIUM, BIG_SIZE)
+FONT_BIG_BOLD = pygame.font.Font(FONT_PATH + FONT_BOLD, BIG_SIZE)
+DATE_FONT = pygame.font.Font(FONT_PATH + FONT_BOLD, DATE_SIZE)
+CLOCK_FONT = pygame.font.Font(FONT_PATH + FONT_BOLD, CLOCK_SIZE)
 
-WEATHERBIT_COUNTRY = config['WEATHERBIT_COUNTRY']
-WEATHERBIT_LANG = config['WEATHERBIT_LANGUAGE']
-WEATHERBIT_POSTALCODE = config['WEATHERBIT_POSTALCODE']
-WEATHERBIT_HOURS = config['WEATHERBIT_HOURS']
-WEATHERBIT_DAYS = config['WEATHERBIT_DAYS']
+WEATHERICON = 'unknown'
 
-display_surf = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT),
-                                       pygame.FULLSCREEN if config['ENV'] == 'Pi' else 0)
-display_surf.fill(BACKGROUND)
-
-dynamic_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
-weather_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
-
-pygame.display.set_caption('WeatherPiTFT')
-
-font_small = pygame.font.Font(FONT_PATH + FONT_MEDIUM, SMALL_SIZE)
-font_big = pygame.font.Font(FONT_PATH + FONT_MEDIUM, BIG_SIZE)
-
-date_font = pygame.font.Font(FONT_PATH + FONT_BOLD, DATE_SIZE)
-clock_font = pygame.font.Font(FONT_PATH + FONT_BOLD, CLOCK_SIZE)
-font_small_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, SMALL_SIZE)
-font_big_bold = pygame.font.Font(FONT_PATH + FONT_BOLD, BIG_SIZE)
-
-WeatherIcon = 'unknown'
-
-ForeCastIcon_Day_1 = 'unknown'
-ForeCastIcon_Day_2 = 'unknown'
-ForeCastIcon_Day_3 = 'unknown'
+FORECASTICON_DAY_1 = 'unknown'
+FORECASTICON_DAY_2 = 'unknown'
+FORECASTICON_DAY_3 = 'unknown'
 
 CONNECTION_ERROR = True
 REFRESH_ERROR = True
@@ -188,13 +184,13 @@ PATH_ERROR = True
 PRECIPTYPE = 'NULL'
 PRECIPCOLOR = WHITE
 
-CONNECTION = True
-READING = True
-UPDATING = True
+CONNECTION = False
+READING = False
+UPDATING = False
 
-threads = []
+THREADS = []
 
-json_data = {}
+JSON_DATA = {}
 
 
 def image_factory(image_path):
@@ -261,7 +257,6 @@ class Particles(object):
                     # Give it a new x position
                     x = random.randrange(0, self.size)
                     particle_list[i][0] = x
-            # pygame.time.delay(75)
 
             surf.blit(self.surf, (155, 140))
 
@@ -431,38 +426,41 @@ class Update:
 
         brightness = get_brightness()
 
-        os.system(f'gpio -g pwm {pwm} {brightness}') if pwm is not False else logger.info('not setting pwm')
+        os.system(f'gpio -g pwm {PWM} {brightness}') if PWM is not False else logger.info('not setting pwm')
 
-        logger.info(f'set brightness: {brightness}, pwm configured: {pwm}')
+        logger.info(f'set brightness: {brightness}, pwm configured: {PWM}')
 
-        global threads, CONNECTION_ERROR, CONNECTION
+        global THREADS, CONNECTION_ERROR, CONNECTION
 
         thread = threading.Timer(config["TIMER"]["UPDATE"], Update.update_json)
 
         thread.start()
 
-        threads.append(thread)
+        THREADS.append(thread)
 
         CONNECTION = pygame.time.get_ticks() + 1500  # 1.5 seconds
 
         try:
 
-            current_endpoint = f'{server}/current'
-            daily_endpoint = f'{server}/forecast/daily'
+            current_endpoint = f'{SERVER}/current'
+            daily_endpoint = f'{SERVER}/forecast/daily'
+            stats_endpoint = f'{SERVER}/subscription/usage'
 
-            logger.info(f'connecting to server: {server}')
+            logger.info(f'connecting to server: {SERVER}')
 
             options = str(f'&postal_code={WEATHERBIT_POSTALCODE}&country={WEATHERBIT_COUNTRY}&lang={WEATHERBIT_LANG}')
 
             current_request_url = str(f'{current_endpoint}?key={WEATHERBIT_IO_KEY}{options}')
             daily_request_url = str(f'{daily_endpoint}?key={WEATHERBIT_IO_KEY}{options}&days={WEATHERBIT_DAYS}')
 
-            current_data = requests.get(current_request_url, headers=headers).json()
-            daily_data = requests.get(daily_request_url, headers=headers).json()
+            current_data = requests.get(current_request_url, headers=HEADERS).json()
+            daily_data = requests.get(daily_request_url, headers=HEADERS).json()
+            stats_data = requests.get(stats_endpoint, headers=HEADERS).json()
 
             data = {
                 'current': current_data,
-                'daily': daily_data
+                'daily': daily_data,
+                'stats': stats_data
             }
 
             with open(LOG_PATH + 'latest_weather.json', 'w') as outputfile:
@@ -481,13 +479,13 @@ class Update:
     @staticmethod
     def read_json():
 
-        global threads, json_data, REFRESH_ERROR, READING
+        global THREADS, JSON_DATA, REFRESH_ERROR, READING
 
         thread = threading.Timer(config["TIMER"]["RELOAD"], Update.read_json)
 
         thread.start()
 
-        threads.append(thread)
+        THREADS.append(thread)
 
         READING = pygame.time.get_ticks() + 1500  # 1.5 seconds
 
@@ -500,7 +498,7 @@ class Update:
             logger.info('json file read by module')
             logger.info(f'{new_json_data}')
 
-            json_data = new_json_data
+            JSON_DATA = new_json_data
 
             REFRESH_ERROR = False
 
@@ -515,21 +513,18 @@ class Update:
     @staticmethod
     def icon_path():
 
-        global WeatherIcon, ForeCastIcon_Day_1, \
-            ForeCastIcon_Day_2, ForeCastIcon_Day_3, PRECIPTYPE, PRECIPCOLOR, UPDATING
-
-        pygame.time.delay(1500)
-        UPDATING = pygame.time.get_ticks() + 1500  # 1.5 seconds
+        global WEATHERICON, FORECASTICON_DAY_1, \
+            FORECASTICON_DAY_2, FORECASTICON_DAY_3, PRECIPTYPE, PRECIPCOLOR, UPDATING
 
         icon_extension = '.png'
 
         updated_list = []
 
-        icon = json_data['current']['data'][0]['weather']['icon']
+        icon = JSON_DATA['current']['data'][0]['weather']['icon']
 
-        forecast_icon_1 = json_data['daily']['data'][1]['weather']['icon']
-        forecast_icon_2 = json_data['daily']['data'][2]['weather']['icon']
-        forecast_icon_3 = json_data['daily']['data'][3]['weather']['icon']
+        forecast_icon_1 = JSON_DATA['daily']['data'][1]['weather']['icon']
+        forecast_icon_2 = JSON_DATA['daily']['data'][2]['weather']['icon']
+        forecast_icon_3 = JSON_DATA['daily']['data'][3]['weather']['icon']
 
         forecast = (str(icon), str(forecast_icon_1), str(forecast_icon_2), str(forecast_icon_3))
 
@@ -551,10 +546,10 @@ class Update:
 
                 updated_list.append('unknown')
 
-        WeatherIcon = updated_list[0]
-        ForeCastIcon_Day_1 = updated_list[1]
-        ForeCastIcon_Day_2 = updated_list[2]
-        ForeCastIcon_Day_3 = updated_list[3]
+        WEATHERICON = updated_list[0]
+        FORECASTICON_DAY_1 = updated_list[1]
+        FORECASTICON_DAY_2 = updated_list[2]
+        FORECASTICON_DAY_3 = updated_list[3]
 
         global PATH_ERROR
 
@@ -573,11 +568,11 @@ class Update:
     @staticmethod
     def get_precip_type():
 
-        global json_data, PRECIPCOLOR, PRECIPTYPE
+        global JSON_DATA, PRECIPCOLOR, PRECIPTYPE
 
-        pop = int(json_data['daily']['data'][0]['pop'])
-        rain = float(json_data['daily']['data'][0]['precip'])
-        snow = float(json_data['daily']['data'][0]['snow'])
+        pop = int(JSON_DATA['daily']['data'][0]['pop'])
+        rain = float(JSON_DATA['daily']['data'][0]['precip'])
+        snow = float(JSON_DATA['daily']['data'][0]['snow'])
 
         if pop == 0:
 
@@ -605,7 +600,38 @@ class Update:
     @staticmethod
     def create_surface():
 
-        global weather_surf
+        current_forecast = JSON_DATA['current']['data'][0]
+
+        summary_string = current_forecast['weather']['description']
+        temp_out_string = str(int(current_forecast['temp'])) + '°C'
+        rain_string = str(int(JSON_DATA['daily']['data'][0]['pop'])) + ' %'
+
+        daily_forecast = JSON_DATA['daily']['data']
+        today = daily_forecast[0]
+        day_1 = daily_forecast[1]
+        day_2 = daily_forecast[2]
+        day_3 = daily_forecast[3]
+        df_forecast = theme["DATE_FORMAT"]["FORECAST_DAY"]
+        df_sun = theme["DATE_FORMAT"]["SUNRISE_SUNSET"]
+
+        forecast_day_1_string = convert_timestamp(time.mktime(time.strptime(day_1['datetime'], '%Y-%m-%d')), df_forecast)
+        forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(day_2['datetime'], '%Y-%m-%d')), df_forecast)
+        forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(day_3['datetime'], '%Y-%m-%d')), df_forecast)
+
+        forecast_day_1_min_max_string = str(int(day_1['low_temp'])) + ' | ' + str(int(day_1['high_temp']))
+
+        forecast_day_2_min_max_string = str(int(day_2['low_temp'])) + ' | ' + str(int(day_2['high_temp']))
+
+        forecast_day_3_min_max_string = str(int(day_3['low_temp'])) + ' | ' + str(int(day_3['high_temp']))
+
+        wind_direction_string = current_forecast['wind_cdir']
+
+        sunrise_string = convert_timestamp(today['sunrise_ts'], df_sun)
+        sunset_string = convert_timestamp(today['sunset_ts'], df_sun)
+
+        wind_speed_string = str(round((float(current_forecast['wind_spd']) * 3.6), 1)) + ' km/h'
+
+        global weather_surf, UPDATING
 
         new_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
         new_surf.fill(BACKGROUND)
@@ -614,84 +640,59 @@ class Update:
         DrawImage(new_surf, images['refresh'], 5, size=15, fillcolor=RED if REFRESH_ERROR else GREEN).right(8)
         DrawImage(new_surf, images['path'], 5, size=15, fillcolor=RED if PATH_ERROR else GREEN).right(-5)
 
-        DrawImage(new_surf, images[WeatherIcon], 68, size=100).center(2, 0, offset=10)
-        DrawImage(new_surf, images[ForeCastIcon_Day_1], 200, size=50).center(3, 0)
-        DrawImage(new_surf, images[ForeCastIcon_Day_2], 200, size=50).center(3, 1)
-        DrawImage(new_surf, images[ForeCastIcon_Day_3], 200, size=50).center(3, 2)
+        DrawImage(new_surf, images[WEATHERICON], 68, size=100).center(2, 0, offset=10)
+        DrawImage(new_surf, images[FORECASTICON_DAY_1], 200, size=50).center(3, 0)
+        DrawImage(new_surf, images[FORECASTICON_DAY_2], 200, size=50).center(3, 1)
+        DrawImage(new_surf, images[FORECASTICON_DAY_3], 200, size=50).center(3, 2)
 
         DrawImage(new_surf, images['sunrise'], 260, size=25).left()
         DrawImage(new_surf, images['sunset'], 290, size=25).left()
 
-        angle = json_data['current']['data'][0]['wind_dir']
-
-        draw_wind_layer(new_surf, angle, 285)
+        draw_wind_layer(new_surf, current_forecast['wind_dir'], 285)
 
         draw_moon_layer(new_surf, 255, 60)
 
-        current_forecast = json_data['current']['data'][0]
+        DrawString(new_surf, summary_string, FONT_SMALL_BOLD, VIOLET, 50).center(1, 0)
 
-        summary_string = current_forecast['weather']['description']
-        temp_out_string = str(int(current_forecast['temp'])) + '°C'
-        rain_string = str(int(json_data['daily']['data'][0]['pop'])) + ' %'
+        DrawString(new_surf, temp_out_string, FONT_BIG, ORANGE, 75).right()
 
-        daily_forecast = json_data['daily']['data']
+        DrawString(new_surf, rain_string, FONT_BIG, PRECIPCOLOR, 105).right()
+        DrawString(new_surf, PRECIPTYPE, FONT_SMALL_BOLD, PRECIPCOLOR, 140).right()
 
-        forecast_day_1_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[1]['datetime'], '%Y-%m-%d')),
-                                                  theme["DATE_FORMAT"]["FORECAST_DAY"])
-        forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[2]['datetime'], '%Y-%m-%d')),
-                                                  theme["DATE_FORMAT"]["FORECAST_DAY"])
-        forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(daily_forecast[3]['datetime'], '%Y-%m-%d')),
-                                                  theme["DATE_FORMAT"]["FORECAST_DAY"])
+        DrawString(new_surf, forecast_day_1_string, FONT_SMALL_BOLD, ORANGE, 165).center(3, 0)
+        DrawString(new_surf, forecast_day_2_string, FONT_SMALL_BOLD, ORANGE, 165).center(3, 1)
+        DrawString(new_surf, forecast_day_3_string, FONT_SMALL_BOLD, ORANGE, 165).center(3, 2)
 
-        forecast_day_1_min_max_string = str(int(daily_forecast[1]['low_temp'])) + ' | ' + str(
-            int(daily_forecast[1]['high_temp']))
+        DrawString(new_surf, forecast_day_1_min_max_string, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 0)
+        DrawString(new_surf, forecast_day_2_min_max_string, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 1)
+        DrawString(new_surf, forecast_day_3_min_max_string, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 2)
 
-        forecast_day_2_min_max_string = str(int(daily_forecast[2]['low_temp'])) + ' | ' + str(
-            int(daily_forecast[2]['high_temp']))
+        DrawString(new_surf, sunrise_string, FONT_SMALL_BOLD, MAIN_FONT, 265).left(30)
+        DrawString(new_surf, sunset_string, FONT_SMALL_BOLD, MAIN_FONT, 292).left(30)
 
-        forecast_day_3_min_max_string = str(int(daily_forecast[3]['low_temp'])) + ' | ' + str(
-            int(daily_forecast[3]['high_temp']))
+        DrawString(new_surf, wind_direction_string, FONT_SMALL_BOLD, MAIN_FONT, 250).center(3, 2)
+        DrawString(new_surf, wind_speed_string, FONT_SMALL_BOLD, MAIN_FONT, 300).center(3, 2)
 
-        wind_direction_string = current_forecast['wind_cdir']
-
-        sunrise_string = convert_timestamp(daily_forecast[0]['sunrise_ts'], theme["DATE_FORMAT"]["SUNRISE_SUNSET"])
-        sunset_string = convert_timestamp(daily_forecast[0]['sunset_ts'], theme["DATE_FORMAT"]["SUNRISE_SUNSET"])
-
-        wind_speed_string = str(round((float(current_forecast['wind_spd']) * 3.6), 1)) + ' km/h'
-
-        DrawString(new_surf, summary_string, font_small_bold, VIOLET, 50).center(1, 0)
-
-        DrawString(new_surf, temp_out_string, font_big, ORANGE, 75).right()
-
-        DrawString(new_surf, rain_string, font_big, PRECIPCOLOR, 105).right()
-        DrawString(new_surf, PRECIPTYPE, font_small_bold, PRECIPCOLOR, 140).right()
-
-        DrawString(new_surf, forecast_day_1_string, font_small_bold, ORANGE, 165).center(3, 0)
-        DrawString(new_surf, forecast_day_2_string, font_small_bold, ORANGE, 165).center(3, 1)
-        DrawString(new_surf, forecast_day_3_string, font_small_bold, ORANGE, 165).center(3, 2)
-
-        DrawString(new_surf, forecast_day_1_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 0)
-        DrawString(new_surf, forecast_day_2_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 1)
-        DrawString(new_surf, forecast_day_3_min_max_string, font_small_bold, MAIN_FONT, 180).center(3, 2)
-
-        DrawString(new_surf, sunrise_string, font_small_bold, MAIN_FONT, 265).left(30)
-        DrawString(new_surf, sunset_string, font_small_bold, MAIN_FONT, 292).left(30)
-
-        DrawString(new_surf, wind_direction_string, font_small_bold, MAIN_FONT, 250).center(3, 2)
-        DrawString(new_surf, wind_speed_string, font_small_bold, MAIN_FONT, 300).center(3, 2)
-
-        weather_surf = create_scaled_surf(new_surf)
+        weather_surf = new_surf
 
         logger.info(f'summary: {summary_string}')
         logger.info(f'temp out: {temp_out_string}')
         logger.info(f'{PRECIPTYPE}: {rain_string}')
-        logger.info(f'icon: {WeatherIcon}')
+        logger.info(f'icon: {WEATHERICON}')
         logger.info(f'forecast: '
-                    f'{forecast_day_1_string} {forecast_day_1_min_max_string} {ForeCastIcon_Day_1}; '
-                    f'{forecast_day_2_string} {forecast_day_2_min_max_string} {ForeCastIcon_Day_2}; '
-                    f'{forecast_day_3_string} {forecast_day_3_min_max_string} {ForeCastIcon_Day_3}')
+                    f'{forecast_day_1_string} {forecast_day_1_min_max_string} {FORECASTICON_DAY_1}; '
+                    f'{forecast_day_2_string} {forecast_day_2_min_max_string} {FORECASTICON_DAY_2}; '
+                    f'{forecast_day_3_string} {forecast_day_3_min_max_string} {FORECASTICON_DAY_3}')
         logger.info(f'sunrise: {sunrise_string} ; sunset {sunset_string}')
         logger.info(f'WindSpeed: {wind_speed_string}')
+
+        # remove the ended timer and threads
+        global THREADS
+        THREADS = [t for t in THREADS if t.is_alive()]
+        logging.info(f'threads cleaned: {len(THREADS)} left in the queue')
+
+        pygame.time.delay(1500)
+        UPDATING = pygame.time.get_ticks() + 1500  # 1.5 seconds
 
         return weather_surf
 
@@ -728,14 +729,14 @@ def draw_time_layer():
     logger.debug(f'Day: {date_day_string}')
     logger.debug(f'Time: {date_time_string}')
 
-    DrawString(dynamic_surf, date_day_string, date_font, MAIN_FONT, 0).center(1, 0)
-    DrawString(dynamic_surf, date_time_string, clock_font, MAIN_FONT, 15).center(1, 0)
+    DrawString(time_surf, date_day_string, DATE_FONT, MAIN_FONT, 0).center(1, 0)
+    DrawString(time_surf, date_time_string, CLOCK_FONT, MAIN_FONT, 15).center(1, 0)
 
 
 def draw_moon_layer(surf, y, size):
     # based on @miyaichi's fork -> great idea :)
     _size = 300
-    dt = datetime.datetime.fromtimestamp(json_data['daily']['data'][0]['ts'])
+    dt = datetime.datetime.fromtimestamp(JSON_DATA['daily']['data'][0]['ts'])
     moon_age = (((dt.year - 11) % 19) * 11 + [0, 2, 0, 2, 2, 4, 5, 6, 7, 8, 9, 10][dt.month - 1] + dt.day) % 30
 
     image = Image.new("RGBA", (_size + 2, _size + 2))
@@ -805,7 +806,7 @@ def draw_statusbar():
 
 
 def draw_fps():
-    DrawString(dynamic_surf, str(int(clock.get_fps())), font_small_bold, RED, 20).left()
+    DrawString(dynamic_surf, str(int(clock.get_fps())), FONT_SMALL_BOLD, RED, 20).left()
 
 
 # ToDo: get touch input working with scaled displays
@@ -816,16 +817,19 @@ def draw_event(color=RED):
     DrawImage(dynamic_surf, images['circle'], size=size, fillcolor=color).draw_position(new_pos)
 
 
-def create_scaled_surf(surf):
-    scaled_surf = pygame.transform.smoothscale(surf, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
+def create_scaled_surf(surf, aa=False):
+    if aa:
+        scaled_surf = pygame.transform.smoothscale(surf, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
+    else:
+        scaled_surf = pygame.transform.scale(surf, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
 
     return scaled_surf
 
 
 def quit_all():
-    global threads
+    global THREADS
 
-    for thread in threads:
+    for thread in THREADS:
         logger.info(f'Thread killed {thread}')
         thread.cancel()
         thread.join()
@@ -867,26 +871,43 @@ def loop():
                     pygame.image.save(dynamic_surf, f'screenshot-{shot_time}.png')
                     logger.info(f'Screenshot created at {shot_time}')
 
-        display_surf.fill(BACKGROUND)
-        display_surf.blit(weather_surf, FIT_SCREEN)
+        tft_surf.fill(BACKGROUND)
 
+        # fill the actual main surface and blit the image/weather layer
+        display_surf.fill(BACKGROUND)
+        display_surf.blit(weather_surf, (0, 0))
+
+        # fill the dynamic layer, make it transparent and usw draw functions that write to that surface
         dynamic_surf.fill(BACKGROUND)
         dynamic_surf.set_colorkey(BACKGROUND)
 
         draw_statusbar()
-        draw_time_layer()
 
         if config["DISPLAY"]["SHOW_FPS"]:
             draw_fps()
 
         my_particles.move(dynamic_surf, my_particles_list)
 
-        scaled_surf = create_scaled_surf(dynamic_surf)
+        # finally scale the dynamic surface and blit it to the main surface
+        display_surf.blit(dynamic_surf, (0, 0))
 
-        display_surf.blit(scaled_surf, FIT_SCREEN)
+        # now do the same for the time layer so it did not interfere with the other layers
+        # fill the layer and make it transparent as well
+        time_surf.fill(BACKGROUND)
+        time_surf.set_colorkey(BACKGROUND)
 
+        # draw the time to the layer
+        draw_time_layer()
+        display_surf.blit(time_surf, (0, 0))
+
+        # finally scale the main surface and blit it to the tft surface
+        # this is performance heavy so do it only once in a loop for the surface that collects all other
+        tft_surf.blit(create_scaled_surf(display_surf, aa=AA), FIT_SCREEN)
+
+        # update the display with all surfaces merged into the main one
         pygame.display.update()
 
+        # do it as often as FPS configured (30 FPS recommend for particle simulation, 15 runs fine too, 60 is overkill)
         clock.tick(FPS)
 
     quit_all()
