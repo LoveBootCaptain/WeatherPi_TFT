@@ -611,7 +611,9 @@ class Update:
         stats_data = JSON_DATA['stats']
 
         summary_string = current_forecast['weather']['description']
-        temp_out_string = str(int(current_forecast['temp'])) + '°C'
+        temp_out_string = str(int(current_forecast['temp']))
+        temp_out_unit = '°C' if config['LOCALE']['METRIC'] else '°F'
+        temp_out_string = str(temp_out_string + temp_out_unit)
         rain_string = str(int(JSON_DATA['daily']['data'][0]['pop'])) + ' %'
 
         today = daily_forecast[0]

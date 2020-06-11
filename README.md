@@ -251,12 +251,16 @@ nano config.json
 #### localise hardcoded strings and ISO settings
 ```
   "LOCALE": {
-    "ISO": "de_DE",
-    "RAIN_STR": "Regen",
-    "SNOW_STR": "Schnee",
-    "PRECIP_STR": "Niederschlag"
+    "ISO": "en_GB",
+    "RAIN_STR": "Rain",
+    "SNOW_STR": "Snow",
+    "PRECIP_STR": "Precipitation",
+    "METRIC": true
   },
 ```
+change `"ISO"` and `"METRIC"` according to your needs. 
+`"METRIC": true` will render `°C` and `"METRIC": false` will render `°F` 
+
 #### timer options
 ```
   "TIMER": {
@@ -329,22 +333,6 @@ python --version
 * it should say something like: 
 ```
 Python 3.7.x
-```
-
-
-### update all python modules
-
-* open up a python console
-```bash
-python
-```
-
-* than run this line by line
-```python
-import pip
-from subprocess import call
-for dist in pip.get_installed_distributions():
-    call("pip install --upgrade " + dist.project_name, shell=True)
 ```
 
 * if everything is set up and updated correctly:
