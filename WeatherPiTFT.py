@@ -99,7 +99,7 @@ try:
             # using the dashboard on a raspberry with TFT displays might make this necessary
             os.putenv('SDL_FBDEV', config['DISPLAY']['FRAMEBUFFER'])
             os.environ["SDL_VIDEODRIVER"] = "fbcon"
-            LOG_PATH = PATH + '/mnt/ramdisk/logs/'
+            LOG_PATH = '/mnt/ramdisk/'
 
         WEATHERBIT_IO_KEY = config['WEATHERBIT_IO_KEY']
 
@@ -469,7 +469,7 @@ class Update:
                 'stats': stats_data
             }
 
-            with open(LOG_PATH + 'latest_weather.json', 'w') as outputfile:
+            with open(LOG_PATH + 'latest_weather.json', 'w+') as outputfile:
                 json.dump(data, outputfile, indent=2, sort_keys=True)
 
             logger.info('json file saved')
