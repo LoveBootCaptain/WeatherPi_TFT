@@ -146,8 +146,11 @@ fbcon=map:10 fbcon=font:VGA8x8 logo.nologo
 #### for Pimoroni Hyperpixel4
 
 just change `"FRAMEBUFFER": "/dev/fb1"` to `"FRAMEBUFFER": "/dev/fb0"` later in your [config file](#edit-the-configjson-file)
-you can also change `"FPS"` to `60` and `"AA"` to `true`for mx quality and frames per second. but 30 is more than enough.
+
+you can also change `"FPS"` to `60` and `"AA"` to `true` for mx quality and frames per second. but 30 is more than enough.
+
 it's just needed for the particle simulation for precipitation types like rain and snow. 
+
 Everything from 15-30 fps should give you decent animations.
 
 ## install and configure WeatherPi_TFT
@@ -170,26 +173,28 @@ sudo pip3 install -r requirements.txt
 
 **NEW PLEASE UPDATE**
 
-WeatherPiTFT will write a json file to sd card after updating the weather data from the api provider.
-this process will reduce writing to your sd card.
+WeatherPiTFT will write a json file to your Pi after updating the weather data from the api provider.
+
+this process will reduce writing to your sd card, cause we're writing it only to RAM.
 
 ramdisk will only be used in production mode. means you have set your `"ENV"` to `"Pi"` which is default when you followed this guide.
 
-you may also consider using great tooling for writing all logs to ram from azlux: [log2ram](https://github.com/azlux/log2ram)
+you may also consider using great tooling for writing all logs to ram from @azlux: [log2ram](https://github.com/azlux/log2ram)
 
 ```
 sudo mkdir /mnt/ramdisk
 sudo nano /etc/fstab
 ```
 add the following line right at the end of the opened file
-`size=5M`specifies the size of the reserved ram (5M is more than enough)
+
+`size=5M` specifies the size of the reserved ram (5M is more than enough)
 ```
 tmpfs /mnt/ramdisk tmpfs nodev,nosuid,size=5M 0 0
 ```
 
 `CTRL-O` to save and `CTRL-X` to quit nano
 
-finally mount the ram disk
+finally mount the ram disk and reboot your Pi
 
 ```
 sudo mount -a
