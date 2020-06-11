@@ -6,7 +6,7 @@
     "SUNRISE_SUNSET": "%H:%M"
   },
   "COLOR": {
-    "BACKGROUND": [43, 43, 43],
+    "BACKGROUND": [10, 10, 10],
     "MAIN_FONT": [255, 255, 255],
     "BLACK": [0, 0, 0],
     "DARK_GRAY": [66, 66, 66],

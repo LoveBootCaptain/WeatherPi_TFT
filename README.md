@@ -1,4 +1,9 @@
 # WeatherPi_TFT
+
+Working on @pimoroni HyperPixel4 Display and a Raspberry Pi 3 B+
+![Hardware](./docs/HARDWARE_1.3.jpg)
+
+Working on @HWHardsoft AZ-Touch-Pi0-Weather with ili9341 Display and a Raspberry Pi Zero W
 ![Hardware](./docs/HARDWARE_1.2.jpg)
 
 
@@ -41,6 +46,7 @@ configuration.
 > * [TFT FeatherWing - 2.4" 320x240 Touchscreen For All Feathers](https://www.adafruit.com/products/3315)
 > * [Adafruit 2.4" TFT LCD with Touchscreen Breakout w/MicroSD Socket - ILI9341](https://www.adafruit.com/product/2478)
 > * adafruit TFT's with ili9341 driver
+> * pimoroni hyperpixel4
 
 > no configuration needed for:
 > * official raspberry pi 7" display
@@ -118,6 +124,32 @@ to connect to a wifi network follow this [guide](https://www.raspberrypi.org/doc
 sudo apt-get update -y && sudo apt-get upgrade -y
 ```
 
+### set up the TFT
+
+#### for ili9341 displays from adafruit
+
+for other displays like this you may have to build your own kernel module or find it from your seller.
+
+* in /boot/config.txt, add in the following at the bottom 
+```
+# TFT display and touch panel
+dtoverlay=rpi-display
+dtparam=rotate=0
+```
+
+* change /boot/cmdline.txt to add the following to the end of the existing line
+```
+fbcon=map:10 fbcon=font:VGA8x8 logo.nologo
+```
+
+
+#### for Pimoroni Hyperpixel4
+
+just change `"FRAMEBUFFER": "/dev/fb1"` to `"FRAMEBUFFER": "/dev/fb0"` later in your [config file](#edit-the-configjson-file)
+you can also change `"FPS"` to `60` and `"AA"` to `true`for mx quality and frames per second. but 30 is more than enough.
+it's just needed for the particle simulation for precipitation types like rain and snow. 
+Everything from 15-30 fps should give you decent animations.
+
 ## install and configure WeatherPi_TFT
 
 ```bash
@@ -134,12 +166,37 @@ since the script has to be run by a root user you have to install the dependenci
 sudo pip3 install -r requirements.txt
 ```
 
-#### NOTE: pygame version 2.0.0.dev8 and SDL2 is required
+### create a ram disk to protect your sd card
 
-* If you have proplems installing pygame find more details here: https://www.pygame.org/wiki/GettingStarted
-* Follow steps from here to install SDL2 on your Pi if not already in your OS image: https://gist.github.com/Lokathor/e6fec720b722b8a6f78e399698cae6e4
+**NEW PLEASE UPDATE**
 
-I hope this process will be improved and easier when pygame 2.0.0 get's it's official release.
+WeatherPiTFT will write a json file to sd card after updating the weather data from the api provider.
+this process will reduce writing to your sd card.
+
+ramdisk will only be used in production mode. means you have set your `"ENV"` to `"Pi"` which is default when you followed this guide.
+
+you may also consider using great tooling for writing all logs to ram from azlux: [log2ram](https://github.com/azlux/log2ram)
+
+```
+sudo mkdir /mnt/ramdisk
+sudo nano /etc/fstab
+```
+add the following line right at the end of the opened file
+`size=5M`specifies the size of the reserved ram (5M is more than enough)
+```
+tmpfs /mnt/ramdisk tmpfs nodev,nosuid,size=5M 0 0
+```
+
+`CTRL-O` to save and `CTRL-X` to quit nano
+
+finally mount the ram disk
+
+```
+sudo mount -a
+sudo reboot
+```
+
+while your Pi reboots grep your API key ...
 
 ### get an api key from weatherbit.io
 
@@ -147,6 +204,8 @@ I hope this process will be improved and easier when pygame 2.0.0 get's it's off
 * and register to get an API key
 
 ### add API key and other options to the config file
+
+when your Pi has rebooted
 
 #### create a new config-file
 ```bash
@@ -164,14 +223,22 @@ nano config.json
     "WIDTH": 240,
     "HEIGHT": 320,
     "FPS": 30,
+    "AA": false,
     "FRAMEBUFFER": "/dev/fb1",
-    "PWM": false
+    "PWM": false,
+    "SHOW_FPS": true,
+    "SHOW_API_STATS": true,
+    "MOUSE": true
   },
 ``` 
 * as long as you configure a 3:4 ratio the dashboard will be scaled
-* `FPS` is used for pygame internal ticks - 30 fps is more than enough to render clock transitions smoothly
-* set `FRAMEBUFFER` according to your display, some use fb0 some fb1, for local set it to `false`
-* set `PWM` to your GPIO pin if your display support pwm brightness - may need some code adjustments on your side depending on your display (some are bright enough with pwm 25, some ore not) otherwhise set it to `false`
+* `FPS` is used for pygame internal ticks - 30 fps is more than enough to render clock transitions and precipitation animations smoothly
+* `AA` turns antialiasing on and off (leave it on a Pi Zero off, it is performance heavy and higher FPS)
+* set `FRAMEBUFFER` according to your display, some use fb0 (e.g. @pimoroni HyperPixel4) some fb1 (most ili9341 from @adafruit), for local development or HDMI displays set it to `false`
+* set `PWM` to your GPIO pin if your display support pwm brightness (HyperPixel supports GPIO 19 for pwm brightness) - may need some code adjustments on your side depending on your display (some are bright enough with pwm 25, some ore not) otherwise set it to `false`
+* `SHOW_FPS` show the current fps on the display
+* `SHOW_API_STATS` show how many API calls are left over (resets every midnight UTC)
+* `MOUSE` enable/disable mouse pointer - needed for local development, better leave it disabled
 
 #### configure weatherbit.io settings
 
@@ -193,11 +260,11 @@ nano config.json
 #### timer options
 ```
   "TIMER": {
-    "UPDATE": 300,
+    "UPDATE": 420,
     "RELOAD": 30
   },
 ```
-* the `UPDATE` timer defines how often the API will be called in seconds
+* the `UPDATE` timer defines how often the API will be called in seconds - 7min will give you enough API calls over the day
 * `RELOAD` defines who often the information on the display will be updated 
 
 ### theme file and theme options
@@ -217,22 +284,11 @@ set your theme file [darcula.theme, light.theme or example.theme] in `config.jso
         ```
     * change every color of an image by adding a color `(r, g, b)` to the optional `fillcolor` parameter in the `DrawImage` class
     * or create your own theme with your fonts and add it to your config/theme
- 
-### set up the TFT
-
-* in /boot/config.txt, add in the following at the bottom 
-```
-# TFT display and touch panel
-dtoverlay=rpi-display
-dtparam=rotate=0
-```
-
-* change /boot/cmdline.txt to add the following to the end of the existing line
-```
-fbcon=map:10 fbcon=font:VGA8x8 logo.nologo
-```
 
 ### setup the services
+
+sadly pygame doesn't like to work well with systemd... so it has to run as init.d service. 
+maybe someone can help to solve this one time.
 
 ```bash
 cd
