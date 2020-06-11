@@ -21,7 +21,8 @@
     "ISO": "en_GB",
     "RAIN_STR": "Rain",
     "SNOW_STR": "Snow",
-    "PRECIP_STR": "Precipitation"
+    "PRECIP_STR": "Precipitation",
+    "METRIC": true
   },
   "THEME": "example.theme",
   "TIMER": {
