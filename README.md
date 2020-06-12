@@ -263,8 +263,10 @@ nano config.json
     "METRIC": true
   },
 ```
-change `"ISO"` and `"METRIC"` according to your needs. 
-`"METRIC": true` will render `°C` and `"METRIC": false` will render `°F` 
+* change `"ISO"` and `"METRIC"` according to your needs
+* `"METRIC": true` will get all weather data units as metric system, change to `false` if you prefer imperial styled units
+    * `°C` will be `°F` and `km/h` will be `mph 
+    * will also change the request parameter `untis` for the api request (see [weatherbit API Docs](https://www.weatherbit.io/api) for more details)
 
 #### timer options
 ```
@@ -292,7 +294,11 @@ set your theme file [darcula.theme, light.theme or example.theme] in `config.jso
         "GREEN" is used for everything fine in status bar icons
         ```
     * change every color of an image by adding a color `(r, g, b)` to the optional `fillcolor` parameter in the `DrawImage` class
-    * or create your own theme with your fonts and add it to your config/theme
+    * change the time and date format according to your preferences
+        * a good reference for strftime options can be found here [Python strftime()](https://www.programiz.com/python-programming/datetime/strftime)
+        * for 12h clock with am and pm support you can use `"%I:%M:%S %p"` instead of `"%H:%M:%S"` for a 24h clock in `yourTheme.DATE_FORMAT.TIME`
+        * for imperial like date format just change `"%A - %d. %b %Y"` to `"%A - %b %d %Y"` in `yourTheme.DATE_FORMAT.DATE`
+    * or create your own theme with your fonts and add it to your config/theme`
 
 ### setup the services
 

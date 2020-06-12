@@ -78,6 +78,7 @@ WEATHERBIT_LANG = config['WEATHERBIT_LANGUAGE']
 WEATHERBIT_POSTALCODE = config['WEATHERBIT_POSTALCODE']
 WEATHERBIT_HOURS = config['WEATHERBIT_HOURS']
 WEATHERBIT_DAYS = config['WEATHERBIT_DAYS']
+METRIC = config['LOCALE']['METRIC']
 
 locale.setlocale(locale.LC_ALL, (config['LOCALE']['ISO'], 'UTF-8'))
 
@@ -126,7 +127,7 @@ SURFACE_WIDTH = 240
 SURFACE_HEIGHT = 320
 
 SCALE = int(DISPLAY_WIDTH / SURFACE_WIDTH)
-FIT_SCREEN = int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HEIGHT - (SURFACE_HEIGHT * SCALE)) / 2)
+FIT_SCREEN = (int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HEIGHT - (SURFACE_HEIGHT * SCALE)) / 2))
 
 FPS = config['DISPLAY']['FPS']
 AA = config['DISPLAY']['AA']
@@ -139,9 +140,15 @@ pygame.display.set_caption('WeatherPiTFT')
 
 tft_surf = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.NOFRAME if config['ENV'] == 'Pi' else 0)
 
+# the drawing area - everything will be drawn here before scaling and rendering on the display tft_surf
 display_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+# dynamic surface for status bar updates and dynamic values like fps
 dynamic_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+# exclusive surface for the time
 time_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+# exclusive surface for the mouse/touch events
+mouse_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
+# surface for the weather data - will only be created once if the data is updated from the api
 weather_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
 
 clock = pygame.time.Clock()
@@ -341,7 +348,7 @@ class DrawImage:
             else:
                 width, height = (int(size / width * height), size)
 
-            new_image = self.image.resize((width, height), Image.LANCZOS)
+            new_image = self.image.resize((width, height), Image.LANCZOS if AA else Image.BILINEAR)
             self.image = new_image
             self.img_size = new_image.size
 
@@ -352,6 +359,7 @@ class DrawImage:
     @staticmethod
     def fill(surface, fillcolor: tuple):
         """converts the color on an icon"""
+        surface.set_colorkey(BACKGROUND)
         w, h = surface.get_size()
         r, g, b = fillcolor
         for x in range(w):
@@ -450,10 +458,11 @@ class Update:
             current_endpoint = f'{SERVER}/current'
             daily_endpoint = f'{SERVER}/forecast/daily'
             stats_endpoint = f'{SERVER}/subscription/usage'
+            units = 'M' if METRIC else 'I'
 
             logger.info(f'connecting to server: {SERVER}')
 
-            options = str(f'&postal_code={WEATHERBIT_POSTALCODE}&country={WEATHERBIT_COUNTRY}&lang={WEATHERBIT_LANG}')
+            options = str(f'&postal_code={WEATHERBIT_POSTALCODE}&country={WEATHERBIT_COUNTRY}&lang={WEATHERBIT_LANG}&units={units}')
 
             current_request_url = str(f'{current_endpoint}?key={WEATHERBIT_IO_KEY}{options}')
             daily_request_url = str(f'{daily_endpoint}?key={WEATHERBIT_IO_KEY}{options}&days={WEATHERBIT_DAYS}')
@@ -612,7 +621,7 @@ class Update:
 
         summary_string = current_forecast['weather']['description']
         temp_out_string = str(int(current_forecast['temp']))
-        temp_out_unit = '°C' if config['LOCALE']['METRIC'] else '°F'
+        temp_out_unit = '°C' if METRIC else '°F'
         temp_out_string = str(temp_out_string + temp_out_unit)
         rain_string = str(int(JSON_DATA['daily']['data'][0]['pop'])) + ' %'
 
@@ -627,18 +636,19 @@ class Update:
         forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(day_2['datetime'], '%Y-%m-%d')), df_forecast)
         forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(day_3['datetime'], '%Y-%m-%d')), df_forecast)
 
-        forecast_day_1_min_max_string = str(int(day_1['low_temp'])) + ' | ' + str(int(day_1['high_temp']))
-
-        forecast_day_2_min_max_string = str(int(day_2['low_temp'])) + ' | ' + str(int(day_2['high_temp']))
-
-        forecast_day_3_min_max_string = str(int(day_3['low_temp'])) + ' | ' + str(int(day_3['high_temp']))
+        forecast_day_1_min_max_string = f"{int(day_1['low_temp'])} | {int(day_1['high_temp'])}"
+        forecast_day_2_min_max_string = f"{int(day_2['low_temp'])} | {int(day_2['high_temp'])}"
+        forecast_day_3_min_max_string = f"{int(day_3['low_temp'])} | {int(day_3['high_temp'])}"
 
         wind_direction_string = current_forecast['wind_cdir']
 
         sunrise_string = convert_timestamp(today['sunrise_ts'], df_sun)
         sunset_string = convert_timestamp(today['sunset_ts'], df_sun)
 
-        wind_speed_string = str(round((float(current_forecast['wind_spd']) * 3.6), 1)) + ' km/h'
+        wind_speed = float(current_forecast['wind_spd'])
+        wind_speed = wind_speed * 3.6 if METRIC else wind_speed
+        wind_speed_unit = 'km/h' if METRIC else 'mph'
+        wind_speed_string = str(f'{round(wind_speed, 1)} {wind_speed_unit}')
 
         global weather_surf, UPDATING
 
@@ -824,10 +834,21 @@ def draw_fps():
 
 # ToDo: get touch input working with scaled displays
 def draw_event(color=RED):
+
     pos = pygame.mouse.get_pos()
+
     size = 16
-    new_pos = (pos[0] - size / 2, pos[1] - size / 2)
-    DrawImage(dynamic_surf, images['circle'], size=size, fillcolor=color).draw_position(new_pos)
+    radius = int(size / 2)
+
+    tft_rect = tft_surf.get_rect()
+    display_surface_rect = display_surf.get_rect()
+
+    ratio_x = int((tft_rect.width / display_surface_rect.width))
+    ratio_y = int((tft_rect.height / display_surface_rect.height))
+
+    scaled_pos = (int(pos[0] / ratio_x) - int(FIT_SCREEN[0] / 2), int(pos[1] / ratio_y) - int(FIT_SCREEN[1] / 2))
+
+    pygame.draw.circle(mouse_surf, color, scaled_pos, radius, 1)
 
 
 def create_scaled_surf(surf, aa=False):
@@ -840,6 +861,10 @@ def create_scaled_surf(surf, aa=False):
 
 
 def quit_all():
+
+    pygame.display.quit()
+    pygame.quit()
+
     global THREADS
 
     for thread in THREADS:
@@ -847,7 +872,6 @@ def quit_all():
         thread.cancel()
         thread.join()
 
-    pygame.quit()
     sys.exit()
 
 
@@ -857,33 +881,6 @@ def loop():
     running = True
 
     while running:
-
-        for event in pygame.event.get():
-
-            if event.type == pygame.QUIT:
-
-                running = False
-
-                quit_all()
-
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-
-                if pygame.MOUSEBUTTONDOWN:
-                    draw_event()
-
-            elif event.type == pygame.KEYDOWN:
-
-                if event.key == pygame.K_ESCAPE:
-
-                    running = False
-
-                    quit_all()
-
-                elif event.key == pygame.K_SPACE:
-                    shot_time = convert_timestamp(time.time(), "%Y-%m-%d %H-%M-%S")
-                    pygame.image.save(dynamic_surf, f'screenshot-{shot_time}.png')
-                    logger.info(f'Screenshot created at {shot_time}')
-
         tft_surf.fill(BACKGROUND)
 
         # fill the actual main surface and blit the image/weather layer
@@ -912,6 +909,39 @@ def loop():
         # draw the time to the layer
         draw_time_layer()
         display_surf.blit(time_surf, (0, 0))
+
+        # draw the mouse events
+        # mouse_surf.fill(BACKGROUND)
+        # mouse_surf.set_colorkey(BACKGROUND)
+        # draw_event(WHITE)
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+
+                running = False
+
+                quit_all()
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+
+                if pygame.MOUSEBUTTONDOWN:
+                    draw_event()
+
+            elif event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_ESCAPE:
+
+                    running = False
+
+                    quit_all()
+
+                elif event.key == pygame.K_SPACE:
+                    shot_time = convert_timestamp(time.time(), "%Y-%m-%d %H-%M-%S")
+                    pygame.image.save(dynamic_surf, f'screenshot-{shot_time}.png')
+                    logger.info(f'Screenshot created at {shot_time}')
+
+        # display_surf.blit(mouse_surf, (0, 0))
 
         # finally scale the main surface and blit it to the tft surface
         # this is performance heavy so do it only once in a loop for the surface that collects all other
