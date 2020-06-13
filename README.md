@@ -142,6 +142,9 @@ dtparam=rotate=0
 fbcon=map:10 fbcon=font:VGA8x8 logo.nologo
 ```
 
+#### for AZ-Touch Pi0
+
+follow the above instructions for the ili9341 and then replace `/boot/overlays/rpi-display.dtbo` with the copy from https://github.com/HWHardsoft/AZ-Touch-Pi0-Weather.
 
 #### for Pimoroni Hyperpixel4
 
