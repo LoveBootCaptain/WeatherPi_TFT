@@ -945,7 +945,7 @@ def loop():
 
         # finally scale the main surface and blit it to the tft surface
         # this is performance heavy so do it only once in a loop for the surface that collects all other
-        tft_surf.blit(create_scaled_surf(display_surf, aa=AA), FIT_SCREEN)
+        tft_surf.blit(create_scaled_surf(display_surf.convert(32, 0), aa=AA), FIT_SCREEN)
 
         # update the display with all surfaces merged into the main one
         pygame.display.update()
