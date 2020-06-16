@@ -126,7 +126,7 @@ DISPLAY_HEIGHT = int(config["DISPLAY"]["HEIGHT"])
 SURFACE_WIDTH = 240
 SURFACE_HEIGHT = 320
 
-SCALE = int(DISPLAY_WIDTH / SURFACE_WIDTH)
+SCALE = float(DISPLAY_WIDTH / SURFACE_WIDTH)
 FIT_SCREEN = (int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HEIGHT - (SURFACE_HEIGHT * SCALE)) / 2))
 
 FPS = config['DISPLAY']['FPS']
@@ -853,9 +853,9 @@ def draw_event(color=RED):
 
 def create_scaled_surf(surf, aa=False):
     if aa:
-        scaled_surf = pygame.transform.smoothscale(surf, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
+        scaled_surf = pygame.transform.smoothscale(surf, (int(SURFACE_WIDTH * SCALE), int(SURFACE_HEIGHT * SCALE)))
     else:
-        scaled_surf = pygame.transform.scale(surf, (SURFACE_WIDTH * SCALE, SURFACE_HEIGHT * SCALE))
+        scaled_surf = pygame.transform.scale(surf, (int(SURFACE_WIDTH * SCALE), int(SURFACE_HEIGHT * SCALE)))
 
     return scaled_surf
 
