@@ -36,6 +36,7 @@ import threading
 import time
 
 import pygame
+import pygame.gfxdraw
 import requests
 from PIL import Image, ImageDraw
 
@@ -424,15 +425,17 @@ class DrawImage:
 
     @staticmethod
     def fill(surface, fillcolor: tuple):
-        """converts the color on an icon"""
+        """converts the color on an mono colored icon"""
         surface.set_colorkey(BACKGROUND)
         w, h = surface.get_size()
         r, g, b = fillcolor
         for x in range(w):
             for y in range(h):
                 a: int = surface.get_at((x, y))[3]
-                color = pygame.Color(r, g, b, a)
-                surface.set_at((x, y), color)
+                # removes some distortion from scaling/zooming
+                if a > 5:
+                    color = pygame.Color(r, g, b, a)
+                    surface.set_at((x, y), color)
 
     def left(self, offset=0):
         """
@@ -477,6 +480,12 @@ class DrawImage:
         if y == 0:
             y += 1
         self.draw_image(draw_x=int(x * ZOOM), draw_y=int(y * ZOOM))
+
+    def draw_absolut_position(self, pos: tuple):
+        x, y = pos
+        if y == 0:
+            y += 1
+        self.draw_image(draw_x=int(x), draw_y=int(y))
 
     def draw_image(self, draw_x, draw_y=None):
         """
@@ -876,7 +885,7 @@ def draw_moon_layer(surf, y, size):
 
     logger.debug(f'moon phase age: {moon_age} percentage: {round(100 - (sum_length / sum_x) * 100, 1)}')
 
-    image = image.resize((size, size), Image.LANCZOS)
+    image = image.resize((size, size), Image.LANCZOS if AA else Image.BILINEAR)
     image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
 
     x = (SURFACE_WIDTH / 2) - (size / 2)
@@ -915,30 +924,22 @@ def draw_fps():
     DrawString(dynamic_surf, str(int(clock.get_fps())), FONT_SMALL_BOLD, RED, 20).left()
 
 
-# ToDo: get touch input working with scaled displays
+# ToDo: make this useful for touch events
 def draw_event(color=RED):
 
     pos = pygame.mouse.get_pos()
 
-    size = 16
+    size = 20
     radius = int(size / 2)
-
-    tft_rect = tft_surf.get_rect()
-    display_surface_rect = display_surf.get_rect()
-
-    ratio_x = int((tft_rect.width / display_surface_rect.width))
-    ratio_y = int((tft_rect.height / display_surface_rect.height))
-
-    scaled_pos = (int(pos[0] / ratio_x) - int(FIT_SCREEN[0] / 2), int(pos[1] / ratio_y) - int(FIT_SCREEN[1] / 2))
-
-    pygame.draw.circle(mouse_surf, color, scaled_pos, radius, 1)
+    new_pos = (int(pos[0] - FIT_SCREEN[0] - (radius * ZOOM)), int(pos[1] - FIT_SCREEN[1] - (radius * ZOOM)))
+    DrawImage(mouse_surf, images['circle'], size=size, fillcolor=color).draw_absolut_position(new_pos)
 
 
 def create_scaled_surf(surf, aa=False):
     if aa:
-        scaled_surf = pygame.transform.smoothscale(surf, (int(SURFACE_WIDTH), int(SURFACE_HEIGHT)))
+        scaled_surf = pygame.transform.smoothscale(surf, (SURFACE_WIDTH, SURFACE_HEIGHT))
     else:
-        scaled_surf = pygame.transform.scale(surf, (int(SURFACE_WIDTH), int(SURFACE_HEIGHT)))
+        scaled_surf = pygame.transform.scale(surf, (SURFACE_WIDTH, SURFACE_HEIGHT))
 
     return scaled_surf
 
@@ -955,7 +956,7 @@ def loop():
         display_surf.fill(BACKGROUND)
         display_surf.blit(weather_surf, (0, 0))
 
-        # fill the dynamic layer, make it transparent and usw draw functions that write to that surface
+        # fill the dynamic layer, make it transparent and use draw functions that write to that surface
         dynamic_surf.fill(BACKGROUND)
         dynamic_surf.set_colorkey(BACKGROUND)
 
@@ -967,7 +968,7 @@ def loop():
         if ANIMATION:
             my_particles.move(dynamic_surf, my_particles_list)
 
-        # finally scale the dynamic surface and blit it to the main surface
+        # finally take the dynamic surface and blit it to the main surface
         display_surf.blit(dynamic_surf, (0, 0))
 
         # now do the same for the time layer so it did not interfere with the other layers
@@ -975,11 +976,11 @@ def loop():
         time_surf.fill(BACKGROUND)
         time_surf.set_colorkey(BACKGROUND)
 
-        # draw the time to the layer
+        # draw the time to the main layer
         draw_time_layer()
         display_surf.blit(time_surf, (0, 0))
 
-        # draw the mouse events
+        # # draw the mouse events
         # mouse_surf.fill(BACKGROUND)
         # mouse_surf.set_colorkey(BACKGROUND)
         # draw_event(WHITE)
@@ -1012,9 +1013,8 @@ def loop():
 
         # display_surf.blit(mouse_surf, (0, 0))
 
-        # finally scale the main surface and blit it to the tft surface
-        # this is performance heavy so do it only once in a loop for the surface that collects all other
-        tft_surf.blit(create_scaled_surf(display_surf.convert(32), aa=AA), FIT_SCREEN)
+        # finally take the main surface and blit it to the tft surface
+        tft_surf.blit(create_scaled_surf(display_surf, aa=AA), FIT_SCREEN)
 
         # update the display with all surfaces merged into the main one
         pygame.display.update()
