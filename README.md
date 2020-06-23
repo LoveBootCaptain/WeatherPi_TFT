@@ -25,10 +25,12 @@ without lost of weather image quality.
 
 ![WeatherPi_TFT](https://user-images.githubusercontent.com/753562/85412434-db14fa00-b569-11ea-8078-49ec3ea7b1f9.png)
 ![WeatherPi_TFT](https://user-images.githubusercontent.com/753562/85412436-dbad9080-b569-11ea-91e9-574c402e3982.png)
+
 **comes with 2 themes (default and darcula styled)**
 
 
 OLD Pics before AA
+
 ![WeatherPi_TFT](https://user-images.githubusercontent.com/753562/85412433-db14fa00-b569-11ea-96c8-77698f12156c.gif)
 
 ### all available weather icons in 2 sizes
