@@ -92,3 +92,4 @@ ENV/
 /config.json
 /logs/latest_weather.json
 /default.theme
+/docs/

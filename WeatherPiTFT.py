@@ -82,6 +82,7 @@ METRIC = config['LOCALE']['METRIC']
 
 locale.setlocale(locale.LC_ALL, (config['LOCALE']['ISO'], 'UTF-8'))
 
+THREADS = []
 
 try:
     # if you do local development you can add a mock server (e.g. from postman.io our your homebrew solution)
@@ -111,6 +112,29 @@ except Exception as e:
     logger.warning(e)
     quit()
 
+
+pygame.display.init()
+pygame.mixer.quit()
+pygame.font.init()
+pygame.mouse.set_visible(config['DISPLAY']['MOUSE'])
+pygame.display.set_caption('WeatherPiTFT')
+
+
+def quit_all():
+
+    pygame.display.quit()
+    pygame.quit()
+
+    global THREADS
+
+    for thread in THREADS:
+        logger.info(f'Thread killed {thread}')
+        thread.cancel()
+        thread.join()
+
+    sys.exit()
+
+
 PWM = config['DISPLAY']['PWM']
 
 if PWM:
@@ -119,26 +143,67 @@ if PWM:
 else:
     logger.info('no PWM for brightness control configured')
 
-# theme settings from theme config
+
+# display settings from theme config
 DISPLAY_WIDTH = int(config["DISPLAY"]["WIDTH"])
 DISPLAY_HEIGHT = int(config["DISPLAY"]["HEIGHT"])
 
+# the drawing area to place all text and img on
 SURFACE_WIDTH = 240
 SURFACE_HEIGHT = 320
 
 SCALE = float(DISPLAY_WIDTH / SURFACE_WIDTH)
-FIT_SCREEN = (int((DISPLAY_WIDTH - (SURFACE_WIDTH * SCALE)) / 2), int((DISPLAY_HEIGHT - (SURFACE_HEIGHT * SCALE)) / 2))
+ZOOM = 1
 
 FPS = config['DISPLAY']['FPS']
 AA = config['DISPLAY']['AA']
+ANIMATION = config['DISPLAY']['ANIMATION']
 
-pygame.display.init()
-pygame.mixer.quit()
-pygame.font.init()
-pygame.mouse.set_visible(config['DISPLAY']['MOUSE'])
-pygame.display.set_caption('WeatherPiTFT')
 
-tft_surf = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.NOFRAME if config['ENV'] == 'Pi' else 0)
+# correction for 1:1 displays like hyperpixel4 square
+if DISPLAY_WIDTH / DISPLAY_HEIGHT == 1:
+    logger.info(f'square display configuration detected')
+    square_width = int(DISPLAY_WIDTH / float(4 / 3))
+    SCALE = float(square_width / SURFACE_WIDTH)
+
+    logger.info(f'scale and display correction caused by square display')
+    logger.info(f'DISPLAY_WIDTH: {square_width} new SCALE: {SCALE}')
+
+# check if a landscape display is configured
+if DISPLAY_WIDTH > DISPLAY_HEIGHT:
+    logger.info(f'landscape display configuration detected')
+    SCALE = float(DISPLAY_HEIGHT / SURFACE_HEIGHT)
+
+    logger.info(f'scale and display correction caused by landscape display')
+    logger.info(f'DISPLAY_HEIGHT: {DISPLAY_HEIGHT} new SCALE: {SCALE}')
+
+# zoom the application surface rendering to display size scale
+if SCALE != 1:
+    ZOOM = SCALE
+
+    if DISPLAY_HEIGHT < SURFACE_HEIGHT:
+        logger.info('screen smaller as surface area - zooming smaller')
+        SURFACE_HEIGHT = DISPLAY_HEIGHT
+        SURFACE_WIDTH = int(SURFACE_HEIGHT / (4 / 3))
+        logger.info(f'surface correction caused by small display')
+        if DISPLAY_WIDTH == DISPLAY_HEIGHT:
+            logger.info('small and square')
+            ZOOM = round(ZOOM, 2)
+        else:
+            ZOOM = round(ZOOM, 1)
+        logger.info(f'zoom correction caused by small display')
+    else:
+        logger.info('screen bigger as surface area - zooming bigger')
+        SURFACE_WIDTH = int(240 * ZOOM)
+        SURFACE_HEIGHT = int(320 * ZOOM)
+        logger.info(f'surface correction caused by bigger display')
+
+    logger.info(f'SURFACE_WIDTH: {SURFACE_WIDTH} SURFACE_HEIGHT: {SURFACE_HEIGHT} ZOOM: {ZOOM}')
+
+FIT_SCREEN = (int((DISPLAY_WIDTH - SURFACE_WIDTH) / 2), int((DISPLAY_HEIGHT - SURFACE_HEIGHT) / 2))
+
+# the real display surface
+tft_surf = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.NOFRAME if config['ENV'] == 'Pi' else pygame.FULLSCREEN)
 
 # the drawing area - everything will be drawn here before scaling and rendering on the display tft_surf
 display_surf = pygame.Surface((SURFACE_WIDTH, SURFACE_HEIGHT))
@@ -172,10 +237,10 @@ COLOR_LIST = [BLUE, LIGHT_BLUE, DARK_BLUE]
 
 FONT_MEDIUM = theme["FONT"]["MEDIUM"]
 FONT_BOLD = theme["FONT"]["BOLD"]
-DATE_SIZE = theme["FONT"]["DATE_SIZE"]
-CLOCK_SIZE = theme["FONT"]["CLOCK_SIZE"]
-SMALL_SIZE = theme["FONT"]["SMALL_SIZE"]
-BIG_SIZE = theme["FONT"]["BIG_SIZE"]
+DATE_SIZE = int(theme["FONT"]["DATE_SIZE"] * ZOOM)
+CLOCK_SIZE = int(theme["FONT"]["CLOCK_SIZE"] * ZOOM)
+SMALL_SIZE = int(theme["FONT"]["SMALL_SIZE"] * ZOOM)
+BIG_SIZE = int(theme["FONT"]["BIG_SIZE"] * ZOOM)
 
 FONT_SMALL = pygame.font.Font(FONT_PATH + FONT_MEDIUM, SMALL_SIZE)
 FONT_SMALL_BOLD = pygame.font.Font(FONT_PATH + FONT_BOLD, SMALL_SIZE)
@@ -200,8 +265,6 @@ CONNECTION = False
 READING = False
 UPDATING = False
 
-THREADS = []
-
 JSON_DATA = {}
 
 
@@ -218,8 +281,8 @@ def image_factory(image_path):
 
 class Particles(object):
     def __init__(self):
-        self.size = 20
-        self.count = 15
+        self.size = int(20 * ZOOM)
+        self.count = 20
         self.surf = pygame.Surface((self.size, self.size))
 
     def create_particle_list(self):
@@ -229,8 +292,8 @@ class Particles(object):
         for i in range(self.count):
             x = random.randrange(0, self.size)
             y = random.randrange(0, self.size)
-            w = 1
-            h = random.randint(2, 3)
+            w = int(1 * ZOOM)
+            h = random.randint(int(2 * ZOOM), int(3 * ZOOM))
             speed = random.choice([1, 2, 3])
             color = random.choice(COLOR_LIST)
             direct = random.choice([0, 0, 1])
@@ -270,7 +333,7 @@ class Particles(object):
                     x = random.randrange(0, self.size)
                     particle_list[i][0] = x
 
-            surf.blit(self.surf, (155, 140))
+            surf.blit(self.surf, (int(155 * ZOOM), int(140 * ZOOM)))
 
 
 class DrawString:
@@ -284,7 +347,7 @@ class DrawString:
         self.string = string
         self.font = font
         self.color = color
-        self.y = int(y)
+        self.y = int(y * ZOOM)
         self.size = self.font.size(self.string)
         self.surf = surf
 
@@ -293,7 +356,7 @@ class DrawString:
         :param offset: define some offset pixel to move strings a little bit more left (default=0)
         """
 
-        x = int(10 + offset)
+        x = int(10 * ZOOM + (offset * ZOOM))
 
         self.draw_string(x)
 
@@ -302,7 +365,7 @@ class DrawString:
         :param offset: define some offset pixel to move strings a little bit more right (default=0)
         """
 
-        x = int((SURFACE_WIDTH - self.size[0] - 10) - offset)
+        x = int((SURFACE_WIDTH - self.size[0] - (10 * ZOOM)) - (offset * ZOOM))
 
         self.draw_string(x)
 
@@ -313,7 +376,8 @@ class DrawString:
         :param offset: define some offset pixel to move strings a little bit (default=0)
         """
 
-        x = int(((((SURFACE_WIDTH / parts) / 2) + ((SURFACE_WIDTH / parts) * part)) - (self.size[0] / 2)) + offset)
+        x = int(((((SURFACE_WIDTH / parts) / 2) + ((SURFACE_WIDTH / parts) * part)) -
+                 (self.size[0] / 2)) + (offset * ZOOM))
 
         self.draw_string(x)
 
@@ -332,9 +396,11 @@ class DrawImage:
         :param y: the y-position of the image you want to render
         """
         self.image = image
-        self.y = y
+        if y:
+            self.y = int(y * ZOOM)
+
         self.img_size = self.image.size
-        self.size = size
+        self.size = int(size * ZOOM)
         self.angle = angle
         self.surf = surf
 
@@ -344,9 +410,9 @@ class DrawImage:
         if size:
             width, height = self.image.size
             if width >= height:
-                width, height = (size, int(size / width * height))
+                width, height = (self.size, int(self.size / width * height))
             else:
-                width, height = (int(size / width * height), size)
+                width, height = (int(self.size / width * height), self.size)
 
             new_image = self.image.resize((width, height), Image.LANCZOS if AA else Image.BILINEAR)
             self.image = new_image
@@ -373,7 +439,7 @@ class DrawImage:
         :param offset: define some offset pixel to move image a little bit more left(default=0)
         """
 
-        x = int(10 + offset)
+        x = int(10 * ZOOM + (offset * ZOOM))
 
         self.draw_image(x)
 
@@ -382,7 +448,7 @@ class DrawImage:
         :param offset: define some offset pixel to move image a little bit more right (default=0)
         """
 
-        x = int((SURFACE_WIDTH - self.img_size[0] - 10) - offset)
+        x = int((SURFACE_WIDTH - self.img_size[0] - 10 * ZOOM) - (offset * ZOOM))
 
         self.draw_image(x)
 
@@ -393,7 +459,8 @@ class DrawImage:
         :param offset: define some offset pixel to move strings a little bit (default=0)
         """
 
-        x = int(((((SURFACE_WIDTH / parts) / 2) + ((SURFACE_WIDTH / parts) * part)) - (self.img_size[0] / 2)) + offset)
+        x = int(((((SURFACE_WIDTH / parts) / 2) + ((SURFACE_WIDTH / parts) * part)) -
+                 (self.img_size[0] / 2)) + (offset * ZOOM))
 
         self.draw_image(x)
 
@@ -409,7 +476,7 @@ class DrawImage:
         x, y = pos
         if y == 0:
             y += 1
-        self.draw_image(draw_x=int(x), draw_y=int(y))
+        self.draw_image(draw_x=int(x * ZOOM), draw_y=int(y * ZOOM))
 
     def draw_image(self, draw_x, draw_y=None):
         """
@@ -422,26 +489,25 @@ class DrawImage:
             self.fill(surface, self.fillcolor)
 
             if draw_y:
-                self.surf.blit(surface, (draw_x, int(draw_y)))
+                self.surf.blit(surface, (int(draw_x), int(draw_y)))
             else:
-                self.surf.blit(surface, (draw_x, self.y))
+                self.surf.blit(surface, (int(draw_x), self.y))
         else:
             if draw_y:
-                self.surf.blit(self.image, (draw_x, int(draw_y)))
+                self.surf.blit(self.image, (int(draw_x), int(draw_y)))
             else:
-                self.surf.blit(self.image, (draw_x, self.y))
+                self.surf.blit(self.image, (int(draw_x), self.y))
 
 
-class Update:
+class Update(object):
 
     @staticmethod
     def update_json():
 
-        brightness = get_brightness()
-
-        os.system(f'gpio -g pwm {PWM} {brightness}') if PWM is not False else logger.info('not setting pwm')
-
-        logger.info(f'set brightness: {brightness}, pwm configured: {PWM}')
+        if PWM:
+            brightness = get_brightness()
+            os.system(f'gpio -g pwm {PWM} {brightness}') if PWM is not False else logger.info('not setting pwm')
+            logger.info(f'set brightness: {brightness}, pwm configured: {PWM}')
 
         global THREADS, CONNECTION_ERROR, CONNECTION
 
@@ -462,7 +528,10 @@ class Update:
 
             logger.info(f'connecting to server: {SERVER}')
 
-            options = str(f'&postal_code={WEATHERBIT_POSTALCODE}&country={WEATHERBIT_COUNTRY}&lang={WEATHERBIT_LANG}&units={units}')
+            options = str(f'&postal_code={WEATHERBIT_POSTALCODE}'
+                          f'&country={WEATHERBIT_COUNTRY}'
+                          f'&lang={WEATHERBIT_LANG}'
+                          f'&units={units}')
 
             current_request_url = str(f'{current_endpoint}?key={WEATHERBIT_IO_KEY}{options}')
             daily_request_url = str(f'{daily_endpoint}?key={WEATHERBIT_IO_KEY}{options}&days={WEATHERBIT_DAYS}')
@@ -620,31 +689,35 @@ class Update:
         stats_data = JSON_DATA['stats']
 
         summary_string = current_forecast['weather']['description']
-        temp_out_string = str(int(current_forecast['temp']))
+        temp_out = str(int(current_forecast['temp']))
         temp_out_unit = '°C' if METRIC else '°F'
-        temp_out_string = str(temp_out_string + temp_out_unit)
-        rain_string = str(int(JSON_DATA['daily']['data'][0]['pop'])) + ' %'
+        temp_out_string = str(temp_out + temp_out_unit)
+        precip = JSON_DATA['daily']['data'][0]['pop']
+        precip_string = str(f'{precip} %')
 
         today = daily_forecast[0]
         day_1 = daily_forecast[1]
         day_2 = daily_forecast[2]
         day_3 = daily_forecast[3]
+
         df_forecast = theme["DATE_FORMAT"]["FORECAST_DAY"]
         df_sun = theme["DATE_FORMAT"]["SUNRISE_SUNSET"]
 
-        forecast_day_1_string = convert_timestamp(time.mktime(time.strptime(day_1['datetime'], '%Y-%m-%d')), df_forecast)
-        forecast_day_2_string = convert_timestamp(time.mktime(time.strptime(day_2['datetime'], '%Y-%m-%d')), df_forecast)
-        forecast_day_3_string = convert_timestamp(time.mktime(time.strptime(day_3['datetime'], '%Y-%m-%d')), df_forecast)
+        day_1_ts = time.mktime(time.strptime(day_1['datetime'], '%Y-%m-%d'))
+        day_1_ts = convert_timestamp(day_1_ts, df_forecast)
+        day_2_ts = time.mktime(time.strptime(day_2['datetime'], '%Y-%m-%d'))
+        day_2_ts = convert_timestamp(day_2_ts, df_forecast)
+        day_3_ts = time.mktime(time.strptime(day_3['datetime'], '%Y-%m-%d'))
+        day_3_ts = convert_timestamp(day_3_ts, df_forecast)
 
-        forecast_day_1_min_max_string = f"{int(day_1['low_temp'])} | {int(day_1['high_temp'])}"
-        forecast_day_2_min_max_string = f"{int(day_2['low_temp'])} | {int(day_2['high_temp'])}"
-        forecast_day_3_min_max_string = f"{int(day_3['low_temp'])} | {int(day_3['high_temp'])}"
+        day_1_min_max_temp = f"{int(day_1['low_temp'])} | {int(day_1['high_temp'])}"
+        day_2_min_max_temp = f"{int(day_2['low_temp'])} | {int(day_2['high_temp'])}"
+        day_3_min_max_temp = f"{int(day_3['low_temp'])} | {int(day_3['high_temp'])}"
 
-        wind_direction_string = current_forecast['wind_cdir']
+        sunrise = convert_timestamp(today['sunrise_ts'], df_sun)
+        sunset = convert_timestamp(today['sunset_ts'], df_sun)
 
-        sunrise_string = convert_timestamp(today['sunrise_ts'], df_sun)
-        sunset_string = convert_timestamp(today['sunset_ts'], df_sun)
-
+        wind_direction = str(current_forecast['wind_cdir'])
         wind_speed = float(current_forecast['wind_spd'])
         wind_speed = wind_speed * 3.6 if METRIC else wind_speed
         wind_speed_unit = 'km/h' if METRIC else 'mph'
@@ -660,6 +733,16 @@ class Update:
         DrawImage(new_surf, images['path'], 5, size=15, fillcolor=RED if PATH_ERROR else GREEN).right(-5)
 
         DrawImage(new_surf, images[WEATHERICON], 68, size=100).center(2, 0, offset=10)
+
+        if not ANIMATION:
+            if PRECIPTYPE == config['LOCALE']['RAIN_STR']:
+
+                DrawImage(new_surf, images['preciprain'], size=20).draw_position(pos=(155, 140))
+
+            elif PRECIPTYPE == config['LOCALE']['SNOW_STR']:
+
+                DrawImage(new_surf, images['precipsnow'], size=20).draw_position(pos=(155, 140))
+
         DrawImage(new_surf, images[FORECASTICON_DAY_1], 200, size=50).center(3, 0)
         DrawImage(new_surf, images[FORECASTICON_DAY_2], 200, size=50).center(3, 1)
         DrawImage(new_surf, images[FORECASTICON_DAY_3], 200, size=50).center(3, 2)
@@ -669,7 +752,7 @@ class Update:
 
         draw_wind_layer(new_surf, current_forecast['wind_dir'], 285)
 
-        draw_moon_layer(new_surf, 255, 60)
+        draw_moon_layer(new_surf, int(255 * ZOOM), int(60 * ZOOM))
 
         # draw all the strings
         if config["DISPLAY"]["SHOW_API_STATS"]:
@@ -679,34 +762,34 @@ class Update:
 
         DrawString(new_surf, temp_out_string, FONT_BIG, ORANGE, 75).right()
 
-        DrawString(new_surf, rain_string, FONT_BIG, PRECIPCOLOR, 105).right()
+        DrawString(new_surf, precip_string, FONT_BIG, PRECIPCOLOR, 105).right()
         DrawString(new_surf, PRECIPTYPE, FONT_SMALL_BOLD, PRECIPCOLOR, 140).right()
 
-        DrawString(new_surf, forecast_day_1_string, FONT_SMALL_BOLD, ORANGE, 165).center(3, 0)
-        DrawString(new_surf, forecast_day_2_string, FONT_SMALL_BOLD, ORANGE, 165).center(3, 1)
-        DrawString(new_surf, forecast_day_3_string, FONT_SMALL_BOLD, ORANGE, 165).center(3, 2)
+        DrawString(new_surf, day_1_ts, FONT_SMALL_BOLD, ORANGE, 165).center(3, 0)
+        DrawString(new_surf, day_2_ts, FONT_SMALL_BOLD, ORANGE, 165).center(3, 1)
+        DrawString(new_surf, day_3_ts, FONT_SMALL_BOLD, ORANGE, 165).center(3, 2)
 
-        DrawString(new_surf, forecast_day_1_min_max_string, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 0)
-        DrawString(new_surf, forecast_day_2_min_max_string, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 1)
-        DrawString(new_surf, forecast_day_3_min_max_string, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 2)
+        DrawString(new_surf, day_1_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 0)
+        DrawString(new_surf, day_2_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 1)
+        DrawString(new_surf, day_3_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 2)
 
-        DrawString(new_surf, sunrise_string, FONT_SMALL_BOLD, MAIN_FONT, 265).left(30)
-        DrawString(new_surf, sunset_string, FONT_SMALL_BOLD, MAIN_FONT, 292).left(30)
+        DrawString(new_surf, sunrise, FONT_SMALL_BOLD, MAIN_FONT, 265).left(30)
+        DrawString(new_surf, sunset, FONT_SMALL_BOLD, MAIN_FONT, 292).left(30)
 
-        DrawString(new_surf, wind_direction_string, FONT_SMALL_BOLD, MAIN_FONT, 250).center(3, 2)
+        DrawString(new_surf, wind_direction, FONT_SMALL_BOLD, MAIN_FONT, 250).center(3, 2)
         DrawString(new_surf, wind_speed_string, FONT_SMALL_BOLD, MAIN_FONT, 300).center(3, 2)
 
         weather_surf = new_surf
 
         logger.info(f'summary: {summary_string}')
         logger.info(f'temp out: {temp_out_string}')
-        logger.info(f'{PRECIPTYPE}: {rain_string}')
+        logger.info(f'{PRECIPTYPE}: {precip_string}')
         logger.info(f'icon: {WEATHERICON}')
         logger.info(f'forecast: '
-                    f'{forecast_day_1_string} {forecast_day_1_min_max_string} {FORECASTICON_DAY_1}; '
-                    f'{forecast_day_2_string} {forecast_day_2_min_max_string} {FORECASTICON_DAY_2}; '
-                    f'{forecast_day_3_string} {forecast_day_3_min_max_string} {FORECASTICON_DAY_3}')
-        logger.info(f'sunrise: {sunrise_string} ; sunset {sunset_string}')
+                    f'{day_1_ts} {day_1_min_max_temp} {FORECASTICON_DAY_1}; '
+                    f'{day_2_ts} {day_2_min_max_temp} {FORECASTICON_DAY_2}; '
+                    f'{day_3_ts} {day_3_min_max_temp} {FORECASTICON_DAY_3}')
+        logger.info(f'sunrise: {sunrise} ; sunset {sunset}')
         logger.info(f'WindSpeed: {wind_speed_string}')
 
         # remove the ended timer and threads
@@ -758,7 +841,7 @@ def draw_time_layer():
 
 def draw_moon_layer(surf, y, size):
     # based on @miyaichi's fork -> great idea :)
-    _size = 300
+    _size = 1000
     dt = datetime.datetime.fromtimestamp(JSON_DATA['daily']['data'][0]['ts'])
     moon_age = (((dt.year - 11) % 19) * 11 + [0, 2, 0, 2, 2, 4, 5, 6, 7, 8, 9, 10][dt.month - 1] + dt.day) % 30
 
@@ -853,26 +936,11 @@ def draw_event(color=RED):
 
 def create_scaled_surf(surf, aa=False):
     if aa:
-        scaled_surf = pygame.transform.smoothscale(surf, (int(SURFACE_WIDTH * SCALE), int(SURFACE_HEIGHT * SCALE)))
+        scaled_surf = pygame.transform.smoothscale(surf, (int(SURFACE_WIDTH), int(SURFACE_HEIGHT)))
     else:
-        scaled_surf = pygame.transform.scale(surf, (int(SURFACE_WIDTH * SCALE), int(SURFACE_HEIGHT * SCALE)))
+        scaled_surf = pygame.transform.scale(surf, (int(SURFACE_WIDTH), int(SURFACE_HEIGHT)))
 
     return scaled_surf
-
-
-def quit_all():
-
-    pygame.display.quit()
-    pygame.quit()
-
-    global THREADS
-
-    for thread in THREADS:
-        logger.info(f'Thread killed {thread}')
-        thread.cancel()
-        thread.join()
-
-    sys.exit()
 
 
 def loop():
@@ -893,10 +961,11 @@ def loop():
 
         draw_statusbar()
 
-        if config["DISPLAY"]["SHOW_FPS"]:
+        if FPS:
             draw_fps()
 
-        my_particles.move(dynamic_surf, my_particles_list)
+        if ANIMATION:
+            my_particles.move(dynamic_surf, my_particles_list)
 
         # finally scale the dynamic surface and blit it to the main surface
         display_surf.blit(dynamic_surf, (0, 0))
@@ -938,14 +1007,14 @@ def loop():
 
                 elif event.key == pygame.K_SPACE:
                     shot_time = convert_timestamp(time.time(), "%Y-%m-%d %H-%M-%S")
-                    pygame.image.save(dynamic_surf, f'screenshot-{shot_time}.png')
+                    pygame.image.save(display_surf, f'screenshot-{shot_time}.png')
                     logger.info(f'Screenshot created at {shot_time}')
 
         # display_surf.blit(mouse_surf, (0, 0))
 
         # finally scale the main surface and blit it to the tft surface
         # this is performance heavy so do it only once in a loop for the surface that collects all other
-        tft_surf.blit(create_scaled_surf(display_surf.convert(32, 0), aa=AA), FIT_SCREEN)
+        tft_surf.blit(create_scaled_surf(display_surf.convert(32), aa=AA), FIT_SCREEN)
 
         # update the display with all surfaces merged into the main one
         pygame.display.update()
@@ -960,8 +1029,10 @@ if __name__ == '__main__':
 
     try:
 
-        my_particles = Particles()
-        my_particles_list = my_particles.create_particle_list()
+        if ANIMATION:
+            my_particles = Particles()
+            my_particles_list = my_particles.create_particle_list()
+
         images = image_factory(ICON_PATH)
 
         loop()
