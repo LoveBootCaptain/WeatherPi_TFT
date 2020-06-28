@@ -1,31 +1,44 @@
 # WeatherPi_TFT
 
 Working on @pimoroni HyperPixel4 Display and a Raspberry Pi 3 B+
-![Hardware](./docs/HARDWARE_1.3.jpg)
+![Hardware](https://user-images.githubusercontent.com/753562/85412425-d9e3cd00-b569-11ea-9a87-57c09a9328d0.jpg)
 
 Working on @HWHardsoft AZ-Touch-Pi0-Weather with ili9341 Display and a Raspberry Pi Zero W
-![Hardware](./docs/HARDWARE_1.2.jpg)
+![Hardware](https://user-images.githubusercontent.com/753562/85412421-d8b2a000-b569-11ea-84a9-902f4a935fff.jpg)
 
 
 ## so it all began
-![Hardware](./docs/HARDWARE_1.1.jpg)
+![Hardware](https://user-images.githubusercontent.com/753562/85412418-d81a0980-b569-11ea-91d5-67841ebd0532.jpg)
 
 
 a weather display for a raspberry pi and a adafruit (featherwing) TFT ili9341 display 
 
+**UPDATE**
+
+WeatherPiTFT now runs on every display size... from the smallest 128x128, 128x160, 240x320, 320x480, 480x640, 480x720, 
+480x800 (pimoroni hyperpixel4 or official Raspberry Pi 7" Touchscreen Display), 720x720 (pimoroni hyperpixel4 square) 
+and above. WeatherPiTFT will always be shown in portrait mode but it also works on a landscape configured display 
+(but still in 3x4 centred on your display). The images have a size of 1000x1000px so it should work even on HD monitors
+without lost of weather image quality.
 
 > written with love in python3.7
 
-![WeatherPi_TFT](./docs/WeatherPi_TFT_01.1.gif)
+![WeatherPi_TFT](https://user-images.githubusercontent.com/753562/85412434-db14fa00-b569-11ea-8078-49ec3ea7b1f9.png)
+![WeatherPi_TFT](https://user-images.githubusercontent.com/753562/85412436-dbad9080-b569-11ea-91e9-574c402e3982.png)
 
-comes with 2 themes (default and darcula styled)
+**comes with 2 themes (default and darcula styled)**
+
+
+OLD Pics before AA
+
+![WeatherPi_TFT](https://user-images.githubusercontent.com/753562/85412433-db14fa00-b569-11ea-96c8-77698f12156c.gif)
 
 ### all available weather icons in 2 sizes
 thx @erikflowers for his [awesome weather-icons](https://github.com/erikflowers/weather-icons)
 
 >I colored them and put a little glitter on it :)
 
-![Weather Icons](./docs/WEATHER_ICONS_1.2.gif)
+![Weather Icons](https://user-images.githubusercontent.com/753562/85412432-db14fa00-b569-11ea-9fa4-f240a9c1e220.gif)
 
 ### icons for moonphases
 moon phase rendering: credits to @miyaichi for his [awesome fork](https://github.com/miyaichi/WeatherPi)
@@ -35,7 +48,7 @@ moon phase rendering: credits to @miyaichi for his [awesome fork](https://github
 > i wrote this app on a mac with PyCharm and tested it quite a while. since it uses only standard python3 modules and libraries 
 it should work on nearly everything that can run python3 and pygame.
 
-![PyCharm IDE by intelliJ jetbrains](./docs/PYCHARM_01.jpg)
+![PyCharm IDE by intelliJ jetbrains](https://user-images.githubusercontent.com/753562/85412428-d9e3cd00-b569-11ea-9917-32b360517446.jpg)
 
 > this tutorial is basically for running it on a raspberry pi (zero, 1, 2, 3) and a TFT display which matches up 
 with chips like the ones from adafruit. as long as it uses standard spi it should work with the new `dtoverlay`module
@@ -55,7 +68,7 @@ configuration.
 
 ### wiring
 
-![wiring](./docs/WIRING_1.1.jpg)
+![wiring](https://user-images.githubusercontent.com/753562/85412438-dc462700-b569-11ea-8a18-949523382be6.jpg)
 
 * this should explain how to wire up your display
 
@@ -78,7 +91,8 @@ VCC 3V3 supply                      = +3V3 or 5V
 BUTTON 1    used for restart app    = GPIO19
 BUTTON 2    used for shutdown pi    = GPIO26
 ```
-* give you the option to put some function on a hardware button (like restart the WeatherPiTFT service, shutdown/reboot your Pi, change display brightness, etc.)
+* give you the option to put some function on a hardware button (like restart the WeatherPiTFT service, 
+shutdown/reboot your Pi, change display brightness, etc.)
 * feel free to add your own functions in `PiButtons.py`
 
 
@@ -158,7 +172,6 @@ Everything from 15-30 fps should give you decent animations.
 ```bash
 git clone https://github.com/LoveBootCaptain/WeatherPi_TFT.git
 cd WeatherPi_TFT
-rm -rf docs/
 ```
 
 ### install the dependencies in python3
@@ -177,7 +190,8 @@ WeatherPiTFT will write a json file to your Pi after updating the weather data f
 
 this process will reduce writing to your sd card, cause we're writing it only to RAM.
 
-ramdisk will only be used in production mode. means you have set your `"ENV"` to `"Pi"` which is default when you followed this guide.
+ramdisk will only be used in production mode. means you have set your `"ENV"` to `"Pi"` 
+which is default when you followed this guide.
 
 you may also consider using great tooling for writing all logs to ram from @azlux: [log2ram](https://github.com/azlux/log2ram)
 
@@ -188,6 +202,7 @@ sudo nano /etc/fstab
 add the following line right at the end of the opened file
 
 `size=5M` specifies the size of the reserved ram (5M is more than enough)
+
 ```
 tmpfs /mnt/ramdisk tmpfs nodev,nosuid,size=5M 0 0
 ```
@@ -229,6 +244,7 @@ nano config.json
     "HEIGHT": 320,
     "FPS": 30,
     "AA": false,
+    "ANIMATION": false,
     "FRAMEBUFFER": "/dev/fb1",
     "PWM": false,
     "SHOW_FPS": true,
@@ -237,10 +253,15 @@ nano config.json
   },
 ``` 
 * as long as you configure a 3:4 ratio the dashboard will be scaled
-* `FPS` is used for pygame internal ticks - 30 fps is more than enough to render clock transitions and precipitation animations smoothly
-* `AA` turns antialiasing on and off (leave it on a Pi Zero off, it is performance heavy and higher FPS)
-* set `FRAMEBUFFER` according to your display, some use fb0 (e.g. @pimoroni HyperPixel4) some fb1 (most ili9341 from @adafruit), for local development or HDMI displays set it to `false`
-* set `PWM` to your GPIO pin if your display support pwm brightness (HyperPixel supports GPIO 19 for pwm brightness) - may need some code adjustments on your side depending on your display (some are bright enough with pwm 25, some ore not) otherwise set it to `false`
+* `FPS` is used for pygame internal ticks - 30 fps is more than enough to render clock transitions and precipitation 
+animations smoothly
+* `AA` turns antialiasing on and off (leave it on a Pi Zero off, it is performance heavy on higher FPS)
+* `ANIMATION` enables the little particle simulation for precipitation, disable will show an image instead
+* set `FRAMEBUFFER` according to your display, some use fb0 (e.g. @pimoroni HyperPixel4) some fb1 (most ili9341 from @adafruit), 
+for local development or HDMI displays set it to `false`
+* set `PWM` to your GPIO pin if your display support pwm brightness (HyperPixel supports GPIO 19 for pwm brightness) - 
+may need some code adjustments on your side depending on your display (some are bright enough with pwm 25, some ore not) 
+otherwise set it to `false`
 * `SHOW_FPS` show the current fps on the display
 * `SHOW_API_STATS` show how many API calls are left over (resets every midnight UTC)
 * `MOUSE` enable/disable mouse pointer - needed for local development, better leave it disabled
@@ -250,7 +271,8 @@ nano config.json
 * replace `xxxxxxxxxxxxxxxxxxxxxxxxx` in  `"WEATHERBIT_IO_KEY": "xxxxxxxxxxxxxxxxxxxxxxxxx"` with your own API key
 * replace `en` in `"WEATHERBIT_LANGUAGE": "en"` with your preferred language
 * replace `de` in `"WEATHERBIT_COUNTRY": "de"` with your country
-* replace `10178` in `"WEATHERBIT_POSTALCODE": 10178` with your zip code / postal code (this example-location zip code is from berlin city, germany)
+* replace `10178` in `"WEATHERBIT_POSTALCODE": 10178` with your zip code / postal code (this example-location zip code 
+is from berlin city, germany)
 * for language-support, units, etc please refer to -> **[weatherbit API Docs](https://www.weatherbit.io/api)**
 
 #### localise hardcoded strings and ISO settings
@@ -266,7 +288,8 @@ nano config.json
 * change `"ISO"` and `"METRIC"` according to your needs
 * `"METRIC": true` will get all weather data units as metric system, change to `false` if you prefer imperial styled units
     * `°C` will be `°F` and `km/h` will be `mph 
-    * will also change the request parameter `untis` for the api request (see [weatherbit API Docs](https://www.weatherbit.io/api) for more details)
+    * will also change the request parameter `untis` for the api request 
+    (see [weatherbit API Docs](https://www.weatherbit.io/api) for more details)
 
 #### timer options
 ```
@@ -400,6 +423,6 @@ sudo update-rc.d PiButtons defaults
 
 #### darcula styled theme with another font
 
-![Darcula styled Theme for WeatherPi_TFT](docs/DARCULA_THEME_01.png)
+![Darcula styled Theme for WeatherPi_TFT](https://user-images.githubusercontent.com/753562/85412408-d4868280-b569-11ea-8544-a8d445f13f3e.png)
 
-![WeatherPi_TFT](docs/DARCULA_THEME_02.jpg)
+![WeatherPi_TFT](https://user-images.githubusercontent.com/753562/85412410-d5b7af80-b569-11ea-8b2f-d8ce94099785.jpg)

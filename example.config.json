@@ -4,6 +4,7 @@
     "HEIGHT": 320,
     "FPS": 30,
     "AA": false,
+    "ANIMATION": true,
     "FRAMEBUFFER": "/dev/fb1",
     "PWM": false,
     "SHOW_FPS": false,
