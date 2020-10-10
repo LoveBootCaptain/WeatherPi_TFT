@@ -157,6 +157,7 @@ SCALE = float(DISPLAY_WIDTH / SURFACE_WIDTH)
 ZOOM = 1
 
 FPS = config['DISPLAY']['FPS']
+SHOW_FPS = config['DISPLAY']['SHOW_FPS']
 AA = config['DISPLAY']['AA']
 ANIMATION = config['DISPLAY']['ANIMATION']
 
@@ -962,7 +963,7 @@ def loop():
 
         draw_statusbar()
 
-        if FPS:
+        if SHOW_FPS:
             draw_fps()
 
         if ANIMATION:
