@@ -23,7 +23,9 @@
     "RAIN_STR": "Rain",
     "SNOW_STR": "Snow",
     "PRECIP_STR": "Precipitation",
-    "METRIC": true
+    "METRIC": true,
+    "HUMIDITY_STR": "Hum.",
+    "PRESSURE_STR": "P. mB"
   },
   "THEME": "example.theme",
   "TIMER": {
