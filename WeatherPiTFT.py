@@ -702,7 +702,7 @@ class Update(object):
         temp_out_unit = '°C' if METRIC else '°F'
         temp_out_string = str(temp_out + temp_out_unit)
         rh_out_string = str(int(current_forecast['rh']))+' %'
-        pres_out = str(int(current_forecast['pres']))
+        slp_out = str(int(current_forecast['slp']))
         precip = JSON_DATA['daily']['data'][0]['pop']
         precip_string = str(f'{precip} %')
 
@@ -786,7 +786,7 @@ class Update(object):
         DrawString(new_surf, day_2_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(4, 1)
         DrawString(new_surf, day_3_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(4, 2)
         DrawString(new_surf, rh_out_string, FONT_SMALL_BOLD, MAIN_FONT, 187).center(4, 3)
-        DrawString(new_surf, pres_out, FONT_SMALL_BOLD, MAIN_FONT, 222).center(4, 3)
+        DrawString(new_surf, slp_out, FONT_SMALL_BOLD, MAIN_FONT, 222).center(4, 3)
 
         DrawString(new_surf, sunrise, FONT_SMALL_BOLD, MAIN_FONT, 265).left(30)
         DrawString(new_surf, sunset, FONT_SMALL_BOLD, MAIN_FONT, 292).left(30)
