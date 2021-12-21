@@ -674,12 +674,12 @@ class Update(object):
 
         else:
 
-            if rain > 0 and pop > 0:
+            if pop > 0 and rain > snow:
 
                 PRECIPTYPE = config['LOCALE']['RAIN_STR']
                 PRECIPCOLOR = BLUE
 
-            elif snow > 0 and pop > 0:
+            elif pop > 0 and snow > rain:
 
                 PRECIPTYPE = config['LOCALE']['SNOW_STR']
                 PRECIPCOLOR = WHITE
