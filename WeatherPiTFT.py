@@ -702,6 +702,8 @@ class Update(object):
         temp_out = str(int(current_forecast['temp']))
         temp_out_unit = '°C' if METRIC else '°F'
         temp_out_string = str(temp_out + temp_out_unit)
+        rh_out_string = str(int(current_forecast['rh']))+' %'
+        slp_out = str(int(current_forecast['slp']))
         precip = JSON_DATA['daily']['data'][0]['pop']
         precip_string = str(f'{precip} %')
 
@@ -775,13 +777,17 @@ class Update(object):
         DrawString(new_surf, precip_string, FONT_BIG, PRECIPCOLOR, 105).right()
         DrawString(new_surf, PRECIPTYPE, FONT_SMALL_BOLD, PRECIPCOLOR, 140).right()
 
-        DrawString(new_surf, day_1_ts, FONT_SMALL_BOLD, ORANGE, 165).center(3, 0)
-        DrawString(new_surf, day_2_ts, FONT_SMALL_BOLD, ORANGE, 165).center(3, 1)
-        DrawString(new_surf, day_3_ts, FONT_SMALL_BOLD, ORANGE, 165).center(3, 2)
+        DrawString(new_surf, day_1_ts, FONT_SMALL_BOLD, ORANGE, 165).center(4, 0)
+        DrawString(new_surf, day_2_ts, FONT_SMALL_BOLD, ORANGE, 165).center(4, 1)
+        DrawString(new_surf, day_3_ts, FONT_SMALL_BOLD, ORANGE, 165).center(4, 2)
+        DrawString(new_surf, config['LOCALE']['HUMIDITY_STR'], FONT_SMALL_BOLD, VIOLET, 172).center(4, 3)
+        DrawString(new_surf, config['LOCALE']['PRESSURE_STR'], FONT_SMALL_BOLD, VIOLET, 207).center(4, 3)
 
-        DrawString(new_surf, day_1_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 0)
-        DrawString(new_surf, day_2_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 1)
-        DrawString(new_surf, day_3_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(3, 2)
+        DrawString(new_surf, day_1_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(4, 0)
+        DrawString(new_surf, day_2_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(4, 1)
+        DrawString(new_surf, day_3_min_max_temp, FONT_SMALL_BOLD, MAIN_FONT, 180).center(4, 2)
+        DrawString(new_surf, rh_out_string, FONT_SMALL_BOLD, MAIN_FONT, 187).center(4, 3)
+        DrawString(new_surf, slp_out, FONT_SMALL_BOLD, MAIN_FONT, 222).center(4, 3)
 
         DrawString(new_surf, sunrise, FONT_SMALL_BOLD, MAIN_FONT, 265).left(30)
         DrawString(new_surf, sunset, FONT_SMALL_BOLD, MAIN_FONT, 292).left(30)
